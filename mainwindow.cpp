@@ -52,7 +52,7 @@ void MainWindow::receiveArgs(const QString &argsString)
         myWebView->setHtml(param, QUrl("http://localhost"));
     }
 
-    else if (command == "Javascript" && argCount >= 1)
+    else if (command == "JavaScript" && argCount >= 1)
     {
         QString param = argsList.join(" ");
         myWebView->page()->mainFrame()->evaluateJavaScript(param);
@@ -61,7 +61,8 @@ void MainWindow::receiveArgs(const QString &argsString)
     else if (command == "InvertColor" && argCount >= 1)
     {
         QString param = argsList[0].toUpper();
-        myWebView->setInvertColor( param == "TRUE" || param == "YES" );
+        myWebView->setInvertColor( param == "TRUE" || param == "YES" || param == "ON" );
+        myWebView->update();
     }
 
     //Transparent background (page content dependent)

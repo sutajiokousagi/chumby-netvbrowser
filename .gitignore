@@ -1,0 +1,9 @@
+*.user
+*.o
+*.debug
+*.release
+*.exe
+tmp
+debug
+release
+bin

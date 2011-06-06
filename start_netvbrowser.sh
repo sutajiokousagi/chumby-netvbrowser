@@ -5,11 +5,11 @@ SCRIPT=$(readlink -f $0)
 # Absolute path this script is in. /home/user/bin
 SCRIPTPATH=`dirname $SCRIPT`
 
-# Process GET/POST variables and export to environment
+# Start in the background so we don't hog the console
 if [ ! -z "$1" ]; then
 	echo "Starting NeTVBrowser with $1"
-	${SCRIPTPATH}/NeTVBrowser -qws SetUrl $1
+	${SCRIPTPATH}/NeTVBrowser -qws SetUrl $1 &
 else
 	echo "Starting NeTVBrowser with default page"
-	${SCRIPTPATH}/NeTVBrowser -qws
+	${SCRIPTPATH}/NeTVBrowser -qws &
 fi

@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 
     if (instance.sendMessage(argsString))
     {
-        printf("Sending '%s' to running NeTVBrowser instance", argsString.toLatin1().constData());
+        printf("Sending arguments to running NeTVBrowser instance: %s\n", argsString.toLatin1().constData());
         return 0;
     }
 

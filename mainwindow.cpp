@@ -1,7 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <stdio.h>
 #include <QStringList>
 #include <QWebFrame>
+#include <QUrl>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -19,6 +21,15 @@ MainWindow::MainWindow(QWidget *parent) :
     //Do any other customization on default view state
     myWebView->setInvertColor(false);
     myWebView->load( QUrl(DEFAULT_URL) );
+
+    //Transparent background (page content dependent)
+    QPalette palette = myWebView->palette();
+    palette.setBrush(QPalette::Base, Qt::transparent);
+    myWebView->page()->setPalette(palette);
+    myWebView->setAttribute(Qt::WA_OpaquePaintEvent, false);
+
+    //Default background color (white)
+    this->setStyleSheet("background-color: rgb(255, 255, 255);");
 }
 
 MainWindow::~MainWindow()
@@ -43,33 +54,86 @@ void MainWindow::receiveArgs(const QString &argsString)
     if (command == "SetUrl" && argCount >= 1)
     {
         QString param = argsList[0];
-        myWebView->load( QUrl(param) );
+        if (param.startsWith("www"))
+            param = param.insert(0, "http://");
+        QUrl newUrl(param, QUrl::TolerantMode);
+        if (newUrl.isValid()) {
+            myWebView->load( QUrl(param, QUrl::TolerantMode) );
+            printf( "Setting new Url: %s \n", param.toLatin1().constData() );
+        } else {
+            printf( "Invalid Url  \n" );
+        }
     }
 
     else if (command == "SetHtml" && argCount >= 1)
     {
         QString param = argsList[0];
         myWebView->setHtml(param, QUrl("http://localhost"));
+        printf( "Setting new HTML content \n" );
     }
 
     else if (command == "JavaScript" && argCount >= 1)
     {
         QString param = argsList.join(" ");
         myWebView->page()->mainFrame()->evaluateJavaScript(param);
+        printf( "Executing JavaScript: %s \n", param.toLatin1().constData() );
     }
 
     else if (command == "InvertColor" && argCount >= 1)
     {
         QString param = argsList[0].toUpper();
-        myWebView->setInvertColor( param == "TRUE" || param == "YES" || param == "ON" );
+        bool isOn = param == "TRUE" || param == "YES" || param == "ON";
+        myWebView->setInvertColor( isOn );
+        myWebView->update();
+        if (isOn)           printf("InvertColor: On \n");
+        else                printf("InvertColor: Off \n");
+    }
+
+    else if (command == "BackgroundColor" && argCount >= 1)
+    {
+        QString param = argsList[0].toUpper();
+        if (param.startsWith("#") && param.length() == 7)
+        {
+            this->setStyleSheet( QString("background-color: %1;").arg(param) );
+            this->update();
+            printf("Setting new background color: %s \n", param.toLatin1().constData() );
+        }
+        else if (param.count(",") == 2 && param.length() <= 11)
+        {
+            this->setStyleSheet( QString("background-color: rgb(%1);").arg(param) );
+            this->update();
+            printf("Setting new background color: %s \n", param.toLatin1().constData() );
+        }
+        else
+        {
+            printf("Invalid argument. Example: '#0080FF' or '0,128,255' \n");
+        }
+    }
+
+    else if (command == "BackgroundTransparent" && argCount >= 1)
+    {
+        QString param = argsList[0].toUpper();
+        bool isOn = param == "TRUE" || param == "YES" || param == "ON";
+
+        if (isOn)
+        {
+            //Transparent background (the <body> tag must not contain 'bgcolor' property)
+            QPalette palette = myWebView->palette();
+            palette.setBrush(QPalette::Base, Qt::transparent);
+            myWebView->page()->setPalette(palette);
+            myWebView->setAttribute(Qt::WA_OpaquePaintEvent, false);
+            printf("BackgroundTransparent: On \n");
+        }
+        else
+        {
+            myWebView->page()->setPalette( myWebView->style()->standardPalette() );
+            printf("BackgroundTransparent: Off \n");
+        }
         myWebView->update();
     }
 
-    //Transparent background (page content dependent)
-    /*
-    QPalette palette = myWebView->palette();
-    palette.setBrush(QPalette::Base, Qt::transparent);
-    myWebView->page()->setPalette(palette);
-    myWebView->setAttribute(Qt::WA_OpaquePaintEvent, false);
-    */
+    else
+    {
+        printf("Invalid arguments");
+    }
 }

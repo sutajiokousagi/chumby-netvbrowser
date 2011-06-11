@@ -7,3 +7,5 @@ tmp
 debug
 release
 bin
+Makefile
+make-arm.sh

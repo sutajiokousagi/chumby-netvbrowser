@@ -11,5 +11,5 @@ if [ ! -z "$1" ]; then
 	${SCRIPTPATH}/NeTVBrowser -qws SetUrl $1 &
 else
 	echo "Starting NeTVBrowser with default page"
-	${SCRIPTPATH}/NeTVBrowser -qws &
+	${SCRIPTPATH}/NeTVBrowser -qws SetUrl http://localhost &
 fi

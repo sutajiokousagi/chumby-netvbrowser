@@ -4,6 +4,7 @@
 #include <QStringList>
 #include <QWebFrame>
 #include <QUrl>
+#include <QProcess>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -22,6 +23,10 @@ MainWindow::MainWindow(QWidget *parent) :
     myWebView->setInvertColor(false);
     myWebView->load( QUrl(DEFAULT_URL) );
 
+    //Hide scrollbars
+    myWebView->page()->mainFrame ()->setScrollBarPolicy ( Qt::Vertical, Qt::ScrollBarAlwaysOff );
+    myWebView->page()->mainFrame ()->setScrollBarPolicy ( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
+
     //Transparent background (page content dependent)
     QPalette palette = myWebView->palette();
     palette.setBrush(QPalette::Base, Qt::transparent);
@@ -30,6 +35,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Default background color (white)
     this->setStyleSheet("background-color: rgb(255, 255, 255);");
+
+    //Chromeless window
+    this->setWindowFlags(Qt::MSWindowsFixedSizeDialogHint);     //Set window to fixed size
+    this->setWindowFlags(Qt::CustomizeWindowHint);              //Set window with no title bar
+    this->setWindowFlags(Qt::FramelessWindowHint);              //Set a frameless window
 }
 
 MainWindow::~MainWindow()
@@ -63,6 +73,10 @@ void MainWindow::receiveArgs(const QString &argsString)
         } else {
             printf( "Invalid Url  \n" );
         }
+
+        //Hide scrollbars
+        myWebView->page()->mainFrame ()->setScrollBarPolicy ( Qt::Vertical, Qt::ScrollBarAlwaysOff );
+        myWebView->page()->mainFrame ()->setScrollBarPolicy ( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
     }
 
     else if (command == "SetHtml" && argCount >= 1)
@@ -70,6 +84,10 @@ void MainWindow::receiveArgs(const QString &argsString)
         QString param = argsList[0];
         myWebView->setHtml(param, QUrl("http://localhost"));
         printf( "Setting new HTML content \n" );
+
+        //Hide scrollbars
+        myWebView->page()->mainFrame ()->setScrollBarPolicy ( Qt::Vertical, Qt::ScrollBarAlwaysOff );
+        myWebView->page()->mainFrame ()->setScrollBarPolicy ( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
     }
 
     else if (command == "JavaScript" && argCount >= 1)
@@ -130,6 +148,48 @@ void MainWindow::receiveArgs(const QString &argsString)
             printf("BackgroundTransparent: Off \n");
         }
         myWebView->update();
+    }
+
+    else if (command == "ShowHide" && argCount >= 1)
+    {
+        QString param = argsList[0].toUpper();
+        bool isShow = param == "TRUE" || param == "YES" || param == "ON" || param == "SHOW";
+
+        if (isShow)            this->showFullScreen();
+        else                   this->setVisible(false);
+    }
+
+    else if (command == "Minimize")
+    {
+        this->setVisible(false);
+    }
+
+    else if (command == "Maximize" || command == "Fullscreen")
+    {
+        this->showFullScreen();
+    }
+
+    else if (command == "SetBox" && argCount >= 4)
+    {
+        int x = argsList[0].toInt();
+        int y = argsList[1].toInt();
+        int w = argsList[2].toInt();
+        int h = argsList[3].toInt();
+
+        this->showNormal();
+        this->setGeometry(x,y,w,h);
+    }
+
+    else if (command == "Quit" || command == "Exit" || command == "Terminate")
+    {
+        QApplication::exit(0);
+    }
+
+    else if (command == "Restart")
+    {
+        //This will just override the 'singleton' class. Awesome!
+        QProcess::startDetached( QApplication::applicationFilePath() );
+        QApplication::exit(0);
     }
 
     else

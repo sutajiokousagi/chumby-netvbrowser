@@ -56,12 +56,12 @@ void MainWindow::receiveArgs(const QString &argsString)
         return;
 
     QString execPath = argsList[0];
-    QString command = argsList[1];
+    QString command = argsList[1].toUpper();;
     argsList.removeFirst();
     argsList.removeFirst();
     argCount = argsList.count();
 
-    if (command == "SetUrl" && argCount >= 1)
+    if (command == "SETURL" && argCount >= 1)
     {
         QString param = argsList[0];
         if (param.startsWith("www"))
@@ -79,7 +79,7 @@ void MainWindow::receiveArgs(const QString &argsString)
         myWebView->page()->mainFrame ()->setScrollBarPolicy ( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
     }
 
-    else if (command == "SetHtml" && argCount >= 1)
+    else if (command == "SETHTML" && argCount >= 1)
     {
         QString param = argsList[0];
         myWebView->setHtml(param, QUrl("http://localhost"));
@@ -90,14 +90,14 @@ void MainWindow::receiveArgs(const QString &argsString)
         myWebView->page()->mainFrame ()->setScrollBarPolicy ( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
     }
 
-    else if (command == "JavaScript" && argCount >= 1)
+    else if (command == "JAVASCRIPT" && argCount >= 1)
     {
         QString param = argsList.join(" ");
         myWebView->page()->mainFrame()->evaluateJavaScript(param);
         printf( "Executing JavaScript: %s \n", param.toLatin1().constData() );
     }
 
-    else if (command == "InvertColor" && argCount >= 1)
+    else if ((command == "INVERTCOLOR" || command == "INVERTCOLOUR") && argCount >= 1)
     {
         QString param = argsList[0].toUpper();
         bool isOn = param == "TRUE" || param == "YES" || param == "ON";
@@ -107,7 +107,7 @@ void MainWindow::receiveArgs(const QString &argsString)
         else                printf("InvertColor: Off \n");
     }
 
-    else if (command == "BackgroundColor" && argCount >= 1)
+    else if ((command == "BACKGROUNDCOLOR" || command == "BACKGROUNDCOLOUR") && argCount >= 1)
     {
         QString param = argsList[0].toUpper();
         if (param.startsWith("#") && param.length() == 7)
@@ -116,7 +116,7 @@ void MainWindow::receiveArgs(const QString &argsString)
             this->update();
             printf("Setting new background color: %s \n", param.toLatin1().constData() );
         }
-        else if (param.count(",") == 2 && param.length() <= 11)
+        else if (param.count(",") == 2 && param.length() <= 11 && param.length() >= 5)
         {
             this->setStyleSheet( QString("background-color: rgb(%1);").arg(param) );
             this->update();
@@ -128,7 +128,7 @@ void MainWindow::receiveArgs(const QString &argsString)
         }
     }
 
-    else if (command == "BackgroundTransparent" && argCount >= 1)
+    else if (command == "BACKGROUNDTRANSPARENT" && argCount >= 1)
     {
         QString param = argsList[0].toUpper();
         bool isOn = param == "TRUE" || param == "YES" || param == "ON";
@@ -150,7 +150,7 @@ void MainWindow::receiveArgs(const QString &argsString)
         myWebView->update();
     }
 
-    else if (command == "ShowHide" && argCount >= 1)
+    else if (command == "SHOWHIDE" && argCount >= 1)
     {
         QString param = argsList[0].toUpper();
         bool isShow = param == "TRUE" || param == "YES" || param == "ON" || param == "SHOW";
@@ -159,17 +159,17 @@ void MainWindow::receiveArgs(const QString &argsString)
         else                   this->setVisible(false);
     }
 
-    else if (command == "Minimize")
+    else if (command == "MINIMIZE")
     {
         this->setVisible(false);
     }
 
-    else if (command == "Maximize" || command == "Fullscreen")
+    else if (command == "MAXIMIZE" || command == "FULLSCREEN")
     {
         this->showFullScreen();
     }
 
-    else if (command == "SetBox" && argCount >= 4)
+    else if (command == "SETBOX" && argCount >= 4)
     {
         int x = argsList[0].toInt();
         int y = argsList[1].toInt();
@@ -180,12 +180,12 @@ void MainWindow::receiveArgs(const QString &argsString)
         this->setGeometry(x,y,w,h);
     }
 
-    else if (command == "Quit" || command == "Exit" || command == "Terminate")
+    else if (command == "QUIT" || command == "EXIT" || command == "TERMINATE")
     {
         QApplication::exit(0);
     }
 
-    else if (command == "Restart")
+    else if (command == "RESTART")
     {
         //This will just override the 'singleton' class. Awesome!
         QProcess::startDetached( QApplication::applicationFilePath() );

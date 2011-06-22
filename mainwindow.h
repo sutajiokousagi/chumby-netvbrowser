@@ -9,7 +9,7 @@ namespace Ui {
 }
 
 #define ARGS_SPLIT_TOKEN    "|~|"
-#define DEFAULT_URL         "http://www.chumby.com"
+#define DEFAULT_URL         "http://localhost"
 
 class MainWindow : public QMainWindow
 {

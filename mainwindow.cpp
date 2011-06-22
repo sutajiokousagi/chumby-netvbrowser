@@ -33,8 +33,8 @@ MainWindow::MainWindow(QWidget *parent) :
     myWebView->page()->setPalette(palette);
     myWebView->setAttribute(Qt::WA_OpaquePaintEvent, false);
 
-    //Default background color (white)
-    this->setStyleSheet("background-color: rgb(255, 255, 255);");
+    //Default background color (bright pink / chroma key color)
+    this->setStyleSheet("background-color: rgb(240, 0, 240);");
 
     //Chromeless window
     this->setWindowFlags(Qt::MSWindowsFixedSizeDialogHint);     //Set window to fixed size

@@ -1,15 +1,22 @@
 
-QT       += core gui webkit
+QT       += core gui webkit network
 
 TARGET   = NeTVBrowser
 TEMPLATE = app
 
-SOURCES += main.cpp mainwindow.cpp mywebview.cpp
+SOURCES += main.cpp \
+           mainwindow.cpp \
+           mywebview.cpp \
+           mainwindow_comm.cpp \
+           mainwindow_common.cpp
 HEADERS += mainwindow.h mywebview.h
 FORMS   += mainwindow.ui
 
 # Singleton & command line argument passing
 include(./qtsingleapplication-2.6_1-opensource/src/qtsingleapplication.pri)
+
+# Testing socket class
+include(./bfSocketServer/src/bfSocketserver.pri)
 
 # Changes the name of the target, when is debug mode
 CONFIG( debug, debug|release ) {

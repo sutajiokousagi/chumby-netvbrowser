@@ -228,22 +228,79 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
     else if (command == "KEY" && argCount >= 1)
     {
         QString param = argsList[0];
-        bool convertOK = false;
-        int keycode = param.toInt(&convertOK);
-        if (!convertOK)
-            return "invalid key";
-
-        QKeyEvent key(QEvent::KeyPress, (Qt::Key)keycode, Qt::NoModifier);
+        QKeyEvent key(QEvent::KeyPress, getKeyCode(param), Qt::NoModifier);
         QApplication::sendEvent(this->myWebView, &key);
 
         if (key.isAccepted())
         {
-            //everything is ok
+            printf("Key accepted");
         } else {
-            //something wrong
+            printf("Key NOT accepted");
         }
         return command;
     }
 
     return UNIMPLEMENTED;
+}
+
+Qt::Key MainWindow::getKeyCode(QString keyname)
+{
+    keyname = keyname.toLower();
+    if (keyname.length() < 1)
+        return Qt::Key_Space;
+
+    if (keyname == "left")              return Qt::Key_Left;
+    else if (keyname == "right")        return Qt::Key_Right;
+    else if (keyname == "up")           return Qt::Key_Up;
+    else if (keyname == "down")         return Qt::Key_Down;
+    else if (keyname == "enter")        return Qt::Key_Enter;
+    else if (keyname == "center")       return Qt::Key_Enter;
+    else if (keyname == "\n")           return Qt::Key_Enter;
+    else if (keyname == "esc")          return Qt::Key_Escape;
+    else if (keyname == "del")          return Qt::Key_Delete;
+    else if (keyname == "backspace")    return Qt::Key_Backspace;
+    else if (keyname == "space")        return Qt::Key_Space;
+    else if (keyname == " ")            return Qt::Key_Space;
+    else if (keyname == "+")            return Qt::Key_Plus;
+    else if (keyname == "-")            return Qt::Key_Minus;
+    else if (keyname == "*")            return Qt::Key_Asterisk;
+    else if (keyname == "/")            return Qt::Key_Slash;
+    else if (keyname == ".")            return Qt::Key_Period;
+    else if (keyname == ",")            return Qt::Key_Comma;
+    else if (keyname == "?")            return Qt::Key_Question;
+    else if (keyname == "<")            return Qt::Key_Less;
+    else if (keyname == ">")            return Qt::Key_Greater;
+    else if (keyname == "=")            return Qt::Key_Equal;
+    else if (keyname == "@")            return Qt::Key_At;
+    else if (keyname == "!")            return Qt::Key_Exclam;
+    else if (keyname == "%")            return Qt::Key_Percent;
+    else if (keyname == "$")            return Qt::Key_Dollar;
+    else if (keyname == ":")            return Qt::Key_Colon;
+    else if (keyname == ";")            return Qt::Key_Semicolon;
+    else if (keyname == "volup")        return Qt::Key_VolumeUp;
+    else if (keyname == "voldown")      return Qt::Key_VolumeDown;
+    else if (keyname == "mute")         return Qt::Key_VolumeMute;
+
+    else if (keyname.length() >= 2)
+    {
+        if (keyname.startsWith('f'))
+        {
+            bool convertOK = false;
+            keyname = keyname.right(keyname.length()-1);
+            int findex = keyname.toInt(&convertOK);
+            if (convertOK)
+                return (Qt::Key)(Qt::Key_F1 + (findex-1));
+        }
+    }
+    else
+    {
+        //a-z
+        if (keyname[0].unicode() >= 'a' && keyname[0].unicode() <= 'z')
+            return (Qt::Key)(Qt::Key_A + keyname[0].unicode() - 'a');
+
+        if (keyname[0].unicode() >= '0' && keyname[0].unicode() <= '9')
+            return (Qt::Key)(Qt::Key_0 + keyname[0].unicode() - 'a');
+    }
+
+    return Qt::Key_Space;
 }

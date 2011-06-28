@@ -53,6 +53,7 @@ private:
 
     //Common functions
     void sendSocketHello(SocketResponse *response);
+    Qt::Key getKeyCode(QString keyname);
     QByteArray processStatelessCommand(QByteArray command, QStringList argsList = QStringList());
 
 private slots:

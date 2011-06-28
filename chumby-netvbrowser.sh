@@ -4,7 +4,7 @@
 case "$1" in
 	start)
 		# Start in the background so we don't hog the console
-		NeTVBrowser -qws SetUrl http://localhost 2>&1 > /dev/null &
+		NeTVBrowser -qws -nomouse SetUrl http://localhost 2>&1 > /dev/null &
 		;;
 
 	stop)

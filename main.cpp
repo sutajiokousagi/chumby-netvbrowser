@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <QtGui/QApplication>
 #include <qtsingleapplication.h>
 #include "mainwindow.h"
@@ -15,6 +16,17 @@ int main(int argc, char *argv[])
         printf("Sending arguments to running NeTVBrowser instance: %s\n", argsString.toLatin1().constData());
         return 0;
     }
+
+    if (argsList.contains("-h")) {
+        printf("\tUsage: %s [-d] -qws [SetUrl http://example.com/]\n"
+               "\tIf -d is specified, this program will run as a daemon.\n",
+               argv[0]);
+        return 0;
+    }
+
+    // If the args list contains "-d", then daemonize
+    if (argsList.contains("-d"))
+        daemon(0, 0);
 
     printf("Starting new NeTVBrowser with args:");
     printf("%s", argsString.toLatin1().constData());

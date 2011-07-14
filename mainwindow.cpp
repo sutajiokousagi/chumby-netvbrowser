@@ -42,6 +42,8 @@ void MainWindow::setupWebview()
 
 void MainWindow::resetWebview()
 {
+    qDebug("NeTVBrowser:resetWebview");
+
     //Do any other customization on default view state
     this->myWebView->setInvertColor(false);
     this->myWebView->load( QUrl(QString("http://%1").arg(DEFAULT_HOST_URL)) );

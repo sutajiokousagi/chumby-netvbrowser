@@ -5,6 +5,7 @@
 #include <QWebFrame>
 #include <QUrl>
 #include <QKeyEvent>
+#include <QScreen>
 
 void MainWindow::sendSocketHello(SocketResponse *response)
 {
@@ -73,6 +74,8 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         resetWebview();
         return command;
     }
+
+    //----------------------------------------------------
 
     else if (command == "BACKGROUNDTRANSPARENT_ON")
     {
@@ -238,6 +241,27 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
             printf("Key NOT accepted");
         }
         return command;
+    }
+
+    //----------------------------------------------------
+
+    else if (command == "SETRESOLUTION" && argCount == 1)
+    {
+        QStringList argsLs = argsList[0].split(",");
+        if (argsList.count() < 3)
+            return UNIMPLEMENTED;
+
+        int w = argsLs[0].toInt();
+        int h = argsLs[1].toInt();
+        int depth = argsLs[2].toInt();
+        QScreen::instance()->setMode(w,h,depth);
+    }
+    else if (command == "SETRESOLUTION" && argCount >= 3)
+    {
+        int w = argsList[0].toInt();
+        int h = argsList[1].toInt();
+        int depth = argsList[2].toInt();
+        QScreen::instance()->setMode(w,h,depth);
     }
 
     return UNIMPLEMENTED;

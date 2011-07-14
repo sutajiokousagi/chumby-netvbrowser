@@ -30,6 +30,11 @@ void MainWindow::slot_socketConnected()
     qDebug("TcpSocket (%x): connected",(unsigned int) this);
 #endif
 
+    //Reload the browser is it is not showing anything at all
+    QWebPage* currentPage = myWebView->page();
+    if (currentPage->totalBytes() < 32)
+        resetWebview();
+
     QTcpSocket *socket = (QTcpSocket *)QObject::sender();
     connect(socket, SIGNAL(readyRead()), this, SLOT(slot_socketReadReady()));
 

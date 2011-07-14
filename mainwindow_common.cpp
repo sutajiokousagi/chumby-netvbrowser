@@ -264,7 +264,13 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         QScreen::instance()->setMode(w,h,depth);
     }
 
-    return UNIMPLEMENTED;
+    else if (command == "HELLO")
+    {
+        //Ignore this message
+        return command;
+    }
+
+    return QByteArray(UNIMPLEMENTED) + ":" + command;
 }
 
 Qt::Key MainWindow::getKeyCode(QString keyname)

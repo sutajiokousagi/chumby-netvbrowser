@@ -32,8 +32,10 @@ void MainWindow::slot_socketConnected()
 
     //Reload the browser is it is not showing anything at all
     QWebPage* currentPage = myWebView->page();
-    if (currentPage->totalBytes() < 32)
+    if (currentPage == NULL || currentPage->totalBytes() < 150) {
         resetWebview();
+    }
+    qDebug("NeTVBrowser:slot_socketConnected: connected to NeTVServer");
 
     QTcpSocket *socket = (QTcpSocket *)QObject::sender();
     connect(socket, SIGNAL(readyRead()), this, SLOT(slot_socketReadReady()));
@@ -114,5 +116,5 @@ void MainWindow::slot_newSocketMessage( SocketRequest *request, SocketResponse *
     response->setParameter("value", string);
     response->write();
 
-    qDebug("slot_newSocketMessage: %s", string.constData());
+    qDebug("NeTVBrowser:slot_newSocketMessage: %s", string.constData());
 }

@@ -3,6 +3,8 @@
 
 case "$1" in
 	start)
+		export QWS_KEYBOARD=chumbyirkb
+
 		# Start in the background so we don't hog the console
 		NeTVBrowser -qws -nomouse SetUrl http://localhost 2>&1 > /dev/null &
 

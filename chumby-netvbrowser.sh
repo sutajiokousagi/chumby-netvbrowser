@@ -9,7 +9,14 @@ case "$1" in
 		rm -rf /tmp/qtembedded-0
 
 		# Start in the background so we don't hog the console
-		NeTVBrowser -qws -nomouse SetUrl /usr/share/netvserver/docroot/index.html 2>&1 > /dev/null &
+		# if NeTVServer is not up, we have to use absolute path, else http://localhost returns nothing
+		# when server is up, we should use http://localhost for POST/GET to work
+		netv_started=$(ps ax | grep 'NeTVServer')
+		if [ ${#netv_started} -gt 10 ]; then
+			NeTVBrowser -qws -nomouse SetUrl http://localhost 2>&1 > /dev/null &
+		else
+			NeTVBrowser -qws -nomouse SetUrl /usr/share/netvserver/docroot/index.html 2>&1 > /dev/null &
+		fi
 		;;
 
 	stop)

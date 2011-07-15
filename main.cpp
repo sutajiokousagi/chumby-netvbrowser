@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     }
 
     if (argsList.contains("-h")) {
-        printf("\tUsage: %s [-d] -qws [SetUrl http://example.com/]\n"
+        printf("\tUsage: %s [-d] -qws -nomouse [SetUrl http://example.com/]\n"
                "\tIf -d is specified, this program will run as a daemon.\n",
                argv[0]);
         return 0;

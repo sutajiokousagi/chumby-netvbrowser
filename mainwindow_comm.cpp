@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QHostAddress>
 #include <QTimer>
+#include <QWebFrame>
 
 void MainWindow::setupSocket()
 {
@@ -30,11 +31,13 @@ void MainWindow::slot_socketConnected()
     qDebug("TcpSocket (%x): connected",(unsigned int) this);
 #endif
 
-    //Reload the browser is it is not showing anything at all
-    QWebPage* currentPage = myWebView->page();
-    if (currentPage == NULL || currentPage->totalBytes() < 150) {
-        resetWebview();
-    }
+    static bool firstTime = true;
+
+    //Notify the ControlPanel about this event
+    QString javascriptString = QString("fServerReset(%1);").arg(firstTime ? "true" : "false");
+    this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString);
+    firstTime = false;
+
     qDebug("NeTVBrowser:slot_socketConnected: connected to NeTVServer");
 
     QTcpSocket *socket = (QTcpSocket *)QObject::sender();

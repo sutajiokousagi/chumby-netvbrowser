@@ -6,19 +6,7 @@ case "$1" in
 		export QWS_KEYBOARD=chumbyirkb
 
 		# Start in the background so we don't hog the console
-		# if NeTVServer is not up, we have to use absolute path, else http://localhost returns nothing
-		# when server is up, we should use http://localhost for POST/GET to work
-		netv_started=$(ps ax | grep 'NeTVServer')
-		if [ ${#netv_started} -gt 10 ]; then
-			NeTVBrowser SetUrl http://localhost 2>&1 > /dev/null &
-		else
-			NeTVBrowser SetUrl /usr/share/netvserver/docroot/index.html 2>&1 > /dev/null &
-		fi
-
-		# Temp fix for "Semop lock/unlock failure Identifier removed" flood
-		# Should be after we started the Qt process
-		sleep 2
-		rm -rf /tmp/qtembedded-0
+		NeTVBrowser SetUrl http://localhost 2>&1 > /dev/null &
 		;;
 
 	stop)

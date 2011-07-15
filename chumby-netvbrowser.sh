@@ -10,9 +10,9 @@ case "$1" in
 		# when server is up, we should use http://localhost for POST/GET to work
 		netv_started=$(ps ax | grep 'NeTVServer')
 		if [ ${#netv_started} -gt 10 ]; then
-			NeTVBrowser -qws -nomouse SetUrl http://localhost 2>&1 > /dev/null &
+			NeTVBrowser SetUrl http://localhost 2>&1 > /dev/null &
 		else
-			NeTVBrowser -qws -nomouse SetUrl /usr/share/netvserver/docroot/index.html 2>&1 > /dev/null &
+			NeTVBrowser SetUrl /usr/share/netvserver/docroot/index.html 2>&1 > /dev/null &
 		fi
 
 		# Temp fix for "Semop lock/unlock failure Identifier removed" flood

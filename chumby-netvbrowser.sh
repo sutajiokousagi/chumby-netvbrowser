@@ -17,6 +17,7 @@ case "$1" in
 
 		# Temp fix for "Semop lock/unlock failure Identifier removed" flood
 		# Should be after we started the Qt process
+		sleep 2
 		rm -rf /tmp/qtembedded-0
 		;;
 

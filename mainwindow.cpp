@@ -12,6 +12,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     isShuttingDown = false;
     this->myWebView = NULL;
+    this->myWebPage = NULL;
     this->mySocket = NULL;
     this->port = DEFAULT_PORT;
 
@@ -35,6 +36,7 @@ void MainWindow::setupWebview()
 
     //Replace it with our custom webview
     this->myWebView = new MyWebView(this);
+    this->myWebPage = new MyWebPage(this);
     this->ui->rootLayout->addWidget(this->myWebView);
 
     resetWebview();
@@ -46,7 +48,9 @@ void MainWindow::resetWebview()
 
     //Do any other customization on default view state
     this->myWebView->setInvertColor(false);
+    this->myWebView->setPage(myWebPage);
     this->myWebView->load( QUrl(QString("http://%1").arg(DEFAULT_HOST_URL)) );
+
 
     //Hide scrollbars
     this->myWebView->page()->mainFrame ()->setScrollBarPolicy ( Qt::Vertical, Qt::ScrollBarAlwaysOff );
@@ -67,6 +71,7 @@ MainWindow::~MainWindow()
     isShuttingDown = true;
     delete this->mySocket;
     delete this->myWebView;
+    delete this->myWebPage;
     delete this->ui;
 }
 

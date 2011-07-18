@@ -5,6 +5,7 @@
 #include <QTcpSocket>
 #include <QStringList>
 #include "mywebview.h"
+#include "mywebpage.h"
 #include "socketrequest.h"
 #include "socketresponse.h"
 
@@ -43,6 +44,7 @@ private:
 
     //Webview
     MyWebView* myWebView;
+    MyWebPage* myWebPage;
     void setupWebview();
     void resetWebview();
 

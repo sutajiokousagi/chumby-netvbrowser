@@ -62,6 +62,8 @@ void MainWindow::slot_socketError(QAbstractSocket::SocketError err)
 {
 #ifdef SUPERVERBOSE
     qDebug("TcpSocket (%x): error (%d)", (unsigned int) this, (unsigned int) err);
+#else
+    Q_UNUSED (err);
 #endif
 
     QTimer::singleShot( 2000, this, SLOT(slot_sockerRetry()) );

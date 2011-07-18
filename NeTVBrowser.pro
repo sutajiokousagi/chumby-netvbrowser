@@ -8,8 +8,10 @@ SOURCES += main.cpp \
            mainwindow.cpp \
            mywebview.cpp \
            mainwindow_comm.cpp \
-           mainwindow_common.cpp
-HEADERS += mainwindow.h mywebview.h
+           mainwindow_common.cpp \
+           mywebpage.cpp
+HEADERS += mainwindow.h mywebview.h \
+           mywebpage.h
 FORMS   += mainwindow.ui
 
 # Singleton & command line argument passing

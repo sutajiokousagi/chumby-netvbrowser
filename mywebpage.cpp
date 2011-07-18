@@ -7,6 +7,6 @@ MyWebPage::MyWebPage(QObject *parent) : QWebPage(parent)
 
 void MyWebPage::javaScriptConsoleMessage(const QString& message, int lineNumber, const QString& sourceID)
 {
-    QString logText = sourceID + "(line " + QString::number(lineNumber) + "): " + message;
-    qDebug() << logText;
+    if (message.startsWith("|~|"))      qDebug() << message.right(message.length()-3);
+    else                                qDebug() << sourceID << " (line " << lineNumber << "): " << message;
 }

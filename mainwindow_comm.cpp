@@ -36,7 +36,7 @@ void MainWindow::slot_socketConnected()
 
     //Notify the ControlPanel about this event
     QString javascriptString = QString("fServerReset(%1);").arg(firstTime ? "true" : "false");
-    qDebug("NeTVBrowser: calling JavaScript function %s", javascriptString);
+    qDebug("NeTVBrowser: calling JavaScript function %s", javascriptString.toLatin1().constData());
     this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString);
     firstTime = false;
 

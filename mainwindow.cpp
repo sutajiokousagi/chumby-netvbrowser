@@ -78,12 +78,12 @@ void MainWindow::receiveArgs(const QString &argsString)
         return;
 
     //QString execPath = argsList[0];
-    QString command = argsList[1].toUpper();;
+    QString command = argsList[1].toUpper();
     argsList.removeFirst();
     argsList.removeFirst();
 
     QByteArray string = processStatelessCommand(command.toLatin1(), argsList);
-    if (string != UNIMPLEMENTED)            printf("%s", string.constData());
+    if (string != UNIMPLEMENTED)            printf("NeTVBrowser: %s", string.constData());
     else                                    printf("Invalid argument");
 }
 

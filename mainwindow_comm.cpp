@@ -31,14 +31,14 @@ void MainWindow::slot_socketConnected()
     qDebug("TcpSocket (%x): connected",(unsigned int) this);
 #endif
 
+    qDebug("NeTVBrowser:slot_socketConnected: connected to NeTVServer");
     static bool firstTime = true;
 
     //Notify the ControlPanel about this event
     QString javascriptString = QString("fServerReset(%1);").arg(firstTime ? "true" : "false");
+    qDebug("NeTVBrowser: calling JavaScript function %s", javascriptString);
     this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString);
     firstTime = false;
-
-    qDebug("NeTVBrowser:slot_socketConnected: connected to NeTVServer");
 
     QTcpSocket *socket = (QTcpSocket *)QObject::sender();
     connect(socket, SIGNAL(readyRead()), this, SLOT(slot_socketReadReady()));

@@ -5,7 +5,7 @@
 #include <QWebFrame>
 #include <QUrl>
 #include <QKeyEvent>
-#include <QScreen>
+//#include <QScreen>
 
 void MainWindow::sendSocketHello(SocketResponse *response)
 {
@@ -142,7 +142,7 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         {
             printf("Invalid argument. Example: '#0080FF' or '0,128,255' \n");
         }
-        return command;
+        return QString("%1 %2").arg(command.constData()).arg(param).toLatin1();
     }
 
     else if (command == "BACKGROUNDTRANSPARENT" && argCount >= 1)
@@ -177,7 +177,7 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         //Hide scrollbars
         myWebView->page()->mainFrame ()->setScrollBarPolicy ( Qt::Vertical, Qt::ScrollBarAlwaysOff );
         myWebView->page()->mainFrame ()->setScrollBarPolicy ( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
-        return command;
+        return QString("%1 %2").arg(command.constData()).arg(param).toLatin1();
     }
 
     else if (command == "SETHTML" && argCount >= 1)
@@ -195,16 +195,18 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
     else if (command == "REMOTECONTROL" && argCount >= 1)
     {
         QString param = argsList[0];
-        //printf( "Remote control button: %s \n", param.toLatin1().constData() );
 
         if (param.toUpper() == "RESET")
         {
             resetWebview();
-            return command;
+            return param.toLatin1();
         }
 
         QString javascriptString = QString("fButtonPress('%1');").arg(param);
-        return (this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
+        QByteArray javaResult = (this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
+        if (javaResult != "")
+            return javaResult;
+        return QString("%1 %2").arg(command.constData()).arg(param).toLatin1();
     }
 
     //----------------------------------------------------
@@ -213,7 +215,10 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
     {
         QString param = argsList.join(" ");
         printf( "Executing JavaScript: %s \n", param.toLatin1().constData() );
-        return (this->myWebView->page()->mainFrame()->evaluateJavaScript(param)).toByteArray();
+        QByteArray javaResult = (this->myWebView->page()->mainFrame()->evaluateJavaScript(param)).toByteArray();
+        if (javaResult != "")
+            return javaResult;
+        return param.toLatin1();
     }
 
     else if (command == "SETBOX" && argCount >= 4)
@@ -225,7 +230,7 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
 
         this->showNormal();
         this->setGeometry(x,y,w,h);
-        return command;
+        return QString("%1 %2 %3 %4 %5").arg(command.constData()).arg(x).arg(y).arg(w).arg(h).toLatin1();
     }
 
     else if (command == "KEY" && argCount >= 1)
@@ -240,11 +245,12 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         } else {
             printf("Key NOT accepted");
         }
-        return command;
+        return QString("%1 %2").arg(command.constData()).arg(param).toLatin1();
     }
 
     //----------------------------------------------------
 
+    /*
     else if (command == "SETRESOLUTION" && argCount == 1)
     {
         QStringList argsLs = argsList[0].split(",");
@@ -255,6 +261,7 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         int h = argsLs[1].toInt();
         int depth = argsLs[2].toInt();
         QScreen::instance()->setMode(w,h,depth);
+        return QString("%1 %2 %3 %4").arg(command.constData()).arg(w).arg(h).arg(depth).toLatin1();
     }
     else if (command == "SETRESOLUTION" && argCount >= 3)
     {
@@ -262,7 +269,9 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         int h = argsList[1].toInt();
         int depth = argsList[2].toInt();
         QScreen::instance()->setMode(w,h,depth);
+        return QString("%1 %2 %3 %4").arg(command.constData()).arg(w).arg(h).arg(depth).toLatin1();
     }
+    */
 
     else if (command == "HELLO")
     {

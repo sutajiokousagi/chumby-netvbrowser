@@ -130,19 +130,17 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         {
             this->setStyleSheet( QString("background-color: %1;").arg(param) );
             this->update();
-            printf("Setting new background color: %s \n", param.toLatin1().constData() );
         }
         else if (param.count(",") == 2 && param.length() <= 11 && param.length() >= 5)
         {
             this->setStyleSheet( QString("background-color: rgb(%1);").arg(param) );
             this->update();
-            printf("Setting new background color: %s \n", param.toLatin1().constData() );
         }
         else
         {
             printf("Invalid argument. Example: '#0080FF' or '0,128,255' \n");
         }
-        return QString("%1 %2").arg(command.constData()).arg(param).toLatin1();
+        return command;     //QString("%1 %2").arg(command.constData()).arg(param).toLatin1();
     }
 
     else if (command == "BACKGROUNDTRANSPARENT" && argCount >= 1)
@@ -167,24 +165,21 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         if (param.startsWith("www"))
             param = param.insert(0, "http://");
         QUrl newUrl(param, QUrl::TolerantMode);
-        if (newUrl.isValid()) {
-            myWebView->load( QUrl(param, QUrl::TolerantMode) );
-            printf( "Setting new Url: %s \n", param.toLatin1().constData() );
-        } else {
-            printf( "Invalid Url  \n" );
-        }
+        if (newUrl.isValid())   myWebView->load( QUrl(param, QUrl::TolerantMode) );
+        else                    printf( "Invalid Url  \n" );
 
         //Hide scrollbars
         myWebView->page()->mainFrame ()->setScrollBarPolicy ( Qt::Vertical, Qt::ScrollBarAlwaysOff );
         myWebView->page()->mainFrame ()->setScrollBarPolicy ( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
-        return QString("%1 %2").arg(command.constData()).arg(param).toLatin1();
+        if (param != "")
+            return QString("%1 %2").arg(command.constData()).arg(param).toLatin1();
+        return command;
     }
 
     else if (command == "SETHTML" && argCount >= 1)
     {
         QString param = argsList[0];
         myWebView->setHtml(param, QUrl("http://localhost"));
-        printf( "Setting new HTML content \n" );
 
         //Hide scrollbars
         myWebView->page()->mainFrame ()->setScrollBarPolicy ( Qt::Vertical, Qt::ScrollBarAlwaysOff );
@@ -205,8 +200,10 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         QString javascriptString = QString("fButtonPress('%1');").arg(param);
         QByteArray javaResult = (this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
         if (javaResult != "")
-            return javaResult;
-        return QString("%1 %2").arg(command.constData()).arg(param).toLatin1();
+            return QString("%1 %2").arg(command.constData()).arg(javaResult.constData()).toLatin1();
+        if (param != "")
+            return QString("%1 %2").arg(command.constData()).arg(param).toLatin1();
+        return command;
     }
 
     //----------------------------------------------------
@@ -218,7 +215,7 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         QByteArray javaResult = (this->myWebView->page()->mainFrame()->evaluateJavaScript(param)).toByteArray();
         if (javaResult != "")
             return javaResult;
-        return param.toLatin1();
+        return command;     //param.toLatin1();
     }
 
     else if (command == "SETBOX" && argCount >= 4)
@@ -230,7 +227,7 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
 
         this->showNormal();
         this->setGeometry(x,y,w,h);
-        return QString("%1 %2 %3 %4 %5").arg(command.constData()).arg(x).arg(y).arg(w).arg(h).toLatin1();
+        return command;     //QString("%1 %2 %3 %4 %5").arg(command.constData()).arg(x).arg(y).arg(w).arg(h).toLatin1();
     }
 
     else if (command == "KEY" && argCount >= 1)
@@ -245,7 +242,7 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         } else {
             printf("Key NOT accepted");
         }
-        return QString("%1 %2").arg(command.constData()).arg(param).toLatin1();
+        return command;     //QString("%1 %2").arg(command.constData()).arg(param).toLatin1();
     }
 
     //----------------------------------------------------

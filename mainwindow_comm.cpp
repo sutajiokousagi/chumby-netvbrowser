@@ -31,7 +31,7 @@ void MainWindow::slot_socketConnected()
     qDebug("TcpSocket (%x): connected",(unsigned int) this);
 #endif
 
-    qDebug("NeTVBrowser:slot_socketConnected: connected to NeTVServer");
+    qDebug("NeTVBrowser: connected to NeTVServer");
     static bool firstTime = true;
 
     //Notify the ControlPanel about this event

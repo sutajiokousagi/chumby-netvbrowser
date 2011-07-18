@@ -5,6 +5,7 @@
 #include <QProcess>
 #include <QWebFrame>
 #include <QUrl>
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -88,7 +89,7 @@ void MainWindow::receiveArgs(const QString &argsString)
     argsList.removeFirst();
 
     QByteArray string = processStatelessCommand(command.toLatin1(), argsList);
-    if (string != UNIMPLEMENTED)            printf("NeTVBrowser: %s", string.constData());
-    else                                    printf("Invalid argument");
+    if (string != UNIMPLEMENTED)            qDebug("NeTVBrowser: %s", string.constData());
+    else                                    qDebug("Invalid argument");
 }
 

@@ -5,7 +5,6 @@
 #include <QWebFrame>
 #include <QUrl>
 #include <QKeyEvent>
-//#include <QScreen>
 
 void MainWindow::sendSocketHello(SocketResponse *response)
 {

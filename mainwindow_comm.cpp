@@ -112,7 +112,7 @@ void MainWindow::slot_notifyBrowser()
 
     //Notify the ControlPanel about this event
     QString javascriptString = QString("fServerReset(%1);").arg(firstTime ? "true" : "false");
-    qDebug("NeTVBrowser: calling JavaScript function %s", javascriptString.toLatin1().constData());
+    qDebug("NeTVBrowser: calling JavaScript function '%s'", javascriptString.toLatin1().constData());
     this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString);
 
     firstTime = false;

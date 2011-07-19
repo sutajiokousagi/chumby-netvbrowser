@@ -32,13 +32,9 @@ void MainWindow::slot_socketConnected()
 #endif
 
     qDebug("NeTVBrowser: connected to NeTVServer");
-    static bool firstTime = true;
 
-    //Notify the ControlPanel about this event
-    QString javascriptString = QString("fServerReset(%1);").arg(firstTime ? "true" : "false");
-    qDebug("NeTVBrowser: calling JavaScript function %s", javascriptString.toLatin1().constData());
-    this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString);
-    firstTime = false;
+    //Wait for .js in browser to load, then notify it
+    QTimer::singleShot( 3000, this, SLOT(slot_notifyBrowser()) );
 
     QTcpSocket *socket = (QTcpSocket *)QObject::sender();
     connect(socket, SIGNAL(readyRead()), this, SLOT(slot_socketReadReady()));
@@ -108,6 +104,18 @@ void MainWindow::slot_socketReadReady()
     buffer = QByteArray();
     delete response;
     delete request;
+}
+
+void MainWindow::slot_notifyBrowser()
+{
+    static bool firstTime = true;
+
+    //Notify the ControlPanel about this event
+    QString javascriptString = QString("fServerReset(%1);").arg(firstTime ? "true" : "false");
+    qDebug("NeTVBrowser: calling JavaScript function %s", javascriptString.toLatin1().constData());
+    this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString);
+
+    firstTime = false;
 }
 
 void MainWindow::slot_newSocketMessage( SocketRequest *request, SocketResponse *response )

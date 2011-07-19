@@ -65,6 +65,8 @@ private slots:
     void slot_socketError(QAbstractSocket::SocketError);
     void slot_sockerRetry();
     void slot_socketReadReady();
+
+    void slot_notifyBrowser();
     void slot_newSocketMessage(SocketRequest *request, SocketResponse *response );
 };
 

@@ -5,6 +5,10 @@ case "$1" in
 	start)
 		export QWS_KEYBOARD=chumbyirkb
 
+		# [Temp] Hide the flash player
+		setplayer c 0 0 1 1
+		setplayer p
+
 		# Start in the background so we don't hog the console
 		NeTVBrowser SetUrl http://localhost 2>&1 > /dev/null &
 		;;

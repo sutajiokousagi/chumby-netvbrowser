@@ -207,6 +207,63 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
 
     //----------------------------------------------------
 
+    else if (command == "NMSTATECHANGED" && argCount >= 1)
+    {
+        QString param = argsList[0];
+
+        //See http://projects.gnome.org/NetworkManager/developers/spec.html#type-NM_STATE
+        if (param.toUpper() == "0")         param = "unknown";
+        else if (param.toUpper() == "1")    param = "sleeping";
+        else if (param.toUpper() == "2")    param = "connecting";
+        else if (param.toUpper() == "3")    param = "connected";
+        else if (param.toUpper() == "4")    param = "disconnected";
+
+        QString javascriptString = QString("fNMStateChanged('%1');").arg(param);
+        QByteArray javaResult = (this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
+        if (javaResult != "")
+            return QString("%1 %2").arg(command.constData()).arg(javaResult.constData()).toLatin1();
+        if (param != "")
+            return QString("%1 %2").arg(command.constData()).arg(param).toLatin1();
+        return command;
+    }
+
+    else if (command == "NMPROPERTIESCHANGED" && argCount >= 1)
+    {
+        //QString param = argsList[0];
+
+        //To be decided
+
+        return command;
+    }
+
+    else if (command == "NMDEVICEADDED" && argCount >= 1)
+    {
+        QString param = argsList[0];        //object path?
+
+        QString javascriptString = QString("fNMDeviceAdded('%1');").arg(param);
+        QByteArray javaResult = (this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
+        if (javaResult != "")
+            return QString("%1 %2").arg(command.constData()).arg(javaResult.constData()).toLatin1();
+        if (param != "")
+            return QString("%1 %2").arg(command.constData()).arg(param).toLatin1();
+        return command;
+    }
+
+    else if (command == "NMDEVICEREMOVED" && argCount >= 1)
+    {
+        QString param = argsList[0];        //object path?
+
+        QString javascriptString = QString("fNMDeviceRemoved('%1');").arg(param);
+        QByteArray javaResult = (this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
+        if (javaResult != "")
+            return QString("%1 %2").arg(command.constData()).arg(javaResult.constData()).toLatin1();
+        if (param != "")
+            return QString("%1 %2").arg(command.constData()).arg(param).toLatin1();
+        return command;
+    }
+
+    //----------------------------------------------------
+
     else if (command == "JAVASCRIPT" && argCount >= 1)
     {
         QString param = argsList.join(" ");

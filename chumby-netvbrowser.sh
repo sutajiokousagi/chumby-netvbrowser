@@ -3,8 +3,6 @@
 
 case "$1" in
 	start)
-		export QWS_KEYBOARD=chumbyirkb
-
 		# [Temp] Hide the flash player
 		setplayer c 0 0 1 1
 		setplayer p

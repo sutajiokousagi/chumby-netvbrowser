@@ -7,6 +7,9 @@ case "$1" in
 		setplayer c 0 0 1 1
 		setplayer p
 
+		# [Temp] Mute the browser complains
+		echo 2 > /proc/cpu/alignment
+
 		# Start in the background so we don't hog the console
 		NeTVBrowser SetUrl http://localhost 2>&1 > /dev/null &
 		;;

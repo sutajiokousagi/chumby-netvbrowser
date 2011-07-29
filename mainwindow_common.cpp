@@ -27,9 +27,9 @@ QByteArray MainWindow::remoteControlKey(QByteArray buttonName)
         resetWebview();
         return "";
     }
+    qDebug("%s: [keyboard override] %s", TAG, buttonName);
     QString javascriptString = QString("fButtonPress('%1');").arg(QString(buttonName));
-    QByteArray javascriptResult = (this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
-    return javascriptResult;
+    return (this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
 }
 
 QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList argsList)

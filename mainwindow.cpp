@@ -181,7 +181,7 @@ void MainWindow::keyReleaseEvent  ( QKeyEvent * event )
 
         case Qt::Key_PageDown:
             if (widget >= 0 && currentEpochMs - widget > longClickThresholdMs1) {
-                qDebug("%s :[keyboard override] long-press Widget key (%lldms)", TAG, currentEpochMs-cpanel);
+                qDebug("%s :[keyboard override] long-press Widget key (%lldms)", TAG, currentEpochMs-widget);
                 remoteControlKey("reset");
             }
             widget = 0;

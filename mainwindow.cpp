@@ -44,6 +44,9 @@ void MainWindow::setupWebview()
     this->myWebPage = new MyWebPage(this);
     this->ui->rootLayout->addWidget(this->myWebView);
 
+    //Ignore mouse & keyboard
+    this->myWebView->setEnabled(false);
+
     resetWebview();
 }
 
@@ -115,44 +118,44 @@ void MainWindow::keyPressEvent ( QKeyEvent * event )
 
     switch (keycode)
     {
-        case Qt::Key_Up:                up = currentEpochMs;
+        case Qt::Key_Up:
+            up = currentEpochMs;
             remoteControlKey("up");
-            event->accept();
             return;
-        case Qt::Key_Down:              down = currentEpochMs;
+        case Qt::Key_Down:
+            down = currentEpochMs;
             remoteControlKey("down");
-            event->accept();
             return;
-        case Qt::Key_Left:              left = currentEpochMs;
+        case Qt::Key_Left:
+            left = currentEpochMs;
             remoteControlKey("left");
-            event->accept();
             return;
-        case Qt::Key_Right:             right = currentEpochMs;
+        case Qt::Key_Right:
+            right = currentEpochMs;
             remoteControlKey("right");
-            event->accept();
             return;
 
         case Qt::Key_Enter:
-        case Qt::Key_Return:            center = currentEpochMs;
+        case Qt::Key_Return:
+            center = currentEpochMs;
             remoteControlKey("center");
-            event->accept();
             return;
-        case Qt::Key_PageUp:            cpanel = currentEpochMs;
+        case Qt::Key_PageUp:
+            cpanel = currentEpochMs;
             remoteControlKey("cpanel");
-            event->accept();
             return;
-        case Qt::Key_PageDown:          widget = currentEpochMs;
+        case Qt::Key_PageDown:
+            widget = currentEpochMs;
             remoteControlKey("widget");
-            event->accept();
             return;
 
-        case Qt::Key_1:                 hidden1 = currentEpochMs;
+        case Qt::Key_1:
+            hidden1 = currentEpochMs;
             remoteControlKey("reset");
-            event->accept();
             return;
-        case Qt::Key_2:                 hidden2 = currentEpochMs;
+        case Qt::Key_2:
+            hidden2 = currentEpochMs;
             remoteControlKey("reset");
-            event->accept();
             return;
     }
 
@@ -174,7 +177,6 @@ void MainWindow::keyReleaseEvent  ( QKeyEvent * event )
                 remoteControlKey("reset");
             }
             cpanel = 0;
-            event->accept();
             return;
 
         case Qt::Key_PageDown:
@@ -183,10 +185,9 @@ void MainWindow::keyReleaseEvent  ( QKeyEvent * event )
                 remoteControlKey("reset");
             }
             widget = 0;
-            event->accept();
             return;
     }
 
     //Default behavior
-    QWidget::keyPressEvent(event);
+    QWidget::keyReleaseEvent(event);
 }

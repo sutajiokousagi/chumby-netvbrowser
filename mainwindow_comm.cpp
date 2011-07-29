@@ -27,14 +27,10 @@ void MainWindow::setupSocket()
 
 void MainWindow::slot_socketConnected()
 {
-#ifdef SUPERVERBOSE
-    qDebug("TcpSocket (%x): connected",(unsigned int) this);
-#endif
-
     qDebug("%s: connected to NeTVServer", TAG);
 
     //Notify ControlPanel about this
-    QTimer::singleShot( 500, this, SLOT(slot_notifyBrowser()) );
+    QTimer::singleShot( 400, this, SLOT(slot_notifyBrowser()) );
 
     QTcpSocket *socket = (QTcpSocket *)QObject::sender();
     connect(socket, SIGNAL(readyRead()), this, SLOT(slot_socketReadReady()));
@@ -51,7 +47,9 @@ void MainWindow::slot_socketDisconnected()
         qDebug("TcpSocket (%x): disconnected",(unsigned int) this);
 #endif
 
-    QTimer::singleShot( 2000, this, SLOT(slot_sockerRetry()) );
+    if (QObject::sender() != NULL)
+        qDebug("%s: disconnected from NeTVServer", TAG);
+    QTimer::singleShot( 3000, this, SLOT(slot_sockerRetry()) );
 }
 
 void MainWindow::slot_socketError(QAbstractSocket::SocketError err)
@@ -62,7 +60,7 @@ void MainWindow::slot_socketError(QAbstractSocket::SocketError err)
     Q_UNUSED (err);
 #endif
 
-    QTimer::singleShot( 2000, this, SLOT(slot_sockerRetry()) );
+    QTimer::singleShot( 3000, this, SLOT(slot_sockerRetry()) );
 }
 
 void MainWindow::slot_sockerRetry()

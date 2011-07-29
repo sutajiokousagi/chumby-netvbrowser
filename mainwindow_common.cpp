@@ -6,12 +6,30 @@
 #include <QUrl>
 #include <QKeyEvent>
 
+#ifdef ENABLE_QWS_STUFF
+    #include <QWSServer>
+    #include <QScreen>
+#endif
+
+
 void MainWindow::sendSocketHello(SocketResponse *response)
 {
     response->setCommand("Hello");
     response->setParameter("type", "netvbrowser");
     response->setParameter("version", "1.0");
     response->write();
+}
+
+QByteArray MainWindow::remoteControlKey(QByteArray buttonName)
+{
+    if (buttonName.toUpper() == "RESET")
+    {
+        resetWebview();
+        return "";
+    }
+    QString javascriptString = QString("fButtonPress('%1');").arg(QString(buttonName));
+    QByteArray javascriptResult = (this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
+    return javascriptResult;
 }
 
 QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList argsList)
@@ -24,47 +42,15 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
     //arguments
     int argCount = argsList.count();
 
-    if (command == "MINIMIZE")
+    if (command == "MINIMIZE" || command == "HIDE")
     {
         this->setVisible(false);
         return command;
     }
 
-    else if (command == "MAXIMIZE" || command == "FULLSCREEN")
+    else if (command == "MAXIMIZE" || command == "FULLSCREEN" || command == "SHOW")
     {
         this->showFullScreen();
-        return command;
-    }
-
-    else if (command == "SHOW")
-    {
-        this->showFullScreen();
-        return command;
-    }
-
-    else if (command == "HIDE")
-    {
-        this->setVisible(false);
-        return command;
-    }
-
-    else if (command == "REDRAW" || command == "UPDATE")
-    {
-        this->myWebView->update();
-        return command;
-    }
-
-    else if (command == "QUIT" || command == "EXIT" || command == "TERMINATE")
-    {
-        QApplication::exit(0);
-        return command;
-    }
-
-    else if (command == "RESTART")
-    {
-        //This will just ignore the 'singleton' class behaviour. Awesome!
-        QProcess::startDetached( QApplication::applicationFilePath() );
-        QApplication::exit(0);
         return command;
     }
 
@@ -189,15 +175,7 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
     else if (command == "REMOTECONTROL" && argCount >= 1)
     {
         QString param = argsList[0];
-
-        if (param.toUpper() == "RESET")
-        {
-            resetWebview();
-            return param.toLatin1();
-        }
-
-        QString javascriptString = QString("fButtonPress('%1');").arg(param);
-        QByteArray javaResult = (this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
+        QByteArray javaResult = remoteControlKey(param.toLatin1());
         if (javaResult != "")
             return QString("%1 %2").arg(command.constData()).arg(javaResult.constData()).toLatin1();
         if (param != "")
@@ -303,7 +281,12 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
 
     //----------------------------------------------------
 
-    /*
+#ifdef ENABLE_QWS_STUFF
+    else if (command == "REFRESH" || command == "REDRAW")
+    {
+        //redraw the entire screen
+        QWSServer::instance()->refresh();
+    }
     else if (command == "SETRESOLUTION" && argCount == 1)
     {
         QStringList argsLs = argsList[0].split(",");
@@ -314,7 +297,10 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         int h = argsLs[1].toInt();
         int depth = argsLs[2].toInt();
         QScreen::instance()->setMode(w,h,depth);
+        this->showFullScreen();
+        QWSServer::instance()->refresh();
         return QString("%1 %2 %3 %4").arg(command.constData()).arg(w).arg(h).arg(depth).toLatin1();
+
     }
     else if (command == "SETRESOLUTION" && argCount >= 3)
     {
@@ -322,9 +308,11 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         int h = argsList[1].toInt();
         int depth = argsList[2].toInt();
         QScreen::instance()->setMode(w,h,depth);
+        this->showFullScreen();
+        QWSServer::instance()->refresh();
         return QString("%1 %2 %3 %4").arg(command.constData()).arg(w).arg(h).arg(depth).toLatin1();
     }
-    */
+#endif
 
     else if (command == "HELLO")
     {

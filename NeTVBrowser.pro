@@ -9,7 +9,8 @@ SOURCES += main.cpp \
            mywebview.cpp \
            mainwindow_comm.cpp \
            mainwindow_common.cpp \
-           mywebpage.cpp
+           mywebpage.cpp \
+    mainwindow_page.cpp
 HEADERS += mainwindow.h mywebview.h \
            mywebpage.h
 FORMS   += mainwindow.ui
@@ -17,8 +18,12 @@ FORMS   += mainwindow.ui
 # Singleton & command line argument passing
 include(./qtsingleapplication-2.6_1-opensource/src/qtsingleapplication.pri)
 
-# Testing socket class
+# Socket class
 include(./bfSocketServer/src/bfSocketserver.pri)
+
+# QWSServer
+message("ENABLE_QWS_STUFF enabled")
+DEFINES += ENABLE_QWS_STUFF
 
 # Changes the name of the target, when is debug mode
 CONFIG( debug, debug|release ) {

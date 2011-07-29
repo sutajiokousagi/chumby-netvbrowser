@@ -31,10 +31,10 @@ void MainWindow::slot_socketConnected()
     qDebug("TcpSocket (%x): connected",(unsigned int) this);
 #endif
 
-    qDebug("NeTVBrowser: connected to NeTVServer");
+    qDebug("%s: connected to NeTVServer", TAG);
 
-    //Wait for .js in browser to load, then notify it
-    QTimer::singleShot( 3000, this, SLOT(slot_notifyBrowser()) );
+    //Notify ControlPanel about this
+    QTimer::singleShot( 500, this, SLOT(slot_notifyBrowser()) );
 
     QTcpSocket *socket = (QTcpSocket *)QObject::sender();
     connect(socket, SIGNAL(readyRead()), this, SLOT(slot_socketReadReady()));
@@ -81,10 +81,6 @@ void MainWindow::slot_sockerRetry()
 
 void MainWindow::slot_socketReadReady()
 {
-#ifdef SUPERVERBOSE
-    qDebug("TcpSocket (%x): read input", (unsigned int) this);
-#endif
-
     QTcpSocket *socket = (QTcpSocket *)QObject::sender();
 
     QByteArray buffer;
@@ -108,14 +104,13 @@ void MainWindow::slot_socketReadReady()
 
 void MainWindow::slot_notifyBrowser()
 {
-    static bool firstTime = true;
-
-    //Notify the ControlPanel about this event
-    QString javascriptString = QString("fServerReset(%1);").arg(firstTime ? "true" : "false");
-    qDebug("NeTVBrowser: calling JavaScript function '%s'", javascriptString.toLatin1().constData());
-    this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString);
-
-    firstTime = false;
+    //If ControlPanel has loaded & running
+    if (cPanelLoaded)
+    {
+        QString javascriptString = QString("fServerReset();");
+        qDebug("%s: calling JavaScript function '%s'", TAG, javascriptString.toLatin1().constData());
+        this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString);
+    }
 }
 
 void MainWindow::slot_newSocketMessage( SocketRequest *request, SocketResponse *response )
@@ -129,5 +124,5 @@ void MainWindow::slot_newSocketMessage( SocketRequest *request, SocketResponse *
     response->setParameter("value", string);
     response->write();
 
-    qDebug("NeTVBrowser:slot_newSocketMessage: %s", string.constData());
+    qDebug("%s:slot_newSocketMessage: %s", TAG, string.constData());
 }

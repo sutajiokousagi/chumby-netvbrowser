@@ -15,7 +15,7 @@ public:
 
 protected:
 
-    void paintEvent(QPaintEvent *pe);
+    void paintEvent( QPaintEvent *pe );
 
 private:
 

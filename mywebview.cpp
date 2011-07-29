@@ -17,5 +17,5 @@ void MyWebView::paintEvent(QPaintEvent *pe)
         QPainter p(this);
         p.setCompositionMode(QPainter::CompositionMode_Difference);
         p.fillRect(this->rect(), QColor(255,255,255,255));
-    }
+    }    
 }

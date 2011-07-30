@@ -12,9 +12,6 @@ case "$1" in
 		$(fpga_ctl w 0xf 240)
 		$(fpga_ctl w 0xc 2)
 
-		# [Temp] Mute the browser alignment complains
-		echo 2 > /proc/cpu/alignment
-
 		# [Temp] Hide the flash player
 		$(setplayer c 0 0 1 1)
 		$(setplayer p)

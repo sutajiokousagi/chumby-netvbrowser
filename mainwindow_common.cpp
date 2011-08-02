@@ -287,7 +287,17 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         //redraw the entire screen
         QWSServer::instance()->refresh();
     }
-    else if (command == "SETRESOLUTION" && argCount == 1)
+    else if (command == "SETRESOLUTION" && argCount >= 3)
+    {
+        int w = argsList[0].toInt();
+        int h = argsList[1].toInt();
+        int depth = argsList[2].toInt();
+        QScreen::instance()->setMode(w,h,depth);
+        this->showFullScreen();
+        QWSServer::instance()->refresh();
+        return QString("%1 %2 %3 %4").arg(command.constData()).arg(w).arg(h).arg(depth).toLatin1();
+    }
+    else if (command == "SETRESOLUTION" && argCount >= 1)
     {
         QStringList argsLs = argsList[0].split(",");
         if (argsList.count() < 3)
@@ -302,15 +312,14 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         return QString("%1 %2 %3 %4").arg(command.constData()).arg(w).arg(h).arg(depth).toLatin1();
 
     }
-    else if (command == "SETRESOLUTION" && argCount >= 3)
+    else if (command == "HDMI" && argCount >= 1)
     {
-        int w = argsList[0].toInt();
-        int h = argsList[1].toInt();
-        int depth = argsList[2].toInt();
-        QScreen::instance()->setMode(w,h,depth);
-        this->showFullScreen();
-        QWSServer::instance()->refresh();
-        return QString("%1 %2 %3 %4").arg(command.constData()).arg(w).arg(h).arg(depth).toLatin1();
+        QString eventName = argsList[0];
+        QString javascriptString = QString("fHDMIEvent('%1');").arg(QString(eventName));
+        QByteArray javaResult = (this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
+        if (javaResult != "")
+            return javaResult;
+        return command;
     }
 #endif
 

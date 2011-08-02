@@ -23,14 +23,14 @@ case "$1" in
 		export QWS_KEYBOARD=chumbyirkb
 
 		# Start in the background so we don't hog the console
-		NeTVBrowser -qws SetUrl http://localhost 2>&1 > /dev/null &
+		NeTVBrowser -qws SetUrl http://localhost > /dev/null 2>&1 &
 
 		# fullscreen
 		setbox 0 0 1279 719
 		;;
 
 	stop)
-		killall NeTVBrowser 2> /dev/null
+		killall NeTVBrowser > /dev/null 2>&1 &
 		;;
 
 	restart)

@@ -42,7 +42,13 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
     //arguments
     int argCount = argsList.count();
 
-    if (command == "MINIMIZE" || command == "HIDE")
+    if (command == "HELLO")
+    {
+        //Ignore this message
+        return command;
+    }
+
+    else if (command == "MINIMIZE" || command == "HIDE")
     {
         this->setVisible(false);
         return command;
@@ -323,10 +329,23 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
     }
 #endif
 
-    else if (command == "HELLO")
+    //----------------------------------------------------
+    // Generic command
+    // Directly passed to JavaScript ControlPanel as fCOMMANDEvent(arg1,arg2,arg3...);
+
+    else
     {
-        //Ignore this message
-        return command;
+        QString paramString = "";
+        for (int i=0; i<argCount; i++)
+        {
+            if (i < argCount-1)     paramString.append(argsList[i]).append(",");
+            else                    paramString.append(argsList[i]);
+        }
+        QString javascriptString = QString("f%1Event('%2');").arg(QString(command)).arg(paramString);
+        QByteArray javaResult = (this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
+        if (javaResult != "")
+            return javaResult;
+        return QByteArray(UNIMPLEMENTED) + ":" + command;
     }
 
     return QByteArray(UNIMPLEMENTED) + ":" + command;

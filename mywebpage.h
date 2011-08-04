@@ -17,6 +17,7 @@ protected:
     void javaScriptConsoleMessage(const QString& message, int lineNumber, const QString& sourceID);
     bool javaScriptPrompt ( QWebFrame * frame, const QString & msg, const QString & defaultValue, QString * result );
     bool swallowContextMenuEvent ( QContextMenuEvent * event );
+    QString chooseFile ( QWebFrame * parentFrame, const QString & suggestedFile );
 
 public slots:
 

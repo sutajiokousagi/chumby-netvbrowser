@@ -273,16 +273,25 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
     else if (command == "KEY" && argCount >= 1)
     {
         QString param = argsList[0];
-        QKeyEvent key(QEvent::KeyPress, getKeyCode(param), Qt::NoModifier);
-        QApplication::sendEvent(this->myWebView, &key);
+        Qt::Key keycode = getKeyCode(param);
+        if (keycode == Qt::Key_unknown)
+            return QString("%1 %2").arg(command.constData()).arg("Unknown key").toLatin1();
 
+        QKeyEvent key1(QEvent::KeyPress, keycode, Qt::ShiftModifier);
+        QApplication::sendEvent(this->myWebView, &key1);
+
+        QKeyEvent key2(QEvent::KeyRelease, keycode, Qt::NoModifier);
+        QApplication::sendEvent(this->myWebView, &key2);
+
+        /*
         if (key.isAccepted())
         {
-            printf("Key accepted");
+            qDebug("Key accepted");
         } else {
-            printf("Key NOT accepted");
+            qDebug("Key NOT accepted");
         }
-        return command;     //QString("%1 %2").arg(command.constData()).arg(param).toLatin1();
+        */
+        return QString("%1 %2").arg(command.constData()).arg("Unknown key").toLatin1();
     }
 
     //----------------------------------------------------
@@ -355,7 +364,7 @@ Qt::Key MainWindow::getKeyCode(QString keyname)
 {
     keyname = keyname.toLower();
     if (keyname.length() < 1)
-        return Qt::Key_Space;
+        return Qt::Key_unknown;
 
     if (keyname == "left")              return Qt::Key_Left;
     else if (keyname == "right")        return Qt::Key_Right;
@@ -388,6 +397,8 @@ Qt::Key MainWindow::getKeyCode(QString keyname)
     else if (keyname == "volup")        return Qt::Key_VolumeUp;
     else if (keyname == "voldown")      return Qt::Key_VolumeDown;
     else if (keyname == "mute")         return Qt::Key_VolumeMute;
+    else if (keyname == "search")       return Qt::Key_Search;
+    else if (keyname == "menu")         return Qt::Key_Menu;
 
     else if (keyname.length() >= 2)
     {
@@ -410,5 +421,5 @@ Qt::Key MainWindow::getKeyCode(QString keyname)
             return (Qt::Key)(Qt::Key_0 + keyname[0].unicode() - 'a');
     }
 
-    return Qt::Key_Space;
+    return Qt::Key_unknown;
 }

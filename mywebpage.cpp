@@ -41,3 +41,8 @@ bool MyWebPage::shouldInterruptJavaScript()
     qDebug() << "NeTVBrowser: unresponsive JavaScript detected. Killed.";
     return true;
 }
+
+QString MyWebPage::chooseFile ( QWebFrame * parentFrame, const QString & suggestedFile )
+{
+    return "";
+}

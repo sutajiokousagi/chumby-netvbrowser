@@ -251,7 +251,7 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
     else if (command == "JAVASCRIPT" && argCount >= 1)
     {
         QString param = argsList.join(" ");
-        printf( "Executing JavaScript: %s \n", param.toLatin1().constData() );
+        //printf( "Executing JavaScript: %s \n", param.toLatin1().constData() );
         QByteArray javaResult = (this->myWebView->page()->mainFrame()->evaluateJavaScript(param)).toByteArray();
         if (javaResult != "")
             return javaResult;

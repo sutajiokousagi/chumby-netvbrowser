@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->myWebView = NULL;
     this->myWebPage = NULL;
     this->mySocket = NULL;
+    this->opkgSocket = NULL;
     this->port = DEFAULT_PORT;
 
     up = 0;down = 0;left = 0;right = 0;center = 0;cpanel = 0;widget = 0;hidden1 = 0; hidden2 = 0;
@@ -32,6 +33,21 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->setupWebview();
     this->setupSocket();
+    this->setupUpdate();
+
+    //Previously not doing an update
+    if (!FileExists(UPDATE_PROGRESS_FILE))
+    {
+        this->resetWebview();
+        return;
+    }
+
+    //Continue update progress bar
+    QByteArray rawUpgradeStatus = GetFileContents(UPDATE_PROGRESS_FILE);
+
+    //Here we have to reload the package list & recalculate the size
+    QByteArray progress = "50";
+    this->resetWebview(QByteArray(UPDATE_PAGE) + "?continue=" + progress);
 }
 
 void MainWindow::setupWebview()
@@ -46,11 +62,9 @@ void MainWindow::setupWebview()
 
     //Ignore mouse & keyboard
     this->myWebView->setEnabled(false);
-
-    resetWebview();
 }
 
-void MainWindow::resetWebview()
+void MainWindow::resetWebview(QByteArray address /* = "" */)
 {
     qDebug("NeTVBrowser:resetWebview");
 
@@ -77,7 +91,8 @@ void MainWindow::resetWebview()
     this->setStyleSheet("background-color: rgb(240, 0, 240);");
 
     //Load default page
-    this->myWebView->load( QUrl(QString("http://%1").arg(DEFAULT_HOST_URL)) );
+    if (address == "")      this->myWebView->load( QUrl(QString("http://%1").arg(DEFAULT_HOST_URL)) );
+    else                    this->myWebView->load( QUrl(address) );
 }
 
 MainWindow::~MainWindow()

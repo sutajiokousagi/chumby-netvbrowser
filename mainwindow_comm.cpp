@@ -49,7 +49,7 @@ void MainWindow::slot_socketDisconnected()
 
     if (QObject::sender() != NULL)
         qDebug("%s: disconnected from NeTVServer", TAG);
-    QTimer::singleShot( 3000, this, SLOT(slot_sockerRetry()) );
+    QTimer::singleShot( 3000, this, SLOT(slot_socketRetry()) );
 }
 
 void MainWindow::slot_socketError(QAbstractSocket::SocketError err)
@@ -60,10 +60,10 @@ void MainWindow::slot_socketError(QAbstractSocket::SocketError err)
     Q_UNUSED (err);
 #endif
 
-    QTimer::singleShot( 3000, this, SLOT(slot_sockerRetry()) );
+    QTimer::singleShot( 3000, this, SLOT(slot_socketRetry()) );
 }
 
-void MainWindow::slot_sockerRetry()
+void MainWindow::slot_socketRetry()
 {
     this->mySocket->close();
     disconnect(this->mySocket, SIGNAL(connected()), this, SLOT(slot_socketConnected()));
@@ -71,7 +71,7 @@ void MainWindow::slot_sockerRetry()
     disconnect(this->mySocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(slot_socketError(QAbstractSocket::SocketError)));
     disconnect(this->mySocket, SIGNAL(readyRead()), this, SLOT(slot_socketReadReady()));
 
-    if (isShuttingDown)
+    if (this->isShuttingDown)
         return;
 
     setupSocket();

@@ -9,8 +9,10 @@ SOURCES += main.cpp \
            mywebview.cpp \
            mainwindow_comm.cpp \
            mainwindow_common.cpp \
+           mainwindow_page.cpp \
+           mainwindow_update.cpp \
+           mainwindow_utils.cpp
            mywebpage.cpp \
-    mainwindow_page.cpp
 HEADERS += mainwindow.h mywebview.h \
            mywebpage.h
 FORMS   += mainwindow.ui

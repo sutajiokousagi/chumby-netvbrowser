@@ -340,17 +340,17 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
 
     //----------------------------------------------------
     // Generic command
-    // Directly passed to JavaScript ControlPanel as fCOMMANDEvent(arg1,arg2,arg3...);
+    // Directly passed to JavaScript ControlPanel as fCOMMANDEvent('arg1','arg2','arg3'...);
 
     else
     {
         QString paramString = "";
         for (int i=0; i<argCount; i++)
         {
-            if (i < argCount-1)     paramString.append(argsList[i]).append(",");
-            else                    paramString.append(argsList[i]);
+            if (i < argCount-1)     paramString.append( QString("'%1',").arg(argsList[i]) );
+            else                    paramString.append( QString("'%1'").arg(argsList[i]) );
         }
-        QString javascriptString = QString("f%1Event('%2');").arg(QString(command)).arg(paramString);
+        QString javascriptString = QString("f%1Event(%2);").arg(QString(command)).arg(paramString);
         QByteArray javaResult = (this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
         if (javaResult != "")
             return javaResult;

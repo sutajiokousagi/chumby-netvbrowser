@@ -4,7 +4,7 @@ OPKG_FIFO=/tmp/opkg_upgrade_fifo
 UPDATE_PROGRESS_FILE=/tmp/netvbrowser_temp_upgrade
 
 # Create the fifo if it's not already there
-# Should have been created by NeTVBrowser anyway
+# Should have been done by NeTVBrowser anyway
 if [ ! -e ${OPKG_FIFO} ]; then
 	mkfifo ${OPKG_FIFO}
 fi
@@ -42,7 +42,7 @@ NeTVBrowser -qws UpdateDone &
 sleep 2
 
 # Cleaning up
-# Should have been created by NeTVBrowser anyway
+# Should have been done by NeTVBrowser anyway
 if [ -e ${OPKG_FIFO} ]; then
 	rm ${OPKG_FIFO}
 fi

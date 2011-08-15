@@ -40,6 +40,7 @@ bool async_fifo::setup()
 void async_fifo::stopMe()
 {
     this->isStopping = true;
+    this->terminate();
 }
 
 bool async_fifo::isOpen()

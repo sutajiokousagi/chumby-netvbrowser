@@ -35,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setupWebview();
 
     //Previously not doing an update
-    if (!FileExists(UPDATE_PROGRESS_FILE))
+    if (!FileExists(UPGRADE_PROGRESS_FILE))
     {
         this->resetWebview();
         return;
@@ -43,9 +43,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Continue reading the fifo
     this->setupUpgrade();
-
-    //Continue update progress bar
-    QByteArray rawUpgradeStatus = GetFileContents(UPDATE_PROGRESS_FILE);
 
     //Here we have to reload the package list & recalculate the size
     QByteArray progress = "50";

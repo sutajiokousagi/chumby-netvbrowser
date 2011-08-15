@@ -33,7 +33,7 @@ namespace Ui {
 #define DESCRIPTION "Customized web server based on Qt"
 
 /** The special string used to split & join arguements */
-#define ARGS_SPLIT_TOKEN    "|~|"
+#define ARGS_SPLIT_TOKEN        "|~|"
 
 #define DEFAULT_HOST_URL        "localhost"
 #define DEFAULT_PORT            8081
@@ -42,9 +42,9 @@ namespace Ui {
 
 #define OPKG_READ_INTERVAL      2000
 #define OPKG_FIFO               "/tmp/opkg_upgrade_fifo"
-#define UPGRADE_SCRIPT          "/usr/bin/chumby-netvbrowser-update.sh"
+#define UPGRADE_SCRIPT          "/usr/bin/chumby-netvbrowser-upgrade.sh"
 #define OPKG_DOWNLOAD_PATH      "/var/lib/opkg/tmp"
-#define UPDATE_PROGRESS_FILE    "/tmp/netvbrowser_temp_upgrade"
+#define UPGRADE_PROGRESS_FILE   "/tmp/netvbrowser_temp_upgrade"
 #define UPDATE_PAGE             "http://localhost/html_update/index.html"
 
 class MainWindow : public QMainWindow
@@ -103,9 +103,7 @@ private:
 
     //Update mechanism
     async_fifo *opkgFifo;
-    QList<QByteArray> packageList;
-    QMap<QByteArray, quint64> packageSizeMap;
-    QMap<QByteArray, bool> packageStateMap;
+    QMap<QByteArray, QByteArray> packageSizeMap;
     qint64 doUpgrade();
     void upgradeDone();
     void setupUpgrade();
@@ -115,9 +113,14 @@ private:
     void getDownloadedPackageSize();
     void updatePackageSize(QByteArray rawPackageName, quint64 size);
     void updatePackageState(QByteArray packagefilename, bool isDone);
+    quint64 getPackageSize(QByteArray packagefilename);
+    bool getPackageState(QByteArray packagefilename);
     quint64 getUpdateTotalSizeKb();
     quint64 getUpdateProgressSizeKb();
     double getUpdatePercentage();
+
+    bool exportPackageList();
+    bool importPackageList();
 
 protected:
 

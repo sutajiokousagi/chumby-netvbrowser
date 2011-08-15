@@ -13,7 +13,9 @@ sleep 1
 
 # Start the upgrade, pipe to fifo (blocking)
 # Might restart the browser half way
+mount -o remount,rw /
 opkg --cache /var/lib/opkg/tmp upgrade > ${OPKG_FIFO}
+mount -o remount,ro /
 
 # Wait for NeTVBrowser
 if ps ax | grep -v grep | grep NeTVBrowser > /dev/null

@@ -17,10 +17,24 @@ sleep 4
 mount -o remount,rw /
 opkg --cache /var/lib/opkg/tmp upgrade > ${OPKG_FIFO}
 
-# NOTE: right here there are 2 opened file handles to /tmp to OPKG_FIFO & UPDATE_PROGRESS_FILE
-# Does it matter?
-sleep 2
-mount -o remount,ro /
+# XXX HACK XXX
+# We're having problems where / is not remounting as ro.
+# This hack forces the two chumby processes to restart.
+if ! mount -o remount,ro /
+then
+	logger -t update "Unable to remount / as ro.  Stopping netvbrowser and netvserver and trying again..."
+	/etc/init.d/chumby-netvbrowser stop
+	/etc/init.d/chumby-netvserver stop
+	sync
+	if ! mount -oremount,ro /
+	then
+		logger -t update "Critical error!  Root still mounted rw!"
+	else
+		logger -t update "Managed to mount / as ro"
+	fi
+	/etc/init.d/chumby-netvserver start
+	/etc/init.d/chumby-netvserver start
+fi
 
 # Wait for NeTVBrowser in case it got killed
 if [ ! -z "$(pidof NeTVBrowser)" ];
@@ -37,6 +51,7 @@ then
 else
 	sleep 4
 fi
+
 
 # Tell the browser that we are done here
 # The browser should have reloaded the html_update page &

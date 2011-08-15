@@ -44,5 +44,7 @@ bool MyWebPage::shouldInterruptJavaScript()
 
 QString MyWebPage::chooseFile ( QWebFrame * parentFrame, const QString & suggestedFile )
 {
+    Q_UNUSED(parentFrame);
+    Q_UNUSED(suggestedFile);
     return "";
 }

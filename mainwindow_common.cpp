@@ -343,15 +343,22 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
 
     else if (command == "UPDATEREADY" && argCount >= 2)
     {
-        resetUpdate();
+        setupUpgrade();
+        resetUpgrade();
         getUpgradablePackageList();
         getDownloadedPackageSize();
-        //doUpgrade();
+        doUpgrade();
 
         //Notify JavaScript
         QString javascriptString = QString("fUPDATEEvents('starting', '%1');").arg(argsList[1]);
         QByteArray javaResult = (this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
         return javaResult;
+    }
+
+    else if (command == "UPDATEDONE" || command == "UPGRADEDONE")
+    {
+        upgradeDone();
+        return command;
     }
 
     //----------------------------------------------------

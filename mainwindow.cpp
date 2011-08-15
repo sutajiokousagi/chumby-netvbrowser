@@ -17,8 +17,8 @@ MainWindow::MainWindow(QWidget *parent) :
     this->myWebView = NULL;
     this->myWebPage = NULL;
     this->mySocket = NULL;
-    this->opkgSocket = NULL;
     this->port = DEFAULT_PORT;
+    this->opkgFifo = NULL;
 
     up = 0;down = 0;left = 0;right = 0;center = 0;cpanel = 0;widget = 0;hidden1 = 0; hidden2 = 0;
 
@@ -31,9 +31,8 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowFlags(Qt::FramelessWindowHint);              //Set a frameless window
 #endif
 
-    this->setupWebview();
     this->setupSocket();
-    this->setupUpdate();
+    this->setupWebview();
 
     //Previously not doing an update
     if (!FileExists(UPDATE_PROGRESS_FILE))
@@ -41,6 +40,9 @@ MainWindow::MainWindow(QWidget *parent) :
         this->resetWebview();
         return;
     }
+
+    //Continue reading the fifo
+    this->setupUpgrade();
 
     //Continue update progress bar
     QByteArray rawUpgradeStatus = GetFileContents(UPDATE_PROGRESS_FILE);

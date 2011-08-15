@@ -3,129 +3,61 @@
 #include <QWebFrame>
 #include <QDebug>
 #include <QDir>
-#include <QTimer>
 #include <QFileInfoList>
 #include <QProcess>
 
-void MainWindow::setupUpdate()
+void MainWindow::setupUpgrade()
 {
     //clean up
-    if (this->opkgSocket != NULL)
+    if (this->opkgFifo != NULL)
     {
-        opkgSocket->close();
-        delete opkgSocket;
-        opkgSocket = NULL;
+        opkgFifo->stopMe();
+        QObject::disconnect(opkgFifo, SIGNAL(signal_fileopen(bool)), this, SLOT(slot_opkgFileOpen(bool)));
+        QObject::disconnect(opkgFifo, SIGNAL(signal_newline(QByteArray)), this, SLOT(slot_opkgNewLine(QByteArray)));
+        delete opkgFifo;
+        opkgFifo = NULL;
     }
 
-    //Make sure mkfifo is called in NeTVBrowser start up script
-    this->opkgSocket = new QLocalServer(this);
+    //Create the fifo if it doesn't exist yet
+    if (!FileExists(OPKG_FIFO))
+        QProcess::startDetached("mkfifo", QStringList(QString(OPKG_FIFO)));
 
-    if (FileExists(OPKG_FIFO))
-        UnlinkFile(OPKG_FIFO);
-    bool ok = opkgSocket->listen(OPKG_FIFO);
-
-    if (ok)     qDebug("%s: listerning to opkg fifo", TAG);
-    else        qDebug("%s: failed to listen to opkg fifo (%s)", TAG, opkgSocket->errorString().toLatin1().constData());
-
-    if (ok)
-        QObject::connect(opkgSocket, SIGNAL(newConnection()), SLOT(slot_opkgReceiveConnection()));
+    //Start an async fifo reader
+    this->opkgFifo = new async_fifo(QString(OPKG_FIFO), this);
+    QObject::connect(opkgFifo, SIGNAL(signal_fileopen(bool)), this, SLOT(slot_opkgFileOpen(bool)));
+    QObject::connect(opkgFifo, SIGNAL(signal_newline(QByteArray)), this, SLOT(slot_opkgNewLine(QByteArray)));
+    this->opkgFifo->start();
 }
 
-void MainWindow::resetUpdate()
+void MainWindow::resetUpgrade()
 {
     packageList.clear();
     packageSizeMap.clear();
     packageStateMap.clear();
 }
 
-void MainWindow::slot_opkgConnected()
+void MainWindow::slot_opkgFileOpen(bool isOpen)
 {
-    qDebug("%s: connected to opkg fifo", TAG);
-
-    QLocalSocket *socket = (QLocalSocket *)QObject::sender();
-    connect(socket, SIGNAL(readyRead()), this, SLOT(slot_opkgReadReady()));
+    if (isOpen)     qDebug("%s: listening to opkg fifo", TAG);
+    else            qDebug("%s: failed to listen to opkg fifo", TAG);
 }
 
-void MainWindow::slot_opkgDisconnected()
+void MainWindow::slot_opkgNewLine(QByteArray newline)
 {
-    qDebug("%s: disconnected from opkg fifo", TAG);
-
-    if (QObject::sender() == NULL)
-        return;
-
-    QLocalSocket *socket = (QLocalSocket *)QObject::sender();
-    socket->close();
-    QObject::disconnect(socket, SIGNAL(connected()), this, SLOT(slot_opkgConnected()));
-    QObject::disconnect(socket, SIGNAL(disconnected()), this, SLOT(slot_opkgDisconnected()));
-    QObject::disconnect(socket, SIGNAL(error(QLocalSocket::LocalSocketError)), this, SLOT(slot_opkgError(QLocalSocket::LocalSocketError)));
-    QObject::disconnect(socket, SIGNAL(readyRead()), this, SLOT(slot_opkgReadReady()));
-}
-
-void MainWindow::slot_opkgError(QLocalSocket::LocalSocketError err)
-{
-    Q_UNUSED(err);
-    qDebug() << err;
-}
-
-void MainWindow::slot_opkgReadReady()
-{
-    QLocalSocket *socket = (QLocalSocket *)QObject::sender();
-
-    //Should be a line here
-    QByteArray buffer;
-    while (socket->bytesAvailable() > 0)
-        buffer.append( socket->read(socket->bytesAvailable()) );
     qDebug() << "---";
-    qDebug() << buffer;
+    qDebug() << newline;
 
     //Indicate that this package is done
-    updatePackageState(buffer, true);
+    updatePackageState(newline, true);
 
     //Execute JavaScript
     QString javascriptString = QString("fUPDATEEvents('progress',%1);").arg(QString().setNum(getUpdatePercentage()));
     this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString);
     qDebug() << "Upgrade progress: " << getUpdatePercentage() << "%";
+
+    //Clean up memory
+    newline = QByteArray();
 }
-
-void MainWindow::slot_opkgReceiveConnection()
-{
-    QLocalSocket* socket = this->opkgSocket->nextPendingConnection();
-    if (!socket)
-        return;
-
-    connect(socket, SIGNAL(connected()), this, SLOT(slot_opkgConnected()));
-    connect(socket, SIGNAL(disconnected()), this, SLOT(slot_opkgDisconnected()));
-    connect(socket, SIGNAL(error(QLocalSocket::LocalSocketError)), this, SLOT(slot_opkgError(QLocalSocket::LocalSocketError)));
-    connect(socket, SIGNAL(readyRead()), this, SLOT(slot_opkgReadReady()));
-
-    /*
-    while (socket->bytesAvailable() < (int)sizeof(quint32))
-        socket->waitForReadyRead();
-    QDataStream ds(socket);
-    QByteArray uMsg;
-    quint32 remaining;
-    ds >> remaining;
-    uMsg.resize(remaining);
-    int got = 0;
-    char* uMsgBuf = uMsg.data();
-    do {
-        got = ds.readRawData(uMsgBuf, remaining);
-        remaining -= got;
-        uMsgBuf += got;
-    } while (remaining && got >= 0 && socket->waitForReadyRead(2000));
-    if (got < 0) {
-        qWarning() << "QtLocalPeer: Message reception failed" << socket->errorString();
-        delete socket;
-        return;
-    }
-    QString message(QString::fromUtf8(uMsg));
-    socket->write(ack, qstrlen(ack));
-    socket->waitForBytesWritten(1000);
-    delete socket;
-    emit messageReceived(message); //### (might take a long time to return)
-    */
-}
-
 
 //-----------------------------------------------------------------------------------
 // Getting useful info
@@ -134,8 +66,20 @@ void MainWindow::slot_opkgReceiveConnection()
 qint64 MainWindow::doUpgrade()
 {
     qint64 pid = 0;
-    QProcess::startDetached(QString("/usr/bin/opkg"), QStringList("upgrade"), QString(""), &pid);
+    QProcess::startDetached(QString(UPGRADE_SCRIPT), QStringList(), QString(""), &pid);
     return pid;
+}
+
+void MainWindow::upgradeDone()
+{
+    if (opkgFifo != NULL) {
+        opkgFifo->stopMe();
+    }
+
+    //Execute JavaScript
+    QString javascriptString = QString("fUPDATEEvents('done', '');");
+    this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString);
+    qDebug() << "Upgrade done!";
 }
 
 QByteArray MainWindow::getFriendlyPackageName(QByteArray rawName)

@@ -5,14 +5,15 @@
 #include <QTcpSocket>
 #include <QStringList>
 #include <QKeyEvent>
-#include <QLocalServer>
-#include <QLocalSocket>
+#include <QFile>
 #include <QByteArray>
 #include <QMap>
+#include <QTimer>
 #include "mywebview.h"
 #include "mywebpage.h"
 #include "socketrequest.h"
 #include "socketresponse.h"
+#include "async_fifo.h"
 
 namespace Ui {
     class MainWindow;
@@ -38,9 +39,12 @@ namespace Ui {
 #define DEFAULT_PORT            8081
 #define UNIMPLEMENTED           "Un1mPl3m3nT3D"
 #define TAG                     APPNAME
+
+#define OPKG_READ_INTERVAL      2000
 #define OPKG_FIFO               "/tmp/opkg_upgrade_fifo"
-#define UPDATE_PROGRESS_FILE    "/tmp/netvbrowser_temp_upgrade"
+#define UPGRADE_SCRIPT          "/usr/bin/chumby-netvbrowser-update.sh"
 #define OPKG_DOWNLOAD_PATH      "/var/lib/opkg/tmp"
+#define UPDATE_PROGRESS_FILE    "/tmp/netvbrowser_temp_upgrade"
 #define UPDATE_PAGE             "http://localhost/html_update/index.html"
 
 class MainWindow : public QMainWindow
@@ -98,13 +102,14 @@ private:
     qint64 up,down,left,right,center,cpanel,widget,hidden1,hidden2;
 
     //Update mechanism
-    QLocalServer *opkgSocket;
+    async_fifo *opkgFifo;
     QList<QByteArray> packageList;
     QMap<QByteArray, quint64> packageSizeMap;
     QMap<QByteArray, bool> packageStateMap;
     qint64 doUpgrade();
-    void setupUpdate();
-    void resetUpdate();
+    void upgradeDone();
+    void setupUpgrade();
+    void resetUpgrade();
     QByteArray getFriendlyPackageName(QByteArray rawName);
     void getUpgradablePackageList();
     void getDownloadedPackageSize();
@@ -134,11 +139,8 @@ private slots:
     void slot_notifyBrowser();
     void slot_newSocketMessage(SocketRequest *request, SocketResponse *response );
 
-    void slot_opkgReceiveConnection();
-    void slot_opkgConnected();
-    void slot_opkgDisconnected();
-    void slot_opkgError(QLocalSocket::LocalSocketError err);
-    void slot_opkgReadReady();
+    void slot_opkgFileOpen(bool);
+    void slot_opkgNewLine(QByteArray);
 };
 
 #endif // MAINWINDOW_H

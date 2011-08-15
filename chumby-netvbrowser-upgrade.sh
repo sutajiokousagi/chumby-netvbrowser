@@ -41,6 +41,9 @@ NeTVBrowser -qws UpdateDone &
 # Wait for browser to perform cleaning up (1650ms)
 sleep 2
 
+# Wipe opkg cache folder
+rm -rf /var/lib/opkg/tmp/*
+
 # Cleaning up
 # Should have been done by NeTVBrowser anyway
 if [ -e ${OPKG_FIFO} ]; then

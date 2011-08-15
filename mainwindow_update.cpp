@@ -88,13 +88,33 @@ void MainWindow::slot_opkgNewLine(QByteArray newline)
 {
     //qDebug() << newline;
 
-    //Indicate that this package is done
-    updatePackageState(newline, true);
+    /* Example output
+    Upgrading angstrom-version on root from v20110703-r44.9 to v20110703-r45.9...
+    Downloading http://buildbot.chumby.com.sg/build/silvermoon-netv-debug/LATEST/chumby-silvermoon-netv/angstrom-version_v20110703-r45.9_chumby-silvermoon-netv.ipk.
+    //usr/lib/opkg/info/opkg-collateral.postinst: line 2: /home/chumby/chumby-oe/netv-debug/work/output-angstrom-.9/work/all-angstrom-linux-gnueabi/opkg-collateral-1.0-r7/opkg.conf: No such file or directory
+    //usr/lib/opkg/info/opkg-collateral.postinst: line 3: /home/chumby/chumby-oe/netv-debug/work/output-angstrom-.9/work/all-angstrom-linux-gnueabi/opkg-collateral-1.0-r7/opkg.conf: No such file or directory
+    Configuring angstrom-version.
+    Configuring opkg-collateral.
+    Collected errors:
+     * pkg_run_script: package "opkg-collateral" postinst script returned status 1.
+     * opkg_configure: opkg-collateral.postinst returned 1.
+    */
 
-    //Execute JavaScript
-    QString javascriptString = QString("fUPDATEEvents('progress',%1);").arg(QString().setNum(getUpdatePercentage()));
-    this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString);
-    qDebug() << "Upgrade progress: " << getUpdatePercentage() << "%";
+    if (newline.startsWith("Upgrading "))
+    {
+        newline.replace("Upgrading ", "");
+        newline.replace(" on root from ", " - ");
+        newline.replace(" to ", " - ");
+
+        //Indicate that this package is done
+        updatePackageState(newline, true);
+
+        //Execute JavaScript
+        QString javascriptString = QString("fUPDATEEvents('progress',%1);").arg(QString().setNum(getUpdatePercentage()));
+        this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString);
+        qDebug("%s: Upgrade progress %.1f%%", TAG, getUpdatePercentage());
+
+    }
 
     //Clean up memory
     newline = QByteArray();
@@ -146,12 +166,12 @@ void MainWindow::updatePackageSize(QByteArray packagefilename, quint64 size)
     {
         i.next();
 
-        // angstrom-version - v20110703-r22.9 - v20110703-r24.9
-        // http,,www......n-netv-debug,LATEST,chumby-silvermoon-netv,angstrom-version_v20110703-r24.9_chumby-silvermoon-netv.ipk
+        // in qmap: angstrom-version - v20110703-r22.9 - v20110703-r24.9
+        // input filename: http,,www......n-netv-debug,LATEST,chumby-silvermoon-netv,angstrom-version_v20110703-r24.9_chumby-silvermoon-netv.ipk
         QByteArray filename = i.key();
         filename.replace(" - ", "_");
 
-        if (filename.length() < 3 || !packagefilename.contains(filename))
+        if (filename.length() < 3 || packagefilename.length() < 3 || !packagefilename.contains(filename))
             continue;
 
         QByteArray state = packageSizeMap.value(i.key(), "");
@@ -173,12 +193,10 @@ void MainWindow::updatePackageState(QByteArray packagefilename, bool isDone)
     {
         i.next();
 
-        //angstrom-version - v20110703-r22.9 - v20110703-r24.9
-        //...n-netv-debug,LATEST,chumby-silvermoon-netv,angstrom-version_v20110703-r24.9_chumby-silvermoon-netv.ipk
+        // in qmap: angstrom-version - v20110703-r22.9 - v20110703-r24.9
+        // input filename: same
         QByteArray filename = i.key();
-        filename.replace(" - ", "_");
-
-        if (filename.length() < 3 || !packagefilename.contains(filename))
+        if (filename.length() < 3 || packagefilename.length() < 3 || !packagefilename.contains(filename))
             continue;
 
         QByteArray size = packageSizeMap.value(i.key(), "");
@@ -243,6 +261,9 @@ quint64 MainWindow::getUpdateProgressSizeKb()
 
 double MainWindow::getUpdatePercentage()
 {
+    quint64 totalsize = getUpdateTotalSizeKb();
+    if (totalsize == 0)
+        return 0;
     return (double)getUpdateProgressSizeKb() / getUpdateTotalSizeKb() * 100.0;
 }
 

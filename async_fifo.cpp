@@ -53,7 +53,7 @@ void async_fifo::run()
     bool ok = this->setup();
     if (ok)         qDebug("%s: listening to opkg fifo", "NeTVBrowser");
     else            qDebug("%s: failed to listen to opkg fifo", "NeTVBrowser");
-    emit signal_fileopen(ok);
+    //emit signal_fileopen(ok);
     if (!ok)
         return;
 

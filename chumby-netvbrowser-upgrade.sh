@@ -9,7 +9,8 @@ if [ ! -e ${OPKG_FIFO} ]; then
 	mkfifo ${OPKG_FIFO}
 fi
 
-sleep 1
+# Wait for CPanel to hide & new html_page to load
+sleep 4
 
 # Start the upgrade, pipe to fifo (blocking)
 # Might restart the browser half way

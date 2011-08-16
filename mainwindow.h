@@ -111,8 +111,8 @@ private:
     QByteArray getFriendlyPackageName(QByteArray rawName);
     void getUpgradablePackageList();
     void getDownloadedPackageSize();
-    void updatePackageSize(QByteArray rawPackageName, quint64 size);
-    void updatePackageState(QByteArray packagefilename, bool isDone);
+    QByteArray updatePackageSize(QByteArray rawPackageName, quint64 size);
+    QByteArray updatePackageState(QByteArray packagefilename, bool isDone);
     quint64 getPackageSize(QByteArray packagefilename);
     bool getPackageState(QByteArray packagefilename);
     quint64 getUpdateTotalSizeKb();

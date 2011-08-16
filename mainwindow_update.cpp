@@ -86,34 +86,43 @@ void MainWindow::slot_opkgFileOpen(bool isOpen)
 
 void MainWindow::slot_opkgNewLine(QByteArray newline)
 {
-    //qDebug() << newline;
+    //qDebug() << newline.constData();
 
     /* Example output
-    Upgrading angstrom-version on root from v20110703-r44.9 to v20110703-r45.9...
-    Downloading http://buildbot.chumby.com.sg/build/silvermoon-netv-debug/LATEST/chumby-silvermoon-netv/angstrom-version_v20110703-r45.9_chumby-silvermoon-netv.ipk.
-    //usr/lib/opkg/info/opkg-collateral.postinst: line 2: /home/chumby/chumby-oe/netv-debug/work/output-angstrom-.9/work/all-angstrom-linux-gnueabi/opkg-collateral-1.0-r7/opkg.conf: No such file or directory
-    //usr/lib/opkg/info/opkg-collateral.postinst: line 3: /home/chumby/chumby-oe/netv-debug/work/output-angstrom-.9/work/all-angstrom-linux-gnueabi/opkg-collateral-1.0-r7/opkg.conf: No such file or directory
+    Upgrading angstrom-version on root from v20110703-r47.9 to v20110703-r55.9...
+    --> NeTVBrowser: Upgrade progress 100.0%
+    Copying /var/lib/opkg/tmp/http:,,buildbot.chumby.com.sg,build,silvermoon-netv-debug,LATEST,chumby-silvermoon-netv,angstrom-version_v20110703-r55.9_chumby-silvermoon-netv.ipk.
+    (sometimes) //usr/lib/opkg/info/opkg-collateral.postinst: line 2: /home/chumby/chumby-oe/netv-debug/work/output-angstrom-.9/work/all-angstrom-linux-gnueabi/opkg-collateral-1.0-r7/opkg.conf: No such file or directory
+    (sometimes) //usr/lib/opkg/info/opkg-collateral.postinst: line 3: /home/chumby/chumby-oe/netv-debug/work/output-angstrom-.9/work/all-angstrom-linux-gnueabi/opkg-collateral-1.0-r7/opkg.conf: No such file or directory
     Configuring angstrom-version.
     Configuring opkg-collateral.
-    Collected errors:
-     * pkg_run_script: package "opkg-collateral" postinst script returned status 1.
-     * opkg_configure: opkg-collateral.postinst returned 1.
+    (sometimes) Collected errors:
+    (sometimes)  * pkg_run_script: package "opkg-collateral" postinst script returned status 1.
+    (sometimes)  * opkg_configure: opkg-collateral.postinst returned 1.
     */
 
     if (newline.startsWith("Upgrading "))
     {
-        newline.replace("Upgrading ", "");
-        newline.replace(" on root from ", " - ");
-        newline.replace(" to ", " - ");
-
         //Indicate that this package is done
-        updatePackageState(newline, true);
+        QByteArray currentPackage = updatePackageState(newline, true);
+        QString currentPackageName;
+        QString currentPackageVersion;
+        QString currentPackageSize = QString().setNum(getPackageSize(currentPackage));      //in bytes
+
+        //angstrom-version - v20110703-r22.9 - v20110703-r24.9
+        QStringList tempsplit = QString(currentPackage).split(" - ");
+        if (tempsplit.size() >= 3)
+        {
+            currentPackageName = tempsplit.at(0);
+            currentPackageVersion = tempsplit.at(2);
+        }
 
         //Execute JavaScript
-        QString javascriptString = QString("fUPDATEEvents('progress',%1);").arg(QString().setNum(getUpdatePercentage()));
+        double percentage = getUpdatePercentage();
+        QString eventData = QString("<percentage>%1</percentage><pkgname>%2</pkgname><pkgversion>%3</pkgversion><pkgsize>%4</pkgsize>").arg(QString().setNum(percentage)).arg(currentPackageName).arg(currentPackageVersion).arg(currentPackageSize);
+        QString javascriptString = QString("fUPDATEEvents('progress','%1');").arg(QString(QUrl::toPercentEncoding(eventData)));
         this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString);
-        qDebug("%s: Upgrade progress %.1f%%", TAG, getUpdatePercentage());
-
+        qDebug("%s: Upgrade progress %.1f%%", TAG, percentage);
     }
 
     //Clean up memory
@@ -145,7 +154,7 @@ void MainWindow::getUpgradablePackageList()
     QList<QByteArray> packageList = buffer.split('\n');
 
     for( int i=0; i<packageList.size(); i++ )
-        packageSizeMap.insert(packageList[i], QByteArray("false|") + ARGS_SPLIT_TOKEN + "0");
+        packageSizeMap.insert(packageList[i], QByteArray("false") + ARGS_SPLIT_TOKEN + "0");
 }
 
 void MainWindow::getDownloadedPackageSize()
@@ -159,7 +168,7 @@ void MainWindow::getDownloadedPackageSize()
     }
 }
 
-void MainWindow::updatePackageSize(QByteArray packagefilename, quint64 size)
+QByteArray MainWindow::updatePackageSize(QByteArray packagefilename, quint64 size)
 {
     QMapIterator<QByteArray, QByteArray> i(packageSizeMap);
     while (i.hasNext())
@@ -168,10 +177,14 @@ void MainWindow::updatePackageSize(QByteArray packagefilename, quint64 size)
 
         // in qmap: angstrom-version - v20110703-r22.9 - v20110703-r24.9
         // input filename: http,,www......n-netv-debug,LATEST,chumby-silvermoon-netv,angstrom-version_v20110703-r24.9_chumby-silvermoon-netv.ipk
-        QByteArray filename = i.key();
-        filename.replace(" - ", "_");
 
-        if (filename.length() < 3 || packagefilename.length() < 3 || !packagefilename.contains(filename))
+        QByteArray packagename = i.key();
+        QStringList tempsplit = QString(packagename).split(" - ");
+        if (tempsplit.size() < 3)
+            continue;
+        packagename = tempsplit.at(0).toLatin1() + "_" + tempsplit.at(2).toLatin1();
+
+        if (packagename.length() < 3 || packagefilename.length() < 3 || !packagefilename.contains(packagename))
             continue;
 
         QByteArray state = packageSizeMap.value(i.key(), "");
@@ -179,14 +192,15 @@ void MainWindow::updatePackageSize(QByteArray packagefilename, quint64 size)
         QByteArray newMapValue = state + ARGS_SPLIT_TOKEN + QByteArray().setNum(size);
 
         packageSizeMap.insert(i.key(), newMapValue);
-        qDebug() << QString(i.key()) << " --> " << newMapValue;
-        break;
+        qDebug("%s: Got package size %s --> %lld bytes", TAG, packagename.constData(), size);
+        return i.key();
     }
 
-    qDebug("%s: Total upgrade size: %lldMb", TAG, getUpdateTotalSizeKb()/1024);
+    qDebug("%s: Total upgrade size: %lldKb", TAG, getUpdateTotalSizeKb());
+    return "";
 }
 
-void MainWindow::updatePackageState(QByteArray packagefilename, bool isDone)
+QByteArray MainWindow::updatePackageState(QByteArray newUpgradeLine, bool isDone)
 {
     QMapIterator<QByteArray, QByteArray> i(packageSizeMap);
     while (i.hasNext())
@@ -194,9 +208,14 @@ void MainWindow::updatePackageState(QByteArray packagefilename, bool isDone)
         i.next();
 
         // in qmap: angstrom-version - v20110703-r22.9 - v20110703-r24.9
-        // input filename: same
-        QByteArray filename = i.key();
-        if (filename.length() < 3 || packagefilename.length() < 3 || !packagefilename.contains(filename))
+        // input filename: Upgrading angstrom-version on root from v20110703-r47.9 to v20110703-r55.9...
+        QByteArray packagename = i.key();
+        QStringList tempsplit = QString(packagename).split(" - ");
+        if (tempsplit.size() < 3)
+            continue;
+        if (packagename.length() < 3 || newUpgradeLine.length() < 3)
+            continue;
+        if (!newUpgradeLine.contains(tempsplit.at(0).toLatin1()) || !newUpgradeLine.contains(tempsplit.at(2).toLatin1()))
             continue;
 
         QByteArray size = packageSizeMap.value(i.key(), "");
@@ -204,8 +223,9 @@ void MainWindow::updatePackageState(QByteArray packagefilename, bool isDone)
         QByteArray newMapValue = (isDone ? QByteArray("true") : QByteArray("false")) + ARGS_SPLIT_TOKEN + size;
 
         packageSizeMap.insert(i.key(), newMapValue);
-        break;
+        return i.key();
     }
+    return QByteArray();
 }
 
 quint64 MainWindow::getPackageSize(QByteArray packagefilename)

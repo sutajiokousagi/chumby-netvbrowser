@@ -6,12 +6,9 @@ SCRIPT=$(readlink -f $0)
 # Copy this script to /tmp and execute from there
 if [[ ${SCRIPT:0:8} == "/usr/bin" ]]
 then
-	if [ -e /tmp/upgrade-script.sh ]; then
-		rm /tmp/upgrade-script.sh
-	fi
+	rm -f /tmp/upgrade-script.sh
 	cp $SCRIPT /tmp/upgrade-script.sh
-	/tmp/upgrade-script.sh &
-	exit
+	exec /tmp/upgrade-script.sh
 fi
 
 echo "Executing upgrade script from ${SCRIPT}..."

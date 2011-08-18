@@ -79,6 +79,7 @@ void MainWindow::resetWebview(QByteArray address /* = "" */)
     QObject::connect(this->myWebView->page(), SIGNAL(loadFinished(bool)), this, SLOT(slot_pageloadFinished(bool)));
     QObject::connect(this->myWebView->page(), SIGNAL(loadStarted()), this, SLOT(slot_pageloadStarted()));
     QObject::connect(this->myWebView->page(), SIGNAL(loadProgress(int)), this, SLOT(slot_pageloadProgress(int)));
+    QObject::connect(this->myWebView, SIGNAL(statusBarMessage(QString)), this, SLOT(slot_statusBarMessage(QString)));
 
     //Transparent background (page content dependent)
     QPalette palette = this->myWebView->palette();

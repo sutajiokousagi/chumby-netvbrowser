@@ -19,6 +19,7 @@ opkg --cache /var/lib/opkg/tmp upgrade > ${OPKG_FIFO}
 
 # NOTE: right here there are 2 opened file handles to /tmp to OPKG_FIFO & UPDATE_PROGRESS_FILE
 # Does it matter?
+sleep 2
 mount -o remount,ro /
 
 # Wait for NeTVBrowser in case it got killed

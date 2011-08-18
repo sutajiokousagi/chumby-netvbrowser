@@ -153,8 +153,9 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
     else if (command == "SETURL" && argCount >= 1)
     {
         QString param = argsList[0];
-        if (param.startsWith("www"))
+        if (!param.startsWith("http://"))
             param = param.insert(0, "http://");
+
         QUrl newUrl(param, QUrl::TolerantMode);
         if (newUrl.isValid())   myWebView->load( QUrl(param, QUrl::TolerantMode) );
         else                    printf( "Invalid Url  \n" );

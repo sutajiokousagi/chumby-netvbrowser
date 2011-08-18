@@ -132,6 +132,7 @@ private slots:
     void slot_pageloadStarted();
     void slot_pageloadFinished(bool ok);
     void slot_pageloadProgress(int progress);
+    void slot_statusBarMessage ( const QString & text );
 
     void slot_socketDisconnected();
     void slot_socketConnected();

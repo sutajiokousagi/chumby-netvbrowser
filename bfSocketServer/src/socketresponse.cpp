@@ -6,7 +6,7 @@
 
 SocketResponse::SocketResponse(QAbstractSocket* socket, QByteArray address, quint16 port)
 {
-    this->socket=socket;
+    this->socket = socket;
     this->statusText = "0";     //0:unimplemented, 1:success, 2:general error
     this->address = address;
     this->port = port;
@@ -67,6 +67,10 @@ int SocketResponse::getParametersCount()
 
 void SocketResponse::write()
 {
+    //This is a fake socket response (to handle status bar message)
+    if (this->socket == NULL || this->port == 0 || this->address.length() < 1)
+        return;
+
     QByteArray byteArray;
     QBuffer buffer(&byteArray);
     buffer.open(QIODevice::WriteOnly);

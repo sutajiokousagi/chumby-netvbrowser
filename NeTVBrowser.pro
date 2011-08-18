@@ -26,8 +26,8 @@ include(./qtsingleapplication-2.6_1-opensource/src/qtsingleapplication.pri)
 include(./bfSocketServer/src/bfSocketserver.pri)
 
 # QWSServer
-#message("ENABLE_QWS_STUFF enabled")
-#DEFINES += ENABLE_QWS_STUFF
+message("ENABLE_QWS_STUFF enabled")
+DEFINES += ENABLE_QWS_STUFF
 
 # Changes the name of the target, when is debug mode
 CONFIG( debug, debug|release ) {

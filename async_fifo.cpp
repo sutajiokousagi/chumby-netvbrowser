@@ -7,6 +7,7 @@ async_fifo::async_fifo(QString filename, QObject *parent) :
     this->file = NULL;
     this->filename = filename;
     this->isStopping = false;
+    QObject::connect(this, SIGNAL(terminated()), this, SLOT(deleteLater()));
 }
 
 bool async_fifo::setup()
@@ -50,10 +51,10 @@ bool async_fifo::isOpen()
 void async_fifo::run()
 {
     bool ok = this->setup();
-    //if (ok)         qDebug("%s: listening to opkg fifo", "NeTVBrowser");
-    //else            qDebug("%s: failed to listen to opkg fifo", "NeTVBrowser");
+    if (ok)         qDebug("%s: listening to opkg fifo", "NeTVBrowser");
+    else            qDebug("%s: failed to listen to opkg fifo", "NeTVBrowser");
     msleep(50);
-    emit signal_fileopen(ok);
+    //emit signal_fileopen(ok);
     if (!ok)
         return;
 
@@ -62,7 +63,9 @@ void async_fifo::run()
         QThread::msleep(1000);
         readFile();
     }
-    return;
+    this->file->close();
+    delete this->file;
+    this->file = NULL;
 }
 
 void async_fifo::readFile()
@@ -74,7 +77,4 @@ void async_fifo::readFile()
             break;
         emit signal_newline(QByteArray(buf));
     }
-    this->file->close();
-    this->file = NULL;
-    delete this;
 }

@@ -9,17 +9,20 @@ if [ ! -e ${OPKG_FIFO} ]; then
 	mkfifo ${OPKG_FIFO}
 fi
 
-# Wait for CPanel to hide & new html_page to load
+# Wait for CPanel to hide & new html_page to load (1650ms x 2)
 sleep 4
 
 # Start the upgrade, pipe to fifo (blocking)
 # Might restart the browser half way
 mount -o remount,rw /
 opkg --cache /var/lib/opkg/tmp upgrade > ${OPKG_FIFO}
+
+# NOTE: right here there are 2 opened file handles to /tmp to OPKG_FIFO & UPDATE_PROGRESS_FILE
+# Does it matter?
 mount -o remount,ro /
 
-# Wait for NeTVBrowser
-if ps ax | grep -v grep | grep NeTVBrowser > /dev/null
+# Wait for NeTVBrowser in case it got killed
+if [ ! -z $(pidof NeTVBrowser) ];
 then
 	echo "NeTVBrowser is not dead"
 else
@@ -27,11 +30,11 @@ else
 fi
 
 # Wait for NeTVBrowser (2nd chance)
-if ps ax | grep -v grep | grep NeTVBrowser > /dev/null
+if [ ! -z $(pidof NeTVBrowser) ];
 then
-	echo "NeTVBrowser is alive"
+	echo "NeTVBrowser is still alive"
 else
-	sleep 7
+	sleep 4
 fi
 
 # Tell the browser that we are done here
@@ -39,7 +42,7 @@ fi
 # load the upgraded package list from /tmp/
 NeTVBrowser -qws UpdateDone &
 
-# Wait for browser to perform cleaning up (1650ms)
+# Wait for browser to perform cleaning up & slide out update page (1650ms)
 sleep 2
 
 # Wipe opkg cache folder

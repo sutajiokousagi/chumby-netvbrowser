@@ -11,11 +11,12 @@ void MainWindow::setupUpgrade()
     //clean up
     if (this->opkgFifo != NULL)
     {
-        opkgFifo->stopMe();
         QObject::disconnect(opkgFifo, SIGNAL(signal_fileopen(bool)), this, SLOT(slot_opkgFileOpen(bool)));
         QObject::disconnect(opkgFifo, SIGNAL(signal_newline(QByteArray)), this, SLOT(slot_opkgNewLine(QByteArray)));
-        delete opkgFifo;
-        opkgFifo = NULL;
+        opkgFifo->stopMe();
+        //It will self destruct later
+        //delete opkgFifo;
+        //opkgFifo = NULL;
     }
 
     //Reload previous upgrading progress
@@ -36,6 +37,12 @@ void MainWindow::setupUpgrade()
         QString javascriptString = QString("fUPDATEEvents('progress',%1);").arg(QString().setNum(getUpdatePercentage()));
         this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString);
         qDebug() << "Upgrade progress: " << getUpdatePercentage() << "%";
+    }
+    else
+    {
+        //Create an empty file to be used as a flag
+        resetUpgrade();
+        this->exportPackageList();
     }
 
     //Create the fifo if it doesn't exist yet
@@ -82,12 +89,19 @@ void MainWindow::slot_opkgFileOpen(bool isOpen)
 {
     if (isOpen)     qDebug("%s: listening to opkg fifo", TAG);
     else            qDebug("%s: failed to listen to opkg fifo", TAG);
+
+    //Destroy it if it failed
+    if (!isOpen)
+    {
+        QObject::disconnect(opkgFifo, SIGNAL(signal_fileopen(bool)), this, SLOT(slot_opkgFileOpen(bool)));
+        QObject::disconnect(opkgFifo, SIGNAL(signal_newline(QByteArray)), this, SLOT(slot_opkgNewLine(QByteArray)));
+        delete opkgFifo;
+        opkgFifo = NULL;
+    }
 }
 
 void MainWindow::slot_opkgNewLine(QByteArray newline)
 {
-    //qDebug() << newline.constData();
-
     /* Example output
     Upgrading angstrom-version on root from v20110703-r47.9 to v20110703-r55.9...
     --> NeTVBrowser: Upgrade progress 100.0%
@@ -126,7 +140,7 @@ void MainWindow::slot_opkgNewLine(QByteArray newline)
     }
 
     //Clean up memory
-    newline = QByteArray();
+    newline.clear();
 
     //Save package state to a temp file
     exportPackageList();

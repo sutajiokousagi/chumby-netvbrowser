@@ -16,8 +16,11 @@ case "$1" in
 		regutil -w LCD_SPU_V_PORCH=0x50005
 
 		# [Temp] Hide the flash player
-		setplayer c 0 0 1 1
-		setplayer p
+		if [ ! -z $(pidof chumbyflashplayer.x) ];
+		then
+			setplayer c 0 0 1 1
+			setplayer p
+		fi
 
 		# use irkb driver as a normal keyboard		
 		export QWS_KEYBOARD=chumbyirkb

@@ -115,10 +115,27 @@ void MainWindow::slot_newSocketMessage( SocketRequest *request, SocketResponse *
 {
     QByteArray command = request->getCommand().toUpper();
     QByteArray dataString = request->getParameter("value").trimmed();
-    QStringList argsList = QString(dataString).split(ARGS_SPLIT_TOKEN);
 
+    //Some commands are more complex with multiple parameters
+    if (command == "TICKEREVENT")
+    {
+        //All these should already be URI encoded
+        QByteArray message = request->getParameter("message");
+        QByteArray title = request->getParameter("title");
+        QByteArray image = request->getParameter("image");
+        QByteArray type = request->getParameter("type");
+        QByteArray level = request->getParameter("level");
+        QByteArray javaScriptString = QByteArray("fTickerEvents(\"") + message + "\",\"" + title + "\",\"" + image + "\",\"" + type + "\",\"" + level + "\");";
+
+        //Translate to a JavaScript command
+        command = "JAVASCRIPT";
+        dataString = javaScriptString;
+    }
+
+    QStringList argsList = QString(dataString).split(ARGS_SPLIT_TOKEN);
     QByteArray string = processStatelessCommand(command, argsList);
     response->setStatus(1);
+    response->setCommand(command);
     response->setParameter("value", string);
     response->write();
 

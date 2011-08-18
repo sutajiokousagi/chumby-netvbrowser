@@ -135,9 +135,10 @@ void MainWindow::slot_newSocketMessage( SocketRequest *request, SocketResponse *
     QStringList argsList = QString(dataString).split(ARGS_SPLIT_TOKEN);
     QByteArray string = processStatelessCommand(command, argsList);
     response->setStatus(1);
-    response->setCommand(command);
+    //response->setCommand(command);    //this will cause a echo
     response->setParameter("value", string);
     response->write();
 
-    qDebug("%s:slot_newSocketMessage: %s", TAG, string.constData());
+    if (request->getAddress().length() > 3)     qDebug("%s: slot_newSocketMessage: %s from %s", TAG, string.constData(), request->getAddress().constData());
+    else                                        qDebug("%s: slot_newSocketMessage: %s", TAG, string.constData() );
 }

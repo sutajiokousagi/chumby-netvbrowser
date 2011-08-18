@@ -23,7 +23,7 @@ sleep 2
 mount -o remount,ro /
 
 # Wait for NeTVBrowser in case it got killed
-if [ ! -z $(pidof NeTVBrowser) ];
+if [ ! -z "$(pidof NeTVBrowser)" ];
 then
 	echo "NeTVBrowser is not dead"
 else
@@ -31,7 +31,7 @@ else
 fi
 
 # Wait for NeTVBrowser (2nd chance)
-if [ ! -z $(pidof NeTVBrowser) ];
+if [ ! -z "$(pidof NeTVBrowser)" ];
 then
 	echo "NeTVBrowser is still alive"
 else

@@ -1,5 +1,21 @@
 #!/bin/sh
 
+# Absolute path to this script. /home/user/bin/foo.sh
+SCRIPT=$(readlink -f $0)
+
+# Copy this script to /tmp and execute from there
+if [[ ${SCRIPT:0:8} == "/usr/bin" ]]
+then
+	if [ -e /tmp/upgrade-script.sh ]; then
+		rm /tmp/upgrade-script.sh
+	fi
+	cp $SCRIPT /tmp/upgrade-script.sh
+	/tmp/upgrade-script.sh &
+	exit
+fi
+
+echo "Executing upgrade script from ${SCRIPT}..."
+
 OPKG_FIFO=/tmp/opkg_upgrade_fifo
 UPDATE_PROGRESS_FILE=/tmp/netvbrowser_temp_upgrade
 
@@ -33,7 +49,7 @@ then
 		logger -t update "Managed to mount / as ro"
 	fi
 	/etc/init.d/chumby-netvserver start
-	/etc/init.d/chumby-netvbrowser start
+	/etc/init.d/chumby-netvserver start
 fi
 
 # Wait for NeTVBrowser in case it got killed
@@ -72,4 +88,3 @@ fi
 if [ -e ${UPDATE_PROGRESS_FILE} ]; then
 	rm ${UPDATE_PROGRESS_FILE}
 fi
-

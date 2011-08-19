@@ -33,7 +33,7 @@ then
 		logger -t update "Managed to mount / as ro"
 	fi
 	/etc/init.d/chumby-netvserver start
-	/etc/init.d/chumby-netvserver start
+	/etc/init.d/chumby-netvbrowser start
 fi
 
 # Wait for NeTVBrowser in case it got killed

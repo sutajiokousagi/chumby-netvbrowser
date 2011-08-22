@@ -308,7 +308,19 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         int w = argsList[0].toInt();
         int h = argsList[1].toInt();
         int depth = argsList[2].toInt();
+
+        //Ask NeTVServer to SetBox to new resolution
+        if (mySocket != NULL)
+        {
+            SocketResponse *response = new SocketResponse(mySocket);
+            response->setCommand("SetBox");
+            response->setParameter("value", QByteArray("0 0 ") + QByteArray().setNum(w) + " " + QByteArray().setNum(h) );
+            response->write();
+            delete response;
+        }
+
         QScreen::instance()->setMode(w,h,depth);
+        this->setGeometry(0,0,w,h);
         this->showFullScreen();
         QWSServer::instance()->refresh();
         return QString("%1 %2 %3 %4").arg(command.constData()).arg(w).arg(h).arg(depth).toLatin1();
@@ -322,7 +334,19 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         int w = argsLs[0].toInt();
         int h = argsLs[1].toInt();
         int depth = argsLs[2].toInt();
+
+        //Ask NeTVServer to SetBox to new resolution
+        if (mySocket != NULL)
+        {
+            SocketResponse *response = new SocketResponse(mySocket);
+            response->setCommand("SetBox");
+            response->setParameter("value", QByteArray("0 0 ") + QByteArray().setNum(w) + " " + QByteArray().setNum(h) );
+            response->write();
+            delete response;
+        }
+
         QScreen::instance()->setMode(w,h,depth);
+        this->setGeometry(0,0,w,h);
         this->showFullScreen();
         QWSServer::instance()->refresh();
         return QString("%1 %2 %3 %4").arg(command.constData()).arg(w).arg(h).arg(depth).toLatin1();

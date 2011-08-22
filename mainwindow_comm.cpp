@@ -131,6 +131,11 @@ void MainWindow::slot_newSocketMessage( SocketRequest *request, SocketResponse *
         command = "JAVASCRIPT";
         dataString = javaScriptString;
     }
+    else if (command == "SETBOX")
+    {
+        //This is an echo from NeTVServer when SetResolution is triggered on NeTVBrowser
+        return;
+    }
 
     QStringList argsList = QString(dataString).split(ARGS_SPLIT_TOKEN);
     QByteArray string = processStatelessCommand(command, argsList);

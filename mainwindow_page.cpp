@@ -30,7 +30,7 @@ void MainWindow::slot_statusBarMessage ( const QString & text )
     //Simple check to see if the message is in XML format
     if (!text.startsWith("<xml>") || !text.endsWith("</xml>"))
     {
-        qDebug("%s: Statusbar: %s", TAG, text.toLatin1().constData());
+        //qDebug("%s: Statusbar: %s", TAG, text.toLatin1().constData());
         return;
     }
 

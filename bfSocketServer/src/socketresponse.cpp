@@ -68,7 +68,7 @@ int SocketResponse::getParametersCount()
 void SocketResponse::write()
 {
     //This is a fake socket response (to handle status bar message)
-    if (this->socket == NULL || this->port == 0 || this->address.length() < 1)
+    if (this->socket == NULL)
         return;
 
     QByteArray byteArray;
@@ -150,6 +150,8 @@ void SocketResponse::writeToSocket(QByteArray data)
     }
     else if (udpsocket)
     {
+        if (port <= 0)
+            return;
 
         if (address == "")
             udpsocket->writeDatagram(data, QHostAddress(QHostAddress::Broadcast), port);

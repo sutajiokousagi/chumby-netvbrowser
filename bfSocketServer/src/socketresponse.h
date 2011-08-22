@@ -15,7 +15,7 @@ public:
       Constructor.
       @param socket used to write the response
     */
-    SocketResponse(QAbstractSocket* socket, QByteArray address, quint16 port);
+    SocketResponse(QAbstractSocket* socket, QByteArray address = "", quint16 port = 0);
     ~SocketResponse();
 
     void setBroadcast();

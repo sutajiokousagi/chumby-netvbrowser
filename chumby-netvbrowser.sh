@@ -19,8 +19,9 @@ case "$1" in
 			setplayer p
 		fi
 
-		# use irkb driver as a normal keyboard		
-		export QWS_KEYBOARD=chumbyirkb
+		# Use irkb and resetkb driver as a normal keyboard		
+export QWS_KEYBOARD="chumbyirkb
+chumbyresetkb"
 
 		# Start in the background so we don't hog the console
 		NeTVBrowser -qws > /dev/null 2>&1 &

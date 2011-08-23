@@ -3,9 +3,6 @@
 
 case "$1" in
 	start)
-		# hide the ugly initialization sequence
-		setbox 0 0 1 1
-
 		# prefix chroma key
 		fpga_ctl w 0xd 240
 		fpga_ctl w 0xe 0

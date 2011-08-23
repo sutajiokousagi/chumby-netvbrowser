@@ -9,6 +9,8 @@
 #ifdef ENABLE_QWS_STUFF
     #include <QWSServer>
     #include <QScreen>
+    #include <QWSDisplay>
+    #include <QTransformedScreen>
 #endif
 
 
@@ -341,6 +343,25 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
             return javaResult;
         return command;
     }
+
+    else if (command == "ROTATE" && argCount >= 1)
+    {
+        if (QScreen::instance()->classId() != QScreen::TransformedClass)
+            return QByteArray("The screen driver is not a QScreen::TransformedClass subclass");
+
+        QString eventData = argsList[0];
+        if (eventData.toUpper() == "90")
+            QWSDisplay::instance()->setTransformation(1);
+        else if (eventData.toUpper() == "180")
+            QWSDisplay::instance()->setTransformation(2);
+        else if (eventData.toUpper() == "270")
+            QWSDisplay::instance()->setTransformation(3);
+        else
+            QWSDisplay::instance()->setTransformation(0);
+        QWSServer::instance()->refresh();
+        return command;
+    }
+
 #endif
 
     //----------------------------------------------------

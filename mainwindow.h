@@ -13,7 +13,6 @@
 #include "mywebpage.h"
 #include "socketrequest.h"
 #include "socketresponse.h"
-#include "async_fifo.h"
 
 namespace Ui {
     class MainWindow;
@@ -41,7 +40,6 @@ namespace Ui {
 #define TAG                     APPNAME
 
 #define OPKG_READ_INTERVAL      2000
-#define OPKG_FIFO               "/tmp/opkg_upgrade_fifo"
 #define UPGRADE_SCRIPT          "/usr/bin/chumby-netvbrowser-upgrade.sh"
 #define OPKG_DOWNLOAD_PATH      "/var/lib/opkg/tmp"
 #define UPGRADE_PROGRESS_FILE   "/tmp/netvbrowser_temp_upgrade"
@@ -102,9 +100,8 @@ private:
     qint64 up,down,left,right,center,cpanel,widget,hidden1,hidden2;
 
     //Update mechanism
-    async_fifo *opkgFifo;
     QMap<QByteArray, QByteArray> packageSizeMap;
-    qint64 doUpgrade();
+    qint64 doUpgrade(bool reboot);
     void upgradeDone();
     void setupUpgrade();
     void resetUpgrade();
@@ -142,9 +139,6 @@ private slots:
 
     void slot_notifyBrowser();
     void slot_newSocketMessage(SocketRequest *request, SocketResponse *response );
-
-    void slot_opkgFileOpen(bool);
-    void slot_opkgNewLine(QByteArray);
 };
 
 #endif // MAINWINDOW_H

@@ -8,17 +8,6 @@
 
 void MainWindow::setupUpgrade()
 {
-    //clean up
-    if (this->opkgFifo != NULL)
-    {
-        QObject::disconnect(opkgFifo, SIGNAL(signal_fileopen(bool)), this, SLOT(slot_opkgFileOpen(bool)));
-        QObject::disconnect(opkgFifo, SIGNAL(signal_newline(QByteArray)), this, SLOT(slot_opkgNewLine(QByteArray)));
-        opkgFifo->stopMe();
-        //It will self destruct later
-        //delete opkgFifo;
-        //opkgFifo = NULL;
-    }
-
     //Reload previous upgrading progress
     if (FileExists(UPGRADE_PROGRESS_FILE))
     {
@@ -44,16 +33,6 @@ void MainWindow::setupUpgrade()
         resetUpgrade();
         this->exportPackageList();
     }
-
-    //Create the fifo if it doesn't exist yet
-    if (!FileExists(OPKG_FIFO))
-        QProcess::startDetached("mkfifo", QStringList(QString(OPKG_FIFO)));
-
-    //Start an async fifo reader
-    //this->opkgFifo = new async_fifo(QString(OPKG_FIFO), this);
-    //QObject::connect(opkgFifo, SIGNAL(signal_fileopen(bool)), this, SLOT(slot_opkgFileOpen(bool)));
-    //QObject::connect(opkgFifo, SIGNAL(signal_newline(QByteArray)), this, SLOT(slot_opkgNewLine(QByteArray)));
-    //this->opkgFifo->start();
 }
 
 void MainWindow::resetUpgrade()
@@ -61,47 +40,30 @@ void MainWindow::resetUpgrade()
     packageSizeMap.clear();
 }
 
-qint64 MainWindow::doUpgrade()
+qint64 MainWindow::doUpgrade(bool reboot)
 {
     qint64 pid = 0;
-    QProcess::startDetached(QString(UPGRADE_SCRIPT), QStringList(), QString(""), &pid);
+    QProcess::startDetached(QString(UPGRADE_SCRIPT), QStringList(), QString(reboot ? "true" : "false"), &pid);
     return pid;
 }
 
 void MainWindow::upgradeDone()
 {
-    if (opkgFifo != NULL)
-        opkgFifo->stopMe();
-
     //Execute JavaScript
     QString javascriptString = QString("fUPDATEEvents('done', '');");
     this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString);
-    qDebug() << "Upgrade done!";
+    qDebug() << "Upgrade completed!";
 
     //Clean up
     UnlinkFile(UPGRADE_PROGRESS_FILE);
-    UnlinkFile(OPKG_FIFO);
 }
 
 //--------------------------------------------------------------------
 
-void MainWindow::slot_opkgFileOpen(bool isOpen)
-{
-    if (isOpen)     qDebug("%s: listening to opkg fifo", TAG);
-    else            qDebug("%s: failed to listen to opkg fifo", TAG);
-
-    //Destroy it if it failed
-    if (!isOpen)
-    {
-        QObject::disconnect(opkgFifo, SIGNAL(signal_fileopen(bool)), this, SLOT(slot_opkgFileOpen(bool)));
-        QObject::disconnect(opkgFifo, SIGNAL(signal_newline(QByteArray)), this, SLOT(slot_opkgNewLine(QByteArray)));
-        delete opkgFifo;
-        opkgFifo = NULL;
-    }
-}
-
+/*
 void MainWindow::slot_opkgNewLine(QByteArray newline)
 {
+*/
     /* Example output
     Upgrading angstrom-version on root from v20110703-r47.9 to v20110703-r55.9...
     --> NeTVBrowser: Upgrade progress 100.0%
@@ -114,7 +76,7 @@ void MainWindow::slot_opkgNewLine(QByteArray newline)
     (sometimes)  * pkg_run_script: package "opkg-collateral" postinst script returned status 1.
     (sometimes)  * opkg_configure: opkg-collateral.postinst returned 1.
     */
-
+/*
     if (newline.startsWith("Upgrading "))
     {
         //Indicate that this package is done
@@ -145,6 +107,7 @@ void MainWindow::slot_opkgNewLine(QByteArray newline)
     //Save package state to a temp file
     exportPackageList();
 }
+*/
 
 //-----------------------------------------------------------------------------------
 // Getting useful info
@@ -244,16 +207,24 @@ QByteArray MainWindow::updatePackageState(QByteArray newUpgradeLine, bool isDone
 
 quint64 MainWindow::getPackageSize(QByteArray packagefilename)
 {
-    QByteArray packageInfo = packageSizeMap.value(packagefilename, "");
-    if (packageInfo.length() < 3)
-        return 0;
+    quint64 size = 0;
+    QMapIterator<QByteArray, QByteArray> i(packageSizeMap);
+    while (i.hasNext())
+    {
+        i.next();
+        if (!i.key().contains(packagefilename))
+            continue;
 
-    QByteArray sizeStr = (QString(packageInfo).split(ARGS_SPLIT_TOKEN)).at(1).toLatin1();
-    bool ok = false;
-    quint64 size = sizeStr.toULongLong(&ok);
+        QByteArray packageInfo = i.value();
+        if (packageInfo.length() < 3)
+            return 0;
 
-    if (!ok)        return 0;
-    else            return size;
+        QByteArray sizeStr = (QString(packageInfo).split(ARGS_SPLIT_TOKEN)).at(1).toLatin1();
+        bool ok = false;
+        size = sizeStr.toULongLong(&ok);
+        break;
+    }
+    return size/1024;
 }
 
 bool MainWindow::getPackageState(QByteArray packagefilename)

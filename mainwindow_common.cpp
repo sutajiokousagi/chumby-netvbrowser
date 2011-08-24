@@ -372,9 +372,10 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         QString percentage = argsList[0];
         QString pkgname = argsList[1];
         QString sizeprogress = "0";  //argsList[2];
+        quint64 pkgsize = getPackageSize(pkgname.toLatin1());       // = 0 if pkgname is not in list-upgradable
 
         //Notify JavaScript
-        QString eventData = QString("<percentage>%1</percentage><pkgname>%2</pkgname><sizeprogress>%3</sizeprogress>").arg(percentage).arg(pkgname).arg(sizeprogress);
+        QString eventData = QString("<percentage>%1</percentage><pkgname>%2</pkgname><pkgsize>%3</pkgsize><sizeprogress>%4</sizeprogress>").arg(percentage).arg(pkgname).arg(pkgsize).arg(sizeprogress);
         QString javascriptString = QString("fUPDATEEvents('progress', '%1');").arg(QString(QUrl::toPercentEncoding(eventData)));
         QByteArray javaResult = (this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
         return javaResult;
@@ -394,11 +395,14 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
 
     else if (command == "UPDATEREADY" && argCount >= 2)
     {
+        QString numpkg = argsList[0];
+        QString reboot = argsList[1];
+
         setupUpgrade();
         resetUpgrade();
         getUpgradablePackageList();
         getDownloadedPackageSize();
-        doUpgrade();
+        doUpgrade(reboot == "1" ? true : false);
 
         //Notify JavaScript
         QString javascriptString = QString("fUPDATEEvents('starting', '%1');").arg(argsList[1]);

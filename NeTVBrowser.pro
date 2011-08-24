@@ -12,11 +12,9 @@ SOURCES += main.cpp \
            mainwindow_page.cpp \
            mainwindow_update.cpp \
            mainwindow_utils.cpp \
-           mywebpage.cpp \
-           async_fifo.cpp
+           mywebpage.cpp
 HEADERS += mainwindow.h mywebview.h \
-           mywebpage.h \
-           async_fifo.h
+           mywebpage.h
 FORMS   += mainwindow.ui
 
 # Singleton & command line argument passing

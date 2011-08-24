@@ -18,7 +18,6 @@ MainWindow::MainWindow(QWidget *parent) :
     this->myWebPage = NULL;
     this->mySocket = NULL;
     this->port = DEFAULT_PORT;
-    this->opkgFifo = NULL;
 
     up = 0;down = 0;left = 0;right = 0;center = 0;cpanel = 0;widget = 0;hidden1 = 0; hidden2 = 0;
 
@@ -45,8 +44,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setupUpgrade();
 
     //Here we have to reload the package list & recalculate the size
-    QByteArray progress = "50";
-    this->resetWebview(QByteArray(UPDATE_PAGE) + "?continue=" + progress);
+    this->resetWebview(QByteArray(UPDATE_PAGE) + "?continue=true");
 }
 
 void MainWindow::setupWebview()

@@ -43,7 +43,7 @@ void MainWindow::resetUpgrade()
 qint64 MainWindow::doUpgrade(bool reboot)
 {
     qint64 pid = 0;
-    QProcess::startDetached(QString(UPGRADE_SCRIPT), QStringList(), QString(reboot ? "true" : "false"), &pid);
+    QProcess::startDetached(QString(UPGRADE_SCRIPT), QStringList() << (reboot ? "true" : "false"), QString(""), &pid);
     return pid;
 }
 

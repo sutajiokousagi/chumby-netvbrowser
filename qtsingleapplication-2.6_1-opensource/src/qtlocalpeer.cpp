@@ -163,10 +163,10 @@ bool QtLocalPeer::sendMessage(const QString &message, int timeout)
     QByteArray uMsg(message.toUtf8());
     QDataStream ds(&socket);
     ds.writeBytes(uMsg.constData(), uMsg.size());
-    if (socket.state() != QAbstractSocket::ConnectedState)
+    if (socket.state() != QLocalSocket::ConnectedState)
         return false;
     bool res = socket.waitForBytesWritten(timeout);
-    if (socket.state() != QAbstractSocket::ConnectedState)
+    if (socket.state() != QLocalSocket::ConnectedState)
         return false;
     res &= socket.waitForReadyRead(timeout);   // wait for ack
     res &= (socket.read(qstrlen(ack)) == ack);

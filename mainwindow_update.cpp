@@ -50,10 +50,10 @@ void MainWindow::setupUpgrade()
         QProcess::startDetached("mkfifo", QStringList(QString(OPKG_FIFO)));
 
     //Start an async fifo reader
-    this->opkgFifo = new async_fifo(QString(OPKG_FIFO), this);
-    QObject::connect(opkgFifo, SIGNAL(signal_fileopen(bool)), this, SLOT(slot_opkgFileOpen(bool)));
-    QObject::connect(opkgFifo, SIGNAL(signal_newline(QByteArray)), this, SLOT(slot_opkgNewLine(QByteArray)));
-    this->opkgFifo->start();
+    //this->opkgFifo = new async_fifo(QString(OPKG_FIFO), this);
+    //QObject::connect(opkgFifo, SIGNAL(signal_fileopen(bool)), this, SLOT(slot_opkgFileOpen(bool)));
+    //QObject::connect(opkgFifo, SIGNAL(signal_newline(QByteArray)), this, SLOT(slot_opkgNewLine(QByteArray)));
+    //this->opkgFifo->start();
 }
 
 void MainWindow::resetUpgrade()

@@ -365,7 +365,32 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
 #endif
 
     //----------------------------------------------------
-    // Update command
+    // opkg upgrade commands
+
+    else if (command == "UPDATEPROGRESS")
+    {
+        QString percentage = argsList[0];
+        QString pkgname = argsList[1];
+        QString sizeprogress = "0";  //argsList[2];
+
+        //Notify JavaScript
+        QString eventData = QString("<percentage>%1</percentage><pkgname>%2</pkgname><sizeprogress>%3</sizeprogress>").arg(percentage).arg(pkgname).arg(sizeprogress);
+        QString javascriptString = QString("fUPDATEEvents('progress', '%1');").arg(QString(QUrl::toPercentEncoding(eventData)));
+        QByteArray javaResult = (this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
+        return javaResult;
+    }
+
+    else if (command == "CONFIGUREPROGRESS" && argCount >= 2)
+    {
+        QString percentage = argsList[0];
+        QString pkgname = argsList[1];
+
+        //Notify JavaScript
+        QString eventData = QString("<percentage>%1</percentage><pkgname>%2</pkgname>").arg(percentage).arg(pkgname);
+        QString javascriptString = QString("fUPDATEEvents('configuring', '%1');").arg(QString(QUrl::toPercentEncoding(eventData)));
+        QByteArray javaResult = (this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
+        return javaResult;
+    }
 
     else if (command == "UPDATEREADY" && argCount >= 2)
     {
@@ -379,6 +404,11 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         QString javascriptString = QString("fUPDATEEvents('starting', '%1');").arg(argsList[1]);
         QByteArray javaResult = (this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
         return javaResult;
+    }
+
+    else if (command == "UPGRADECOMPLETE" || command == "UPGRADECOMP")
+    {
+        return command;
     }
 
     else if (command == "UPDATEDONE" || command == "UPGRADEDONE")

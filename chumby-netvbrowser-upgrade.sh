@@ -13,14 +13,7 @@ fi
 
 echo "Executing upgrade script from ${SCRIPT}..."
 
-OPKG_FIFO=/tmp/opkg_upgrade_fifo
 UPDATE_PROGRESS_FILE=/tmp/netvbrowser_temp_upgrade
-
-# Create the fifo if it's not already there
-# Should have been done by NeTVBrowser anyway
-if [ ! -e ${OPKG_FIFO} ]; then
-	mkfifo ${OPKG_FIFO}
-fi
 
 # Wait for CPanel to hide & new html_page to load (1650ms x 2)
 sleep 4
@@ -28,7 +21,7 @@ sleep 4
 # Start the upgrade, pipe to fifo (blocking)
 # Might restart the browser half way
 mount -o remount,rw /
-opkg --cache /var/lib/opkg/tmp upgrade > ${OPKG_FIFO}
+opkg-chumby-upgrade > /tmp/upgrade.$$.log 2>&1
 
 # XXX HACK XXX
 # We're having problems where / is not remounting as ro.
@@ -45,7 +38,7 @@ then
 	else
 		logger -t update "Managed to mount / as ro"
 	fi
-	/etc/init.d/chumby-netvserver start
+	/etc/init.d/chumby-netvbrowser start
 	/etc/init.d/chumby-netvserver start
 fi
 
@@ -79,9 +72,6 @@ rm -rf /var/lib/opkg/tmp/*
 
 # Cleaning up
 # Should have been done by NeTVBrowser anyway
-if [ -e ${OPKG_FIFO} ]; then
-	rm ${OPKG_FIFO}
-fi
 if [ -e ${UPDATE_PROGRESS_FILE} ]; then
 	rm ${UPDATE_PROGRESS_FILE}
 fi

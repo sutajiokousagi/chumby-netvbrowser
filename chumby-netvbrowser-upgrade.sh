@@ -3,12 +3,13 @@
 # Absolute path to this script. /home/user/bin/foo.sh
 SCRIPT=$(readlink -f $0)
 
+
 # Copy this script to /tmp and execute from there
 if [[ ${SCRIPT:0:8} == "/usr/bin" ]]
 then
 	rm -f /tmp/upgrade-script.sh
 	cp $SCRIPT /tmp/upgrade-script.sh
-	exec /tmp/upgrade-script.sh
+	exec /tmp/upgrade-script.sh $*
 fi
 
 echo "Executing upgrade script from ${SCRIPT}..."
@@ -21,11 +22,12 @@ sleep 4
 # Start the upgrade, pipe to fifo (blocking)
 # Might restart the browser half way
 mount -o remount,rw /
-opkg-chumby-upgrade > /tmp/upgrade.$$.log 2>&1
+opkg-chumby-upgrade debug > /tmp/upgrade.$$.log 2>&1
 
 # XXX HACK XXX
 # We're having problems where / is not remounting as ro.
 # This hack forces the two chumby processes to restart.
+sleep 2
 if ! mount -o remount,ro /
 then
 	logger -t update "Unable to remount / as ro.  Stopping netvbrowser and netvserver and trying again..."
@@ -75,3 +77,10 @@ rm -rf /var/lib/opkg/tmp/*
 if [ -e ${UPDATE_PROGRESS_FILE} ]; then
 	rm ${UPDATE_PROGRESS_FILE}
 fi
+
+# Reboot
+if [ "$1" == "true" ]; then
+	echo "Reboot required for this update."
+	reboot
+fi
+

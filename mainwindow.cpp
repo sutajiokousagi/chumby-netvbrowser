@@ -131,6 +131,10 @@ void MainWindow::keyPressEvent ( QKeyEvent * event )
 
     switch (keycode)
     {
+        case Qt::Key_HomePage:
+            remoteControlKey("setup");
+            return;
+
         case Qt::Key_Up:
             up = currentEpochMs;
             remoteControlKey("up");
@@ -171,6 +175,8 @@ void MainWindow::keyPressEvent ( QKeyEvent * event )
             remoteControlKey("reset");
             return;
     }
+
+    qDebug("%s: keyPressEvent '%d'", TAG, keycode);
 
     //Default behavior
     QWidget::keyPressEvent(event);

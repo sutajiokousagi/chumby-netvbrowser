@@ -20,8 +20,7 @@ case "$1" in
 		fi
 
 		# Use irkb and resetkb driver as a normal keyboard		
-export QWS_KEYBOARD="chumbyirkb
-chumbyresetkb"
+		export QWS_KEYBOARD="chumbyirkb chumbyresetkb"
 
 		# Start in the background so we don't hog the console
 		NeTVBrowser -qws > /dev/null 2>&1 &

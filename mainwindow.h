@@ -123,12 +123,14 @@ protected:
 
     void keyPressEvent ( QKeyEvent * event );
     void keyReleaseEvent  ( QKeyEvent * event );
+    void paintEvent( QPaintEvent *pe );
 
 private slots:
 
     void slot_pageloadStarted();
     void slot_pageloadFinished(bool ok);
     void slot_pageloadProgress(int progress);
+    void slot_frameCreated(QWebFrame*);
     void slot_statusBarMessage ( const QString & text );
 
     void slot_socketDisconnected();

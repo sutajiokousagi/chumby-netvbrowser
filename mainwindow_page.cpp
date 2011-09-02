@@ -17,12 +17,25 @@ void MainWindow::slot_pageloadFinished(bool ok)
         if (ok)     qDebug("%s: ControlPanel loaded", TAG);
         else        qDebug("%s: ControlPanel loaded with ERROR!", TAG);
     }
+
+    //Hide scrollbars of all the frames
+    this->myWebView->page()->currentFrame()->setScrollBarPolicy ( Qt::Vertical, Qt::ScrollBarAlwaysOff );
+    this->myWebView->page()->currentFrame()->setScrollBarPolicy ( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
+    this->myWebView->page()->mainFrame()->setScrollBarPolicy ( Qt::Vertical, Qt::ScrollBarAlwaysOff );
+    this->myWebView->page()->mainFrame()->setScrollBarPolicy ( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
 }
 
 void MainWindow::slot_pageloadProgress(int progress)
 {
     if (!cPanelLoaded)
         qDebug("%s: loading ControlPanel...%d%%", TAG, progress);
+}
+
+void MainWindow::slot_frameCreated(QWebFrame *frame)
+{
+    qDebug("%s: new web frame created", TAG);
+    frame->setScrollBarPolicy ( Qt::Vertical, Qt::ScrollBarAlwaysOff );
+    frame->setScrollBarPolicy ( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
 }
 
 void MainWindow::slot_statusBarMessage ( const QString & text )

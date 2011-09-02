@@ -70,13 +70,14 @@ void MainWindow::resetWebview(QByteArray address /* = "" */)
     this->myWebView->setPage(myWebPage);
 
     //Hide scrollbars
-    this->myWebView->page()->mainFrame ()->setScrollBarPolicy ( Qt::Vertical, Qt::ScrollBarAlwaysOff );
-    this->myWebView->page()->mainFrame ()->setScrollBarPolicy ( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
+    this->myWebView->page()->mainFrame()->setScrollBarPolicy ( Qt::Vertical, Qt::ScrollBarAlwaysOff );
+    this->myWebView->page()->mainFrame()->setScrollBarPolicy ( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
 
     //Connect signal
     QObject::connect(this->myWebView->page(), SIGNAL(loadFinished(bool)), this, SLOT(slot_pageloadFinished(bool)));
     QObject::connect(this->myWebView->page(), SIGNAL(loadStarted()), this, SLOT(slot_pageloadStarted()));
     QObject::connect(this->myWebView->page(), SIGNAL(loadProgress(int)), this, SLOT(slot_pageloadProgress(int)));
+    QObject::connect(this->myWebView->page(), SIGNAL(frameCreated(QWebFrame*)), this, SLOT(slot_frameCreated(QWebFrame*)));
     QObject::connect(this->myWebView, SIGNAL(statusBarMessage(QString)), this, SLOT(slot_statusBarMessage(QString)));
 
     //Transparent background (page content dependent)
@@ -84,6 +85,9 @@ void MainWindow::resetWebview(QByteArray address /* = "" */)
     palette.setBrush(QPalette::Base, Qt::transparent);
     this->myWebView->page()->setPalette(palette);
     this->myWebView->setAttribute(Qt::WA_OpaquePaintEvent, false);
+
+    //Disable AA
+    this->myWebView->setRenderHints(0);
 
     //Default background color (bright pink chroma key color)
     this->setStyleSheet("background-color: rgb(240, 0, 240);");
@@ -209,4 +213,16 @@ void MainWindow::keyReleaseEvent  ( QKeyEvent * event )
 
     //Default behavior
     QWidget::keyReleaseEvent(event);
+}
+
+void MainWindow::paintEvent(QPaintEvent *pe)
+{
+    // normal painting
+    QMainWindow::paintEvent(pe);
+
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing, false);
+    painter.setRenderHint(QPainter::HighQualityAntialiasing, false);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform, false);
+    painter.setRenderHint(QPainter::NonCosmeticDefaultPen, false);
 }

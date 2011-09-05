@@ -11,6 +11,7 @@
 #include <QTimer>
 #include "mywebview.h"
 #include "mywebpage.h"
+#include <QWebFrame>
 #include "socketrequest.h"
 #include "socketresponse.h"
 
@@ -69,6 +70,7 @@ private:
     bool cPanelLoaded;
     MyWebView* myWebView;
     MyWebPage* myWebPage;
+    QWebFrame* myIFrame;
     void setupWebview();
     void resetWebview(QByteArray address = "");
 
@@ -130,8 +132,11 @@ private slots:
     void slot_pageloadStarted();
     void slot_pageloadFinished(bool ok);
     void slot_pageloadProgress(int progress);
-    void slot_frameCreated(QWebFrame*);
     void slot_statusBarMessage ( const QString & text );
+
+    void slot_frameCreated(QWebFrame*);
+    void slot_frameLoadFinished(bool);
+    void slot_frameContentSizeChange(const QSize&);
 
     void slot_socketDisconnected();
     void slot_socketConnected();

@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->cPanelLoaded = false;
     this->myWebView = NULL;
     this->myWebPage = NULL;
+    this->myIFrame = NULL;
     this->mySocket = NULL;
     this->port = DEFAULT_PORT;
 
@@ -68,6 +69,7 @@ void MainWindow::resetWebview(QByteArray address /* = "" */)
     //Do any other customization on default view state
     this->myWebView->setInvertColor(false);
     this->myWebView->setPage(myWebPage);
+    this->myIFrame = NULL;
 
     //Hide scrollbars
     this->myWebView->page()->mainFrame()->setScrollBarPolicy ( Qt::Vertical, Qt::ScrollBarAlwaysOff );

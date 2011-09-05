@@ -31,12 +31,49 @@ void MainWindow::slot_pageloadProgress(int progress)
         qDebug("%s: loading ControlPanel...%d%%", TAG, progress);
 }
 
+//--------------------------------------------------------------------------------------------------------
+
 void MainWindow::slot_frameCreated(QWebFrame *frame)
 {
-    qDebug("%s: new web frame created", TAG);
+    //qDebug("%s: new web frame created", TAG);
     frame->setScrollBarPolicy ( Qt::Vertical, Qt::ScrollBarAlwaysOff );
     frame->setScrollBarPolicy ( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
+
+    QObject::connect(frame, SIGNAL(contentsSizeChanged(QSize)), this, SLOT(slot_frameContentSizeChange(QSize)));
 }
+
+void MainWindow::slot_frameLoadFinished(bool)
+{
+    QWebFrame *frame = (QWebFrame *)QObject::sender();
+    if (frame == NULL)
+        return;
+
+    qDebug("%s: myIFrame loade finished (%d x %d)", TAG, frame->contentsSize().width(), frame->contentsSize().height());
+    myWebView->page()->mainFrame()->evaluateJavaScript( QString("fSetIFrame(\"resize\", \"%1,%2\");").arg(frame->contentsSize().width()).arg(frame->contentsSize().height()) );
+    frame->setScrollPosition(QPoint(0,0));
+}
+
+void MainWindow::slot_frameContentSizeChange(const QSize&)
+{
+    QWebFrame *frame = (QWebFrame *)QObject::sender();
+    if (frame == NULL)
+        return;
+
+    //This will remember the iFrame element when we first see it
+    if (frame->requestedUrl().toString() == "about:blank" && myIFrame == NULL) {
+        myIFrame = frame;
+        QObject::connect(myIFrame, SIGNAL(loadFinished(bool)), this, SLOT(slot_frameLoadFinished(bool)));
+    }
+
+    if (frame != myIFrame)
+        return;
+
+    //Resize iFrame whenever it changes (can be quite frequent as the content is loading)
+    qDebug("%s: myIFrame size changed (%d x %d)", TAG, frame->contentsSize().width(), frame->contentsSize().height());
+    myWebView->page()->mainFrame()->evaluateJavaScript( QString("fSetIFrame(\"resize\", \"%1,%2\");").arg(frame->contentsSize().width()).arg(frame->contentsSize().height()) );
+}
+
+//--------------------------------------------------------------------------------------------------------
 
 void MainWindow::slot_statusBarMessage ( const QString & text )
 {

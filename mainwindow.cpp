@@ -21,6 +21,10 @@ MainWindow::MainWindow(QWidget *parent) :
     this->port = DEFAULT_PORT;
 
     up = 0;down = 0;left = 0;right = 0;center = 0;cpanel = 0;widget = 0;hidden1 = 0; hidden2 = 0;
+    keyStrokeTimer.setInterval(1000);
+    keyStrokeTimer.setSingleShot(true);
+    keyStrokeTimer.stop();
+    QObject::connect(&keyStrokeTimer, SIGNAL(timeout()), this, SLOT(slot_keyStrokeTimeout()));
 
     ui->setupUi(this);
 
@@ -138,47 +142,57 @@ void MainWindow::keyPressEvent ( QKeyEvent * event )
     switch (keycode)
     {
         case Qt::Key_HomePage:
-            remoteControlKey("setup");
+            //Will be delivered 1 second later
+            addKeyStrokeHistory("setup");
             return;
 
         case Qt::Key_Up:
             up = currentEpochMs;
             remoteControlKey("up");
+            addKeyStrokeHistory("up");
             return;
         case Qt::Key_Down:
             down = currentEpochMs;
             remoteControlKey("down");
+            addKeyStrokeHistory("down");
             return;
         case Qt::Key_Left:
             left = currentEpochMs;
             remoteControlKey("left");
+            addKeyStrokeHistory("left");
             return;
         case Qt::Key_Right:
             right = currentEpochMs;
             remoteControlKey("right");
+            addKeyStrokeHistory("right");
             return;
 
         case Qt::Key_Enter:
         case Qt::Key_Return:
             center = currentEpochMs;
             remoteControlKey("center");
+            addKeyStrokeHistory("center");
             return;
         case Qt::Key_PageUp:
             cpanel = currentEpochMs;
             remoteControlKey("cpanel");
+            addKeyStrokeHistory("cpanel");
             return;
         case Qt::Key_PageDown:
             widget = currentEpochMs;
             remoteControlKey("widget");
+            addKeyStrokeHistory("widget");
             return;
 
         case Qt::Key_1:
             hidden1 = currentEpochMs;
             remoteControlKey("reset");
+            addKeyStrokeHistory("hidden1");
             return;
         case Qt::Key_2:
             hidden2 = currentEpochMs;
             remoteControlKey("reset");
+            addKeyStrokeHistory("hidden2");
             return;
     }
 

@@ -98,8 +98,11 @@ private:
     QByteArray processStatelessCommand(QByteArray command, QStringList argsList = QStringList());
 
     //Remote control & Keyboard events
-    QByteArray remoteControlKey(QByteArray buttonName);
     qint64 up,down,left,right,center,cpanel,widget,hidden1,hidden2;
+    QStringList keyStrokeHistory;
+    QByteArray remoteControlKey(QByteArray buttonName, int oneSecCount = 1);
+    QTimer keyStrokeTimer;
+    void addKeyStrokeHistory(QString);
 
     //Update mechanism
     QMap<QByteArray, QByteArray> packageSizeMap;
@@ -146,6 +149,8 @@ private slots:
 
     void slot_notifyBrowser();
     void slot_newSocketMessage(SocketRequest *request, SocketResponse *response );
+
+    void slot_keyStrokeTimeout();
 };
 
 #endif // MAINWINDOW_H

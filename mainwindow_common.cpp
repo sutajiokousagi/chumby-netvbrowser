@@ -22,16 +22,105 @@ void MainWindow::sendSocketHello(SocketResponse *response)
     response->write();
 }
 
-QByteArray MainWindow::remoteControlKey(QByteArray buttonName)
+QByteArray MainWindow::remoteControlKey(QByteArray buttonName, int oneSecCount /* = 1 */)
 {
     if (buttonName.toUpper() == "RESET")
     {
         resetWebview();
         return "";
     }
-    qDebug("%s: [keyboard override] %s", TAG, buttonName.constData());
-    QString javascriptString = QString("fButtonPress('%1');").arg(QString(buttonName));
+    qDebug("%s: [keyboard override] %s (%d)", TAG, buttonName.constData(), oneSecCount);
+    QString javascriptString;
+    if (oneSecCount <= 1)       javascriptString = QString("fButtonPress('%1');").arg(QString(buttonName));
+    else                        javascriptString = QString("fButtonPress('%1',%2);").arg(QString(buttonName)).arg(oneSecCount);
     return (this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
+}
+
+void MainWindow::addKeyStrokeHistory(QString keyName)
+{
+    qint64 currentEpochMs = QDateTime::currentMSecsSinceEpoch();
+    keyStrokeHistory.prepend( QString("%1|%2").arg(QString(keyName)).arg(currentEpochMs) );
+    while (keyStrokeHistory.size() > 32)
+        keyStrokeHistory.pop_back();
+
+    //Delayed action for SETUP button
+    if (keyName.toUpper() == "SETUP") {
+        if (!keyStrokeTimer.isActive())
+            keyStrokeTimer.start();
+        return;
+    }
+
+    //Detect complex pattern
+    if (keyStrokeHistory.size() >= 9)
+    {
+        QString keyString;
+        bool hit = false;
+        for (int i=0; i < 9; i++)
+            keyString = QString(keyStrokeHistory.at(i).split("|").at(0)).append(QString(",")).append(keyString);
+
+        if (keyString.contains("up,right,down,left,up,right,down,left,cpanel")) {
+            qDebug("%s: key combo: %s", TAG, keyString.toLatin1().constData());
+        }
+        else if (keyString.contains("up,right,down,left,up,right,down,left,widget")) {
+            qDebug("%s: key combo: %s", TAG, keyString.toLatin1().constData());
+        }
+        if (hit)
+            keyStrokeHistory.clear();
+    }
+}
+
+void MainWindow::slot_keyStrokeTimeout()
+{
+    keyStrokeTimer.stop();
+    qint64 currentEpochMs = QDateTime::currentMSecsSinceEpoch();
+
+    //Get the key strokes within 1 seconds
+    QStringList tempOneSecList;
+    for (int i=0; i < keyStrokeHistory.size(); i++)
+    {
+        QString temp = keyStrokeHistory.at(i);
+        bool ok = false;
+        qint64 time = temp.split("|").at(1).toLongLong(&ok);
+        if (!ok)
+            continue;
+        if (currentEpochMs - time > 2000)
+            continue;
+        tempOneSecList.prepend(temp);
+    }
+
+    //Counting which keys are pressed within 1 second
+    QMap<QString, int> keyCountMap;
+    for (int i=0; i < tempOneSecList.size(); i++)
+    {
+        QString temp = tempOneSecList.at(i);
+        QString key = temp.split("|").at(0);
+        if (!keyCountMap.contains(key)) {
+            keyCountMap.insert(key, 1);
+            continue;
+        }
+        int count = keyCountMap.value(key);
+        count++;
+        keyCountMap.insert(key, count);
+    }
+
+    //Detect simple counting pattern
+    QMapIterator<QString, int> i(keyCountMap);
+    while (i.hasNext())
+    {
+        i.next();
+        QString key = i.key();
+        int count = i.value();
+        if (key == "setup")
+        {
+            if (count > 0)
+                remoteControlKey(key.toLatin1(), count);
+        }
+        else if (count > 1)
+            remoteControlKey(key.toLatin1(), count);
+    }
+
+    tempOneSecList.clear();
+    keyCountMap.clear();
 }
 
 QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList argsList)

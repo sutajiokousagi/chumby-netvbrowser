@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->port = DEFAULT_PORT;
 
     up = 0;down = 0;left = 0;right = 0;center = 0;cpanel = 0;widget = 0;hidden1 = 0; hidden2 = 0;
-    keyStrokeTimer.setInterval(1000);
+    keyStrokeTimer.setInterval(2000);
     keyStrokeTimer.setSingleShot(true);
     keyStrokeTimer.stop();
     QObject::connect(&keyStrokeTimer, SIGNAL(timeout()), this, SLOT(slot_keyStrokeTimeout()));

@@ -113,7 +113,13 @@ void MainWindow::slot_keyStrokeTimeout()
         if (key == "setup")
         {
             if (count > 0)
+            {
+                //Call a system script to force rekey & hotplug on FPGA
+                this->Execute("/usr/bin/fpga_setup", QStringList() << QString().setNum(count));
+
+                //Deliver event to Control Panel
                 remoteControlKey(key.toLatin1(), count);
+            }
         }
         else if (count > 1)
             remoteControlKey(key.toLatin1(), count);

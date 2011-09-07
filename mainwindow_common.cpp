@@ -36,97 +36,12 @@ QByteArray MainWindow::remoteControlKey(QByteArray buttonName, int oneSecCount /
     return (this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
 }
 
-void MainWindow::addKeyStrokeHistory(QString keyName)
+void MainWindow::slot_keepAliveTimeout()
 {
-    qint64 currentEpochMs = QDateTime::currentMSecsSinceEpoch();
-    keyStrokeHistory.prepend( QString("%1|%2").arg(QString(keyName)).arg(currentEpochMs) );
-    while (keyStrokeHistory.size() > 32)
-        keyStrokeHistory.pop_back();
-
-    //Delayed action for SETUP button
-    if (keyName.toUpper() == "SETUP") {
-        if (!keyStrokeTimer.isActive())
-            keyStrokeTimer.start();
+    QString isAlive = this->myWebView->page()->mainFrame()->evaluateJavaScript( QString("fCheckAlive();") ).toString();
+    if (isAlive == "true")
         return;
-    }
-
-    //Detect complex pattern
-    if (keyStrokeHistory.size() >= 9)
-    {
-        QString keyString;
-        bool hit = false;
-        for (int i=0; i < 9; i++)
-            keyString = QString(keyStrokeHistory.at(i).split("|").at(0)).append(QString(",")).append(keyString);
-
-        if (keyString.contains("up,right,down,left,up,right,down,left,cpanel")) {
-            qDebug("%s: key combo: %s", TAG, keyString.toLatin1().constData());
-        }
-        else if (keyString.contains("up,right,down,left,up,right,down,left,widget")) {
-            qDebug("%s: key combo: %s", TAG, keyString.toLatin1().constData());
-        }
-        if (hit)
-            keyStrokeHistory.clear();
-    }
-}
-
-void MainWindow::slot_keyStrokeTimeout()
-{
-    keyStrokeTimer.stop();
-    qint64 currentEpochMs = QDateTime::currentMSecsSinceEpoch();
-
-    //Get the key strokes within 1 seconds
-    QStringList tempOneSecList;
-    for (int i=0; i < keyStrokeHistory.size(); i++)
-    {
-        QString temp = keyStrokeHistory.at(i);
-        bool ok = false;
-        qint64 time = temp.split("|").at(1).toLongLong(&ok);
-        if (!ok)
-            continue;
-        if (currentEpochMs - time > 2000)
-            continue;
-        tempOneSecList.prepend(temp);
-    }
-
-    //Counting which keys are pressed within 1 second
-    QMap<QString, int> keyCountMap;
-    for (int i=0; i < tempOneSecList.size(); i++)
-    {
-        QString temp = tempOneSecList.at(i);
-        QString key = temp.split("|").at(0);
-        if (!keyCountMap.contains(key)) {
-            keyCountMap.insert(key, 1);
-            continue;
-        }
-        int count = keyCountMap.value(key);
-        count++;
-        keyCountMap.insert(key, count);
-    }
-
-    //Detect simple counting pattern
-    QMapIterator<QString, int> i(keyCountMap);
-    while (i.hasNext())
-    {
-        i.next();
-        QString key = i.key();
-        int count = i.value();
-        if (key == "setup")
-        {
-            if (count > 0)
-            {
-                //Call a system script to force rekey & hotplug on FPGA
-                this->Execute("/usr/bin/fpga_setup", QStringList() << QString().setNum(count));
-
-                //Deliver event to Control Panel
-                remoteControlKey(key.toLatin1(), count);
-            }
-        }
-        else if (count > 1)
-            remoteControlKey(key.toLatin1(), count);
-    }
-
-    tempOneSecList.clear();
-    keyCountMap.clear();
+    this->myWebView->reload();
 }
 
 QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList argsList)

@@ -107,7 +107,10 @@ void MainWindow::slot_notifyBrowser()
     {
         QString javascriptString = QString("fServerReset();");
         qDebug("%s: calling JavaScript function '%s'", TAG, javascriptString.toLatin1().constData());
-        this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString);
+        if (HasJavaScriptFunction("fServerReset"))
+            this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString);
+        else
+            qDebug("%s: does not contain JavaScript function 'fServerReset'", TAG);
     }
 }
 

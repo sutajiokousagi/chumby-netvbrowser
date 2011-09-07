@@ -5,6 +5,17 @@
 #include <QDir>
 #include <QProcess>
 
+//-----------------------------------------------------------------------------------------------------------
+// JavaScript Utilities
+//-----------------------------------------------------------------------------------------------------------
+
+bool MainWindow::HasJavaScriptFunction(QString functionName)
+{
+    QString javascriptString = QString("function abc() { if (%1) return true; return false; }  abc();").arg(functionName);
+    QString jsresult = this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString).toString();
+    if (jsresult.toUpper() == "TRUE")       return true;
+    else                                    return false;
+}
 
 //-----------------------------------------------------------------------------------------------------------
 // Process Utilities

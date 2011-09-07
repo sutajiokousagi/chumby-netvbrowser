@@ -71,6 +71,7 @@ private:
     MyWebView* myWebView;
     MyWebPage* myWebPage;
     QWebFrame* myIFrame;
+    QTimer keepAliveTimer;
     void setupWebview();
     void resetWebview(QByteArray address = "");
 
@@ -82,6 +83,9 @@ private:
     bool SetFileContents(const QString &fullPath, QByteArray data);
     bool SetFileExecutable(const QString &fullPath);
     bool UnlinkFile(const QString &fullPath);
+
+    //Javascript Utilities
+    bool HasJavaScriptFunction(QString functionName);
 
     // Process Utilities
     QByteArray Execute(const QString &fullPath);
@@ -120,7 +124,6 @@ private:
     quint64 getUpdateTotalSizeKb();
     quint64 getUpdateProgressSizeKb();
     double getUpdatePercentage();
-
     bool exportPackageList();
     bool importPackageList();
 
@@ -151,6 +154,7 @@ private slots:
     void slot_newSocketMessage(SocketRequest *request, SocketResponse *response );
 
     void slot_keyStrokeTimeout();
+    void slot_keepAliveTimeout();
 };
 
 #endif // MAINWINDOW_H

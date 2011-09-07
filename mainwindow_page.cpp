@@ -60,17 +60,24 @@ void MainWindow::slot_frameContentSizeChange(const QSize&)
         return;
 
     //This will remember the iFrame element when we first see it
-    if (frame->requestedUrl().toString() == "about:blank" && myIFrame == NULL) {
+    if ((frame->frameName() == "iframe_externalUrlPlayer" || frame->requestedUrl().toString() == "about:blank") && myIFrame == NULL)
+    {
         myIFrame = frame;
         QObject::connect(myIFrame, SIGNAL(loadFinished(bool)), this, SLOT(slot_frameLoadFinished(bool)));
     }
 
-    if (frame != myIFrame)
+    if (frame != myIFrame || myIFrame == NULL)
         return;
 
-    //Resize iFrame whenever it changes (can be quite frequent as the content is loading)
+    //Resize iFrame whenever it changes (can be quite frequent as new content is loading)
     qDebug("%s: myIFrame size changed (%d x %d)", TAG, frame->contentsSize().width(), frame->contentsSize().height());
-    myWebView->page()->mainFrame()->evaluateJavaScript( QString("fSetIFrame(\"resize\", \"%1,%2\");").arg(frame->contentsSize().width()).arg(frame->contentsSize().height()) );
+    if (HasJavaScriptFunction("fSetIFrame"))
+        myWebView->page()->mainFrame()->evaluateJavaScript( QString("fSetIFrame(\"resize\", \"%1,%2\");").arg(frame->contentsSize().width()).arg(frame->contentsSize().height()) );
+    else
+        qDebug("%s: does not contain JavaScript function 'fSetIFrame' (yet?)", TAG);
+
+    if (HasJavaScriptFunction("dasgrqaew"))         qDebug("%s: does contain JavaScript function 'dasgrqaew'", TAG);
+    else                                            qDebug("%s: does not contain JavaScript function 'dasgrqaew'", TAG);
 }
 
 //--------------------------------------------------------------------------------------------------------

@@ -79,8 +79,8 @@ void MainWindow::slot_frameContentSizeChange(const QSize&)
     else
         qDebug("%s: does not contain JavaScript function 'fSetIFrame' (yet?)", TAG);
 
-    if (HasJavaScriptFunction("dasgrqaew"))         qDebug("%s: does contain JavaScript function 'dasgrqaew'", TAG);
-    else                                            qDebug("%s: does not contain JavaScript function 'dasgrqaew'", TAG);
+    //if (HasJavaScriptFunction("dasgrqaew"))         qDebug("%s: does contain JavaScript function 'dasgrqaew'", TAG);
+    //else                                            qDebug("%s: does not contain JavaScript function 'dasgrqaew'", TAG);
 }
 
 //--------------------------------------------------------------------------------------------------------

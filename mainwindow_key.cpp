@@ -208,15 +208,17 @@ void MainWindow::remoteControlPageInteraction(QString buttonName)
     if (myIFrame == NULL)
         return;
 
+    //This should be done by JavaScript scrolling the wrapper div, because iFrame is always at 100% content size
+    /*
     //Not visible
     QRect rect = myIFrame->geometry();
-    qDebug("%s: %d %d %d %d", TAG, rect.left(), rect.top(), rect.width(), rect.width());
+    qDebug("%s: %d %d %d %d", TAG, rect.left(), rect.top(), rect.width(), rect.height());
     if (rect.top() > 100 || rect.left() > 100)
         return;
 
     //Not a webpage
     QString url = myIFrame->url().toString().toUpper();
-    if (url.endsWith("JPG") || url.endsWith("JEPG") || url.endsWith("PNG") || url.endsWith("GIF") || url.endsWith("BMP"))
+    if (url.endsWith("JPG") || url.endsWith("JPEG") || url.endsWith("PNG") || url.endsWith("GIF") || url.endsWith("BMP"))
         return;
 
     //Scroll 15% of the page or 100px
@@ -226,4 +228,6 @@ void MainWindow::remoteControlPageInteraction(QString buttonName)
         scrollY = 100;
     if (buttonName == "up")         myIFrame->scroll(0, -scrollY);
     else if (buttonName == "down")  myIFrame->scroll(0, scrollY);
+    qDebug("%s: %d", TAG, myIFrame->scrollPosition().y());
+    */
 }

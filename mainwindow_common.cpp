@@ -48,8 +48,8 @@ void MainWindow::slot_keepAliveTimeout()
     if (isAlive == "true")
         return;
 
-    if (url.contains("localhost"))      this->myWebView->reload();
-    else                                this->resetWebview();
+    if (url.contains(DEFAULT_HOST_URL))     this->myWebView->reload();
+    else                                    this->resetWebview();
 }
 
 QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList argsList)

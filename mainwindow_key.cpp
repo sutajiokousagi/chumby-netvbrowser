@@ -23,11 +23,13 @@ void MainWindow::keyPressEvent ( QKeyEvent * event )
             up = currentEpochMs;
             remoteControlKey("up");
             addKeyStrokeHistory("up");
+            remoteControlPageInteraction("up");
             return;
         case Qt::Key_Down:
             down = currentEpochMs;
             remoteControlKey("down");
             addKeyStrokeHistory("down");
+            remoteControlPageInteraction("down");
             return;
         case Qt::Key_Left:
             left = currentEpochMs;
@@ -199,4 +201,29 @@ void MainWindow::slot_keyStrokeTimeout()
 
     tempOneSecList.clear();
     keyCountMap.clear();
+}
+
+void MainWindow::remoteControlPageInteraction(QString buttonName)
+{
+    if (myIFrame == NULL)
+        return;
+
+    //Not visible
+    QRect rect = myIFrame->geometry();
+    qDebug("%s: %d %d %d %d", TAG, rect.left(), rect.top(), rect.width(), rect.width());
+    if (rect.top() > 100 || rect.left() > 100)
+        return;
+
+    //Not a webpage
+    QString url = myIFrame->url().toString().toUpper();
+    if (url.endsWith("JPG") || url.endsWith("JEPG") || url.endsWith("PNG") || url.endsWith("GIF") || url.endsWith("BMP"))
+        return;
+
+    //Scroll 15% of the page or 100px
+    QSize contentSize = myIFrame->contentsSize();
+    int scrollY = contentSize.height() / 15;
+    if (scrollY < 100)
+        scrollY = 100;
+    if (buttonName == "up")         myIFrame->scroll(0, -scrollY);
+    else if (buttonName == "down")  myIFrame->scroll(0, scrollY);
 }

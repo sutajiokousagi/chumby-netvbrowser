@@ -107,6 +107,7 @@ private:
     QByteArray remoteControlKey(QByteArray buttonName, int oneSecCount = 1);
     QTimer keyStrokeTimer;
     void addKeyStrokeHistory(QString);
+    void remoteControlPageInteraction(QString);
 
     //Update mechanism
     QMap<QByteArray, QByteArray> packageSizeMap;

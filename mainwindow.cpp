@@ -65,7 +65,6 @@ void MainWindow::setupWebview()
 
     //Replace it with our custom webview
     this->myWebView = new MyWebView(this);
-    this->myWebPage = new MyWebPage(this);
     this->ui->rootLayout->addWidget(this->myWebView);
 
     //Ignore mouse & keyboard
@@ -75,6 +74,21 @@ void MainWindow::setupWebview()
 void MainWindow::resetWebview(QByteArray address /* = "" */)
 {
     qDebug("NeTVBrowser:resetWebview");
+
+    //Clean up all references to current iFrame
+    if (this->myIFrame != NULL) {
+        QObject::disconnect(myIFrame, SIGNAL(contentsSizeChanged(QSize)), this, SLOT(slot_frameContentSizeChange(QSize)));
+        QObject::disconnect(myIFrame, SIGNAL(loadFinished(bool)), this, SLOT(slot_frameLoadFinished(bool)));
+    }
+    this->myIFrame = NULL;
+
+    //Create a new webpage object
+    if (this->myWebPage != NULL) {
+        this->myWebPage->action(QWebPage::Stop);
+        delete this->myWebPage;
+    }
+    this->myWebPage = NULL;
+    this->myWebPage = new MyWebPage(this);
 
     //Do any other customization on default view state
     this->myWebView->setInvertColor(false);

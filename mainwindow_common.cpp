@@ -38,8 +38,6 @@ QByteArray MainWindow::remoteControlKey(QByteArray buttonName, int oneSecCount /
 
 void MainWindow::slot_keepAliveTimeout()
 {
-    this->keepAliveTimer.start();
-
     //We don't need to check if fCheckAlive exist or not. It will failed anyway.
     QString isAlive = this->myWebView->page()->mainFrame()->evaluateJavaScript( QString("fCheckAlive();") ).toString();
 

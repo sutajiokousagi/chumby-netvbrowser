@@ -25,7 +25,8 @@ void MainWindow::slot_pageloadFinished(bool ok)
     this->myWebView->page()->mainFrame()->setScrollBarPolicy ( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
 
     //Start or restart keep alive timer
-    this->keepAliveTimer.start();
+    if (!this->keepAliveTimer.isActive())
+        this->keepAliveTimer.start();
 }
 
 void MainWindow::slot_pageloadProgress(int progress)

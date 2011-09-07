@@ -5,7 +5,6 @@
 #include <QProcess>
 #include <QWebFrame>
 #include <QUrl>
-#include <QDateTime>
 #include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -20,11 +19,18 @@ MainWindow::MainWindow(QWidget *parent) :
     this->mySocket = NULL;
     this->port = DEFAULT_PORT;
 
+    //Ping the page every 60 seconds
     up = 0;down = 0;left = 0;right = 0;center = 0;cpanel = 0;widget = 0;hidden1 = 0; hidden2 = 0;
     keyStrokeTimer.setInterval(2000);
     keyStrokeTimer.setSingleShot(true);
     keyStrokeTimer.stop();
     QObject::connect(&keyStrokeTimer, SIGNAL(timeout()), this, SLOT(slot_keyStrokeTimeout()));
+
+    //Ping the page every 60 seconds
+    keepAliveTimer.setInterval(60000);
+    keepAliveTimer.setSingleShot(false);
+    keepAliveTimer.stop();
+    QObject::connect(&keepAliveTimer, SIGNAL(timeout()), this, SLOT(slot_keepAliveTimeout()));
 
     ui->setupUi(this);
 
@@ -127,108 +133,6 @@ void MainWindow::receiveArgs(const QString &argsString)
     QByteArray string = processStatelessCommand(command.toLatin1(), argsList);
     if (string != UNIMPLEMENTED)            qDebug("%s: %s", TAG, string.constData());
     else                                    qDebug("Invalid argument");
-}
-
-void MainWindow::keyPressEvent ( QKeyEvent * event )
-{
-    qint64 currentEpochMs = QDateTime::currentMSecsSinceEpoch();
-    int keycode = event->key();
-    bool autoRepeat = event->isAutoRepeat();
-
-    //autoRepeat doesn't work with current IR driver anyway
-    if (autoRepeat)
-        return;
-
-    switch (keycode)
-    {
-        case Qt::Key_HomePage:
-            //Will be delivered 1 second later
-            addKeyStrokeHistory("setup");
-            return;
-
-        case Qt::Key_Up:
-            up = currentEpochMs;
-            remoteControlKey("up");
-            addKeyStrokeHistory("up");
-            return;
-        case Qt::Key_Down:
-            down = currentEpochMs;
-            remoteControlKey("down");
-            addKeyStrokeHistory("down");
-            return;
-        case Qt::Key_Left:
-            left = currentEpochMs;
-            remoteControlKey("left");
-            addKeyStrokeHistory("left");
-            return;
-        case Qt::Key_Right:
-            right = currentEpochMs;
-            remoteControlKey("right");
-            addKeyStrokeHistory("right");
-            return;
-
-        case Qt::Key_Enter:
-        case Qt::Key_Return:
-            center = currentEpochMs;
-            remoteControlKey("center");
-            addKeyStrokeHistory("center");
-            return;
-        case Qt::Key_PageUp:
-            cpanel = currentEpochMs;
-            remoteControlKey("cpanel");
-            addKeyStrokeHistory("cpanel");
-            return;
-        case Qt::Key_PageDown:
-            widget = currentEpochMs;
-            remoteControlKey("widget");
-            addKeyStrokeHistory("widget");
-            return;
-
-        case Qt::Key_1:
-            hidden1 = currentEpochMs;
-            remoteControlKey("reset");
-            addKeyStrokeHistory("hidden1");
-            return;
-        case Qt::Key_2:
-            hidden2 = currentEpochMs;
-            remoteControlKey("reset");
-            addKeyStrokeHistory("hidden2");
-            return;
-    }
-
-    qDebug("%s: keyPressEvent '%d'", TAG, keycode);
-
-    //Default behavior
-    QWidget::keyPressEvent(event);
-}
-
-void MainWindow::keyReleaseEvent  ( QKeyEvent * event )
-{
-    static qint64 longClickThresholdMs1 = 3000;
-    qint64 currentEpochMs = QDateTime::currentMSecsSinceEpoch();
-    int keycode = event->key();
-
-    switch (keycode)
-    {
-        case Qt::Key_PageUp:
-            if (cpanel >= 0 && currentEpochMs - cpanel > longClickThresholdMs1) {
-                qDebug("%s: [keyboard override] long-press ControlPanel key (%lldms)", TAG, currentEpochMs-cpanel);
-                remoteControlKey("reset");
-            }
-            cpanel = 0;
-            return;
-
-        case Qt::Key_PageDown:
-            if (widget >= 0 && currentEpochMs - widget > longClickThresholdMs1) {
-                qDebug("%s :[keyboard override] long-press Widget key (%lldms)", TAG, currentEpochMs-widget);
-                remoteControlKey("reset");
-            }
-            widget = 0;
-            return;
-    }
-
-    //Default behavior
-    QWidget::keyReleaseEvent(event);
 }
 
 void MainWindow::paintEvent(QPaintEvent *pe)

@@ -276,7 +276,7 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         QByteArray javaResult = (this->myWebView->page()->mainFrame()->evaluateJavaScript(param)).toByteArray();
         if (javaResult != "")
             return javaResult;
-        return command;     //param.toLatin1();
+        return command;
     }
 
     else if (command == "SETBOX" && argCount >= 4)

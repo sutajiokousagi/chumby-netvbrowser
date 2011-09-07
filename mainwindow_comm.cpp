@@ -123,11 +123,11 @@ void MainWindow::slot_newSocketMessage( SocketRequest *request, SocketResponse *
     if (command == "TICKEREVENT")
     {
         //All these should already be URI encoded
-        QByteArray message = request->getParameter("message");
-        QByteArray title = request->getParameter("title");
-        QByteArray image = request->getParameter("image");
-        QByteArray type = request->getParameter("type");
-        QByteArray level = request->getParameter("level");
+        QByteArray message = QUrl::toPercentEncoding(QString(request->getParameter("message")), "", "/'\"");
+        QByteArray title = QUrl::toPercentEncoding(QString(request->getParameter("title")), "", "/'\"");
+        QByteArray image = QUrl::toPercentEncoding(QString(request->getParameter("image")), "", "/'\"");
+        QByteArray type = QUrl::toPercentEncoding(QString(request->getParameter("type")), "", "/'\"");
+        QByteArray level = QUrl::toPercentEncoding(QString(request->getParameter("level")), "", "/'\"");
         QByteArray javaScriptString = QByteArray("fTickerEvents(\"") + message + "\",\"" + title + "\",\"" + image + "\",\"" + type + "\",\"" + level + "\");";
 
         //Translate to a JavaScript command

@@ -26,7 +26,8 @@ QByteArray MainWindow::remoteControlKey(QByteArray buttonName, int oneSecCount /
 {
     if (buttonName.toUpper() == "RESET")
     {
-        resetWebview();
+        this->resetWebViewTab(DEFAULT_TAB);
+        this->showWebViewTab(DEFAULT_TAB);
         return "";
     }
     qDebug("%s: [keyboard override] %s (%d)", TAG, buttonName.constData(), oneSecCount);
@@ -38,18 +39,30 @@ QByteArray MainWindow::remoteControlKey(QByteArray buttonName, int oneSecCount /
 
 void MainWindow::slot_keepAliveTimeout()
 {
+    //This is performed on DEFAULT_TAB only
+
+    //If not initialized (should not happen)
+    MyWebView * refWebView = myWebViewArray[DEFAULT_TAB];
+    if (refWebView == NULL)
+    {
+        this->initWebViewFirstTab();
+        this->resetWebViewTab(DEFAULT_TAB);
+        this->showWebViewTab(DEFAULT_TAB);
+        return;
+    }
+
     //We don't need to check if fCheckAlive exist or not. It will failed anyway.
-    QString isAlive = this->myWebView->page()->mainFrame()->evaluateJavaScript( QString("fCheckAlive();") ).toString();
-    QString url = this->myWebView->page()->mainFrame()->url().toString();
+    QString isAlive = refWebView->page()->mainFrame()->evaluateJavaScript( QString("fCheckAlive();") ).toString();
+    QString url = refWebView->page()->mainFrame()->url().toString();
 
-    if (isAlive == "true")      qDebug("%s: [keep alive] [OK] %s", TAG, url.toLatin1().constData());
-    else                        qDebug("%s: [keep alive] [FAILED] %s", TAG, url.toLatin1().constData());
+    if (isAlive.toLower() == "true")        qDebug("%s: [keep alive] [OK] %s", TAG, url.toLatin1().constData());
+    else                                    qDebug("%s: [keep alive] [FAILED] %s", TAG, url.toLatin1().constData());
 
-    if (isAlive == "true")
+    if (isAlive.toLower() == "true")
         return;
 
-    if (url.contains(DEFAULT_HOST_URL))     this->myWebView->reload();
-    else                                    this->resetWebview();
+    if (url.contains(DEFAULT_HOST_URL))     refWebView->reload();
+    else                                    this->resetWebViewTab(DEFAULT_TAB);
 }
 
 QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList argsList)
@@ -82,7 +95,8 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
 
     else if (command == "RESET")
     {
-        resetWebview();
+        resetWebViewTab(DEFAULT_TAB);
+        this->showWebViewTab(DEFAULT_TAB);
         return command;
     }
 
@@ -170,6 +184,8 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         else                   return processStatelessCommand("HIDE");
     }
 
+    //----------------------------------------------------
+
     else if (command == "SETURL" && argCount >= 1)
     {
         QString param = argsList[0];
@@ -178,13 +194,26 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
 
         QUrl newUrl(param, QUrl::TolerantMode);
         if (newUrl.isValid())   myWebView->load( QUrl(param, QUrl::TolerantMode) );
-        else                    printf( "Invalid Url  \n" );
+        else                    qDebug("%s: Invalid Url", TAG);
 
         //Hide scrollbars
         myWebView->page()->mainFrame ()->setScrollBarPolicy ( Qt::Vertical, Qt::ScrollBarAlwaysOff );
         myWebView->page()->mainFrame ()->setScrollBarPolicy ( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
         if (param != "")
             return QString("%1 %2").arg(command.constData()).arg(param).toLatin1();
+        return command;
+    }
+
+    else if (command == "TAB" && argCount >= 2)
+    {
+        QString action = argsList[1];
+        QString tabIndex = argsList[0];
+        int index = tabIndex.toInt();
+
+        if (action.toUpper() == "HIDE")             hideWebViewTab(index);
+        else if (action.toUpper() == "SHOW")        showWebViewTab(index);
+        else                                        loadWebViewTab(index, action.toLatin1());
+
         return command;
     }
 
@@ -199,15 +228,54 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         return command;
     }
 
+    //----------------------------------------------------
+
     else if (command == "REMOTECONTROL" && argCount >= 1)
     {
         QString param = argsList[0];
+        Qt::Key keycode = getKeyCodeFromName(param);
+        if (keycode == Qt::Key_unknown)
+            return QString("%1 %2").arg(command.constData()).arg("Unknown key").toLatin1();
+
+
+        QKeyEvent keyPressEvent(QEvent::KeyPress, keycode, Qt::NoModifier);
+        sendWebViewTabEvent(this->currentWebViewTab, &keyPressEvent);
+
+        QKeyEvent keyReleaseEvent(QEvent::KeyRelease, keycode, Qt::NoModifier);
+        sendWebViewTabEvent(this->currentWebViewTab, &keyReleaseEvent);
+
+        /* // Old implementation
         QByteArray javaResult = remoteControlKey(param.toLatin1());
         if (javaResult != "")
             return QString("%1 %2").arg(command.constData()).arg(javaResult.constData()).toLatin1();
         if (param != "")
             return QString("%1 %2").arg(command.constData()).arg(param).toLatin1();
-        return command;
+        */
+        return QString("%1 %2").arg(command.constData()).arg(param.toLatin1().constData()).toLatin1();
+    }
+
+    else if (command == "KEY" && argCount >= 1)
+    {
+        QString param = argsList[0];
+        Qt::Key keycode = getKeyCodeFromName(param);
+        if (keycode == Qt::Key_unknown)
+            return QString("%1 %2").arg(command.constData()).arg("Unknown key").toLatin1();
+
+        QKeyEvent keyPressEvent(QEvent::KeyPress, keycode, Qt::ShiftModifier);
+        sendWebViewTabEvent(this->currentWebViewTab, &keyPressEvent);
+
+        QKeyEvent keyReleaseEvent(QEvent::KeyRelease, keycode, Qt::NoModifier);
+        sendWebViewTabEvent(this->currentWebViewTab, &keyReleaseEvent);
+
+        /*
+        if (key.isAccepted())
+        {
+            qDebug("Key accepted");
+        } else {
+            qDebug("Key NOT accepted");
+        }
+        */
+        return QString("%1 %2").arg(command.constData()).arg(param.toLatin1().constData()).toLatin1();
     }
 
     //----------------------------------------------------
@@ -289,30 +357,6 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         this->showNormal();
         this->setGeometry(x,y,w,h);
         return command;     //QString("%1 %2 %3 %4 %5").arg(command.constData()).arg(x).arg(y).arg(w).arg(h).toLatin1();
-    }
-
-    else if (command == "KEY" && argCount >= 1)
-    {
-        QString param = argsList[0];
-        Qt::Key keycode = getKeyCode(param);
-        if (keycode == Qt::Key_unknown)
-            return QString("%1 %2").arg(command.constData()).arg("Unknown key").toLatin1();
-
-        QKeyEvent key1(QEvent::KeyPress, keycode, Qt::ShiftModifier);
-        QApplication::sendEvent(this->myWebView, &key1);
-
-        QKeyEvent key2(QEvent::KeyRelease, keycode, Qt::NoModifier);
-        QApplication::sendEvent(this->myWebView, &key2);
-
-        /*
-        if (key.isAccepted())
-        {
-            qDebug("Key accepted");
-        } else {
-            qDebug("Key NOT accepted");
-        }
-        */
-        return QString("%1 %2").arg(command.constData()).arg("Unknown key").toLatin1();
     }
 
     //----------------------------------------------------
@@ -461,7 +505,7 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
     return QByteArray(UNIMPLEMENTED) + ":" + command;
 }
 
-Qt::Key MainWindow::getKeyCode(QString keyname)
+Qt::Key MainWindow::getKeyCodeFromName(QString keyname)
 {
     keyname = keyname.toLower();
     if (keyname.length() < 1)
@@ -474,6 +518,9 @@ Qt::Key MainWindow::getKeyCode(QString keyname)
     else if (keyname == "enter")        return Qt::Key_Enter;
     else if (keyname == "center")       return Qt::Key_Enter;
     else if (keyname == "\n")           return Qt::Key_Enter;
+    else if (keyname == "cpanel")       return Qt::Key_PageUp;
+    else if (keyname == "widget")       return Qt::Key_PageDown;
+
     else if (keyname == "esc")          return Qt::Key_Escape;
     else if (keyname == "del")          return Qt::Key_Delete;
     else if (keyname == "backspace")    return Qt::Key_Backspace;

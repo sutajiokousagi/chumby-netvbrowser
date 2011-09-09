@@ -14,12 +14,17 @@ MainWindow::MainWindow(QWidget *parent) :
     this->isShuttingDown = false;
     this->cPanelLoaded = false;
     this->myWebView = NULL;
-    this->myWebPage = NULL;
-    this->myIFrame = NULL;
     this->mySocket = NULL;
     this->port = DEFAULT_PORT;
 
-    //Ping the page every 60 seconds
+    //Multi-tab
+    this->currentWebViewTab = 0;
+    for (int i=0;i<MAX_TABS; i++)
+        myWebViewArray[i] = NULL;
+    for (int i=0;i<MAX_TABS; i++)
+        myWebPageArray[i] = NULL;
+
+    //Keystroke hander
     up = 0;down = 0;left = 0;right = 0;center = 0;cpanel = 0;widget = 0;hidden1 = 0; hidden2 = 0;
     keyStrokeTimer.setInterval(2000);
     keyStrokeTimer.setSingleShot(true);
@@ -34,6 +39,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
 
+    //Default background color for MainWindow (bright pink chroma key color)
+    this->setStyleSheet("background-color: rgb(240, 0, 240);");
+
 #ifdef ENABLE_QWS_STUFF
     //Chromeless window
     this->setWindowFlags(Qt::MSWindowsFixedSizeDialogHint);     //Set window to fixed size
@@ -41,13 +49,14 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowFlags(Qt::FramelessWindowHint);              //Set a frameless window
 #endif
 
+    this->initWebViewFirstTab();
     this->setupSocket();
-    this->setupWebview();
 
     //Previously not doing an update
     if (!FileExists(UPGRADE_PROGRESS_FILE))
     {
-        this->resetWebview();
+        this->resetWebViewTab(DEFAULT_TAB);
+        this->showWebViewTab(DEFAULT_TAB);
         return;
     }
 
@@ -55,80 +64,24 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setupUpgrade();
 
     //Here we have to reload the package list & recalculate the size
-    this->resetWebview(QByteArray(UPDATE_PAGE) + "?continue=true");
+    this->resetWebViewTab(DEFAULT_TAB, QByteArray(UPDATE_PAGE) + "?continue=true");
+    this->showWebViewTab(DEFAULT_TAB);
 }
 
-void MainWindow::setupWebview()
+void MainWindow::initWebViewFirstTab()
 {
-    //Remove the existing webview
-    this->ui->rootLayout->removeWidget( this->ui->webView );
-
-    //Replace it with our custom webview
-    this->myWebView = new MyWebView(this);
-    this->ui->rootLayout->addWidget(this->myWebView);
-
-    //Ignore mouse & keyboard
-    this->myWebView->setEnabled(false);
-}
-
-void MainWindow::resetWebview(QByteArray address /* = "" */)
-{
-    qDebug("NeTVBrowser:resetWebview");
-
-    //Clean up all references to current iFrame
-    if (this->myIFrame != NULL) {
-        QObject::disconnect(myIFrame, SIGNAL(contentsSizeChanged(QSize)), this, SLOT(slot_frameContentSizeChange(QSize)));
-        QObject::disconnect(myIFrame, SIGNAL(loadFinished(bool)), this, SLOT(slot_frameLoadFinished(bool)));
-    }
-    this->myIFrame = NULL;
-
-    //Create a new webpage object
-    if (this->myWebPage != NULL) {
-        this->myWebPage->action(QWebPage::Stop);
-        delete this->myWebPage;
-    }
-    this->myWebPage = NULL;
-    this->myWebPage = new MyWebPage(this);
-
-    //Do any other customization on default view state
-    this->myWebView->setInvertColor(false);
-    this->myWebView->setPage(myWebPage);
-    this->myIFrame = NULL;
-
-    //Hide scrollbars
-    this->myWebView->page()->mainFrame()->setScrollBarPolicy ( Qt::Vertical, Qt::ScrollBarAlwaysOff );
-    this->myWebView->page()->mainFrame()->setScrollBarPolicy ( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
-
-    //Connect signal
-    QObject::connect(this->myWebView->page(), SIGNAL(loadFinished(bool)), this, SLOT(slot_pageloadFinished(bool)));
-    QObject::connect(this->myWebView->page(), SIGNAL(loadStarted()), this, SLOT(slot_pageloadStarted()));
-    QObject::connect(this->myWebView->page(), SIGNAL(loadProgress(int)), this, SLOT(slot_pageloadProgress(int)));
-    QObject::connect(this->myWebView->page(), SIGNAL(frameCreated(QWebFrame*)), this, SLOT(slot_frameCreated(QWebFrame*)));
-    QObject::connect(this->myWebView, SIGNAL(statusBarMessage(QString)), this, SLOT(slot_statusBarMessage(QString)));
-
-    //Transparent background (page content dependent)
-    QPalette palette = this->myWebView->palette();
-    palette.setBrush(QPalette::Base, Qt::transparent);
-    this->myWebView->page()->setPalette(palette);
-    this->myWebView->setAttribute(Qt::WA_OpaquePaintEvent, false);
-
-    //Disable AA
-    this->myWebView->setRenderHints(0);
-
-    //Default background color (bright pink chroma key color)
-    this->setStyleSheet("background-color: rgb(240, 0, 240);");
-
-    //Load default page
-    if (address == "")      this->myWebView->load( QUrl(QString("http://%1").arg(DEFAULT_HOST_URL)) );
-    else                    this->myWebView->load( QUrl(address) );
+    initWebViewTab(DEFAULT_TAB);
+    this->myWebView = myWebViewArray[DEFAULT_TAB];
 }
 
 MainWindow::~MainWindow()
 {
     isShuttingDown = true;
-    delete this->mySocket;
-    delete this->myWebView;
-    delete this->myWebPage;
+    this->keyStrokeTimer.stop();
+    this->keepAliveTimer.stop();
+    if (this->mySocket != NULL)         delete this->mySocket;
+    for (int i=0;i<MAX_TABS; i++)       if (myWebViewArray[i] != NULL)   {   delete myWebViewArray[i];      myWebViewArray[i] = NULL;   }
+    for (int i=0;i<MAX_TABS; i++)       if (myWebPageArray[i] != NULL)   {   delete myWebPageArray[i];      myWebPageArray[i] = NULL;   }
     delete this->ui;
 }
 
@@ -159,4 +112,23 @@ void MainWindow::paintEvent(QPaintEvent *pe)
     painter.setRenderHint(QPainter::HighQualityAntialiasing, false);
     painter.setRenderHint(QPainter::SmoothPixmapTransform, false);
     painter.setRenderHint(QPainter::NonCosmeticDefaultPen, false);
+}
+
+void MainWindow::resizeEvent ( QResizeEvent * event )
+{
+    QMainWindow::resizeEvent(event);
+
+    //Fit all webviews
+    int count = 0;
+    for (int i=0; i<MAX_TABS; i++)
+    {
+        if (myWebViewArray[i] == NULL)
+            continue;
+        //Resize fullscreen
+        myWebViewArray[i]->resize(this->frameGeometry().size());
+        myWebViewArray[i]->move(0,0);
+        count++;
+    }
+
+    qDebug("%s: resizeEvent (%d x %d) - resized %d tabs", TAG, this->frameGeometry().size().width(), this->frameGeometry().size().height(), count);
 }

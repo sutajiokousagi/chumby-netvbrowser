@@ -13,7 +13,8 @@ SOURCES += main.cpp \
            mainwindow_update.cpp \
            mainwindow_utils.cpp \
            mywebpage.cpp \
-    mainwindow_key.cpp
+           mainwindow_key.cpp \
+           mainwindow_tabs.cpp
 HEADERS += mainwindow.h mywebview.h \
            mywebpage.h
 FORMS   += mainwindow.ui

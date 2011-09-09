@@ -39,12 +39,17 @@ namespace Ui {
 #define DEFAULT_PORT            8081
 #define UNIMPLEMENTED           "Un1mPl3m3nT3D"
 #define TAG                     APPNAME
+#define MAX_TABS                10
+#define DEFAULT_TAB             0
+#define SECOND_TAB              1
 
 #define OPKG_READ_INTERVAL      2000
 #define UPGRADE_SCRIPT          "/usr/bin/chumby-netvbrowser-upgrade.sh"
 #define OPKG_DOWNLOAD_PATH      "/var/lib/opkg/tmp"
 #define UPGRADE_PROGRESS_FILE   "/tmp/netvbrowser_temp_upgrade"
 #define UPDATE_PAGE             "http://localhost/html_update/index.html"
+
+#define HTML_IMAGE              "<html><body style='margin:0; overflow:hidden;'><table width='100%' height='100%' cell-padding='0' cell-spacing='0'><tr><td width='100%' height='100%' align='center' valign='middle'><img src='xxxxxxxxxx' /></tr></td></table></body></html>"
 
 class MainWindow : public QMainWindow
 {
@@ -69,11 +74,27 @@ private:
     //Webview
     bool cPanelLoaded;
     MyWebView* myWebView;
-    MyWebPage* myWebPage;
-    QWebFrame* myIFrame;
+    MyWebView* myWebViewArray[MAX_TABS];
+    MyWebPage* myWebPageArray[MAX_TABS];
     QTimer keepAliveTimer;
-    void setupWebview();
-    void resetWebview(QByteArray address = "");
+    void initWebViewFirstTab();
+
+    //Multi-tabs
+    int currentWebViewTab;
+    void initWebViewTab(int index);
+    void deinitWebViewTab(int index);
+    void resetWebViewTab(int index, QByteArray address = "");
+    void loadWebViewTab(int index, QByteArray address = "");
+    void loadWebViewTabHTML(int index, QByteArray htmlString = "");
+    void showWebViewTab(int index);
+    void hideWebViewTab(int index);
+    void hideOtherWebViewTab(int index);
+    QSize getWebViewTabContentSize(int index);
+    bool isWebViewTabVisible(int index);
+    void scrollWebViewTabDelta(int index, int dx, int dy);
+    void scrollWebViewTabAbsolute(int index, int x, int y);
+    void scrollWebViewTabPercentage(int index, double x, double y);
+    void sendWebViewTabEvent(int index, QEvent * event);
 
     //File Utilities
     bool FileExists(const QString &fullPath);
@@ -98,7 +119,7 @@ private:
 
     //Common functions
     void sendSocketHello(SocketResponse *response);
-    Qt::Key getKeyCode(QString keyname);
+    Qt::Key getKeyCodeFromName(QString keyname);
     QByteArray processStatelessCommand(QByteArray command, QStringList argsList = QStringList());
 
     //Remote control & Keyboard events
@@ -130,6 +151,7 @@ private:
 
 protected:
 
+    void resizeEvent ( QResizeEvent * event );
     void keyPressEvent ( QKeyEvent * event );
     void keyReleaseEvent  ( QKeyEvent * event );
     void paintEvent( QPaintEvent *pe );
@@ -142,7 +164,6 @@ private slots:
     void slot_statusBarMessage ( const QString & text );
 
     void slot_frameCreated(QWebFrame*);
-    void slot_frameLoadFinished(bool);
     void slot_frameContentSizeChange(const QSize&);
 
     void slot_socketDisconnected();

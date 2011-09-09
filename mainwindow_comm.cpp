@@ -122,15 +122,101 @@ void MainWindow::slot_newSocketMessage( SocketRequest *request, SocketResponse *
     //Some commands are more complex with multiple parameters
     if (command == "TICKEREVENT")
     {
-        //All these should already be URI encoded
-        QByteArray message = QUrl::toPercentEncoding(QString(request->getParameter("message")), "", "/'\"");
-        QByteArray title = QUrl::toPercentEncoding(QString(request->getParameter("title")), "", "/'\"");
-        QByteArray image = QUrl::toPercentEncoding(QString(request->getParameter("image")), "", "/'\"");
-        QByteArray type = QUrl::toPercentEncoding(QString(request->getParameter("type")), "", "/'\"");
-        QByteArray level = QUrl::toPercentEncoding(QString(request->getParameter("level")), "", "/'\"");
+        //All these should already be URI encoded by NeTVServer
+        QByteArray message = request->getParameter("message");
+        QByteArray title = request->getParameter("title");
+        QByteArray image = request->getParameter("image");
+        QByteArray type = request->getParameter("type");
+        QByteArray level = request->getParameter("level");
         QByteArray javaScriptString = QByteArray("fTickerEvents(\"") + message + "\",\"" + title + "\",\"" + image + "\",\"" + type + "\",\"" + level + "\");";
 
         //Translate to a JavaScript command
+        command = "JAVASCRIPT";
+        dataString = javaScriptString;
+    }
+    else if (command == "SETIFRAME" || command == "MULTITAB")
+    {
+        QByteArray options = request->getParameter("options");
+        QByteArray param = request->getParameter("param");
+        QByteArray tab = request->getParameter("tab");
+        int tabIndex = tab.toInt();
+
+        if (options.length() < 1 || options.toUpper() == "LOAD")
+        {
+            if (tabIndex < 1 || tabIndex >= MAX_TABS)
+                tabIndex = 1;
+            hideWebViewTab(DEFAULT_TAB);
+            loadWebViewTab(tabIndex, param);
+            qDebug("%s: loading another tab with url [%s]", TAG, param.constData());
+        }
+        else if (options.toUpper() == "IMAGE")
+        {
+            if (tabIndex < 1 || tabIndex >= MAX_TABS)
+                tabIndex = 1;
+            QString htmlString = QString(HTML_IMAGE);
+            htmlString = htmlString.replace("xxxxxxxxxx", QString(param));
+
+            hideWebViewTab(DEFAULT_TAB);
+            loadWebViewTabHTML(tabIndex, htmlString.toLatin1());
+            qDebug("%s: loading another tab with image [%s]", TAG, param.constData());
+        }
+        else if (options.toUpper() == "HTML")
+        {
+            if (tabIndex < 1 || tabIndex >= MAX_TABS)
+                tabIndex = 1;
+            hideWebViewTab(DEFAULT_TAB);
+            loadWebViewTabHTML(tabIndex, QUrl::fromPercentEncoding(param.replace("+", " ")).toLatin1() );
+            qDebug("%s: loading another tab with HTML string", TAG);
+            qDebug("%s", QUrl::fromPercentEncoding(param.replace("+", " ")).toLatin1().constData());
+        }
+        else if (options.toUpper() == "HIDE" || options.toUpper() == "HIDEALL" || options.toUpper() == "BACK")
+        {
+            hideOtherWebViewTab(DEFAULT_TAB);
+            showWebViewTab(DEFAULT_TAB);
+        }
+        else if (options.toUpper() == "HIDEONE")
+        {
+            hideWebViewTab(tabIndex);
+        }
+        else if (options.toUpper() == "SCROLL")
+        {
+            QList<QByteArray> args = param.split(',');
+            if (args.size() >= 2)
+            {
+                bool okx = false;
+                bool oky = false;
+                int x = args.at(0).toInt(&okx);
+                int y = args.at(1).toInt(&oky);
+                if (okx && oky)
+                    scrollWebViewTabAbsolute(this->currentWebViewTab, x,y);
+            }
+
+            //No need to notify Control Panel
+            return;
+        }
+        else if (options.toUpper() == "SCROLLF")
+        {
+            QList<QByteArray> args = param.split(',');
+            if (args.size() >= 2)
+            {
+                bool okx = false;
+                bool oky = false;
+                double x = args.at(0).toDouble(&okx);
+                double y = args.at(1).toDouble(&oky);
+                if (okx && oky)
+                    scrollWebViewTabPercentage(this->currentWebViewTab, x,y);
+                else
+                    qDebug("%s: float conversion failed %s", TAG, param.constData());
+            }
+
+            //No need to notify Control Panel
+            return;
+        }
+
+        //Translate to a JavaScript command
+
+        param = QUrl::toPercentEncoding(param, "", "/'\"");
+        QByteArray javaScriptString = QByteArray("fMultitab(\"") + options + "\",\"" + param + "\",\"" + tab + "\");";
         command = "JAVASCRIPT";
         dataString = javaScriptString;
     }
@@ -138,7 +224,7 @@ void MainWindow::slot_newSocketMessage( SocketRequest *request, SocketResponse *
     QStringList argsList = QString(dataString).split(ARGS_SPLIT_TOKEN);
     QByteArray string = processStatelessCommand(command, argsList);
     response->setStatus(1);
-    //response->setCommand(command);    //this will cause a echo
+    //response->setCommand(command);    //this will cause a echo if called from NeTVServer
     response->setParameter("value", string);
     response->write();
 

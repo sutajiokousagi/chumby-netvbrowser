@@ -20,12 +20,14 @@ void MainWindow::setupUpgrade()
             upgradeDone();
             return;
         }
+        /* This is now invalid by the new chumby-opkg
         qDebug("%s: Total upgrade size: %lldMb", TAG, getUpdateTotalSizeKb()/1024);
 
         //Execute JavaScript
         QString javascriptString = QString("fUPDATEEvents('progress',%1);").arg(QString().setNum(getUpdatePercentage()));
         this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString);
         qDebug() << "Upgrade progress: " << getUpdatePercentage() << "%";
+        */
     }
     else
     {

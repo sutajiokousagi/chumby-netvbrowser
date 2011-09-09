@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string/>
+   <string>NeTVBrowser</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="rootLayout">
@@ -21,38 +21,10 @@
     <property name="margin">
      <number>0</number>
     </property>
-    <item>
-     <widget class="QWebView" name="webView">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>320</width>
-        <height>240</height>
-       </size>
-      </property>
-      <property name="url">
-       <url>
-        <string>about:blank</string>
-       </url>
-      </property>
-     </widget>
-    </item>
    </layout>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <customwidgets>
-  <customwidget>
-   <class>QWebView</class>
-   <extends>QWidget</extends>
-   <header>QtWebKit/QWebView</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

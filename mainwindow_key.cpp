@@ -125,6 +125,7 @@ void MainWindow::addKeyStrokeHistory(QString keyName)
     }
 
     //Detect complex pattern
+    /*
     if (keyStrokeHistory.size() >= 9)
     {
         QString keyString;
@@ -141,6 +142,7 @@ void MainWindow::addKeyStrokeHistory(QString keyName)
         if (hit)
             keyStrokeHistory.clear();
     }
+    */
 }
 
 void MainWindow::slot_keyStrokeTimeout()
@@ -148,7 +150,7 @@ void MainWindow::slot_keyStrokeTimeout()
     keyStrokeTimer.stop();
     qint64 currentEpochMs = QDateTime::currentMSecsSinceEpoch();
 
-    //Get the key strokes within 2 seconds
+    //Get the keys pressed within 2 seconds
     QStringList tempOneSecList;
     for (int i=0; i < keyStrokeHistory.size(); i++)
     {
@@ -205,29 +207,10 @@ void MainWindow::slot_keyStrokeTimeout()
 
 void MainWindow::remoteControlPageInteraction(QString buttonName)
 {
-    if (myIFrame == NULL)
-        return;
-
-    //This should be done by JavaScript scrolling the wrapper div, because iFrame is always at 100% content size
-    /*
-    //Not visible
-    QRect rect = myIFrame->geometry();
-    qDebug("%s: %d %d %d %d", TAG, rect.left(), rect.top(), rect.width(), rect.height());
-    if (rect.top() > 100 || rect.left() > 100)
-        return;
-
-    //Not a webpage
-    QString url = myIFrame->url().toString().toUpper();
-    if (url.endsWith("JPG") || url.endsWith("JPEG") || url.endsWith("PNG") || url.endsWith("GIF") || url.endsWith("BMP"))
-        return;
-
-    //Scroll 15% of the page or 100px
-    QSize contentSize = myIFrame->contentsSize();
-    int scrollY = contentSize.height() / 15;
-    if (scrollY < 100)
-        scrollY = 100;
-    if (buttonName == "up")         myIFrame->scroll(0, -scrollY);
-    else if (buttonName == "down")  myIFrame->scroll(0, scrollY);
-    qDebug("%s: %d", TAG, myIFrame->scrollPosition().y());
-    */
+    if (isWebViewTabVisible(SECOND_TAB))
+    {
+        QSize frameSize = this->frameGeometry().size();
+        if (buttonName == "up")             scrollWebViewTabDelta(SECOND_TAB, 0, -frameSize.height() / 7);
+        else if (buttonName == "down")      scrollWebViewTabDelta(SECOND_TAB, 0, frameSize.height() / 7);
+    }
 }

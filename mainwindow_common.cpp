@@ -189,7 +189,7 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
     else if (command == "SETURL" && argCount >= 1)
     {
         QString param = argsList[0];
-        if (!param.startsWith("http://"))
+        if (!param.startsWith("http://") && !param.startsWith("https://"))
             param = param.insert(0, "http://");
 
         QUrl newUrl(param, QUrl::TolerantMode);

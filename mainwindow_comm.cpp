@@ -145,9 +145,16 @@ void MainWindow::slot_newSocketMessage( SocketRequest *request, SocketResponse *
         {
             if (tabIndex < 1 || tabIndex >= MAX_TABS)
                 tabIndex = 1;
-            hideWebViewTab(DEFAULT_TAB);
-            loadWebViewTab(tabIndex, param);
-            qDebug("%s: loading another tab with url [%s]", TAG, param.constData());
+            if (param.length() > 5)
+            {
+                hideWebViewTab(DEFAULT_TAB);
+                loadWebViewTab(tabIndex, param);
+                qDebug("%s: loading another tab with url [%s]", TAG, param.constData());
+            }
+            else
+            {
+                qDebug("%s: not loading invalid url [%s]", TAG, param.constData());
+            }
         }
         else if (options.toUpper() == "IMAGE")
         {

@@ -22,6 +22,9 @@ case "$1" in
 		# Use irkb and resetkb driver as a normal keyboard		
 		export QWS_KEYBOARD="chumbyirkb chumbyresetkb"
 
+		# Transformed screen driver supporting screen rotation
+		export QWS_DISPLAY="transformed"
+
 		# Start in the background so we don't hog the console
 		NeTVBrowser -qws > /dev/null 2>&1 &
 		;;

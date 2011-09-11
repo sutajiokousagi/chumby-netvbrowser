@@ -89,7 +89,7 @@ void MainWindow::resetWebViewTab(int index, QByteArray address /* = "" */)
 
 void MainWindow::loadWebViewTab(int index, QByteArray address /* = "" */)
 {
-    if (index < 0 || index >= MAX_TABS)
+    if (index < 0 || index >= MAX_TABS || address.length() < 8)
         return;
     if (myWebViewArray[index] == NULL)
         initWebViewTab(index);
@@ -100,7 +100,7 @@ void MainWindow::loadWebViewTab(int index, QByteArray address /* = "" */)
 
 void MainWindow::loadWebViewTabHTML(int index, QByteArray htmlString /* = "" */)
 {
-    if (index < 0 || index >= MAX_TABS)
+    if (index < 0 || index >= MAX_TABS || htmlString.length() < 2)
         return;
     if (myWebViewArray[index] == NULL)
         initWebViewTab(index);

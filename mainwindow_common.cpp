@@ -31,9 +31,7 @@ QByteArray MainWindow::remoteControlKey(QByteArray buttonName, int oneSecCount /
         return "";
     }
     qDebug("%s: [keyboard override] %s (%d)", TAG, buttonName.constData(), oneSecCount);
-    QString javascriptString;
-    if (oneSecCount <= 1)       javascriptString = QString("fButtonPress('%1');").arg(QString(buttonName));
-    else                        javascriptString = QString("fButtonPress('%1',%2);").arg(QString(buttonName)).arg(oneSecCount);
+    QString javascriptString = QString("fButtonPress('%1',%2);").arg(QString(buttonName)).arg(oneSecCount);
     return (this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
 }
 

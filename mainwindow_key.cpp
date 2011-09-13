@@ -109,8 +109,8 @@ void MainWindow::keyReleaseEvent  ( QKeyEvent * event )
 void MainWindow::addKeyStrokeHistory(QString keyName)
 {
     //Disable this temporarily, seems to cause the browser to hang randomly
-    //if (keyName.toUpper() != "SETUP")
-    //    return;
+    if (keyName.toUpper() != "SETUP")
+        return;
 
     qint64 currentEpochMs = QDateTime::currentMSecsSinceEpoch();
     keyStrokeHistory.prepend( QString("%1|%2").arg(QString(keyName)).arg(currentEpochMs) );
@@ -124,6 +124,7 @@ void MainWindow::addKeyStrokeHistory(QString keyName)
         keyStrokeTimer.start();
         keyStrokeTimerEpoch = currentEpochMs;
     }
+    return;
 
     //Detect complex pattern
     if (keyStrokeHistory.size() >= 9)

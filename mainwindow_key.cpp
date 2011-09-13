@@ -120,7 +120,6 @@ void MainWindow::addKeyStrokeHistory(QString keyName)
     //Delayed action for SETUP button only
     if (keyName.toUpper() == "SETUP" && !keyStrokeTimer.isActive())
     {
-        keyStrokeTimer.stop();
         keyStrokeTimer.start();
         keyStrokeTimerEpoch = currentEpochMs;
     }
@@ -149,7 +148,8 @@ void MainWindow::addKeyStrokeHistory(QString keyName)
 
 void MainWindow::slot_keyStrokeTimeout()
 {
-    keyStrokeTimer.stop();
+    //This seems to make the browser hang
+    //keyStrokeTimer.stop();
 
     //Get the keys pressed within 1.5 seconds
     QStringList tempOneSecList;
@@ -157,6 +157,8 @@ void MainWindow::slot_keyStrokeTimeout()
     {
         QString temp = keyStrokeHistory.at(i);
         bool ok = false;
+        if (temp.split("|").size() < 2)
+            continue;
         qint64 time = temp.split("|").at(1).toLongLong(&ok);
         if (!ok)
             continue;
@@ -187,7 +189,7 @@ void MainWindow::slot_keyStrokeTimeout()
         i.next();
         QString key = i.key();
         int count = i.value();
-        if (key == "setup")
+        if (key.toUpper() == "SETUP")
         {
             if (count > 0)
             {

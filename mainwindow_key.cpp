@@ -135,11 +135,11 @@ void MainWindow::addKeyStrokeHistory(QString keyName)
 
         if (keyString.contains("up,right,down,left,up,right,down,left,cpanel")) {
             qDebug("%s: key combo: %s", TAG, keyString.toLatin1().constData());
-            qDebug("%s: do something cool 1");
+            qDebug("%s: do something cool 1", TAG);
         }
         else if (keyString.contains("up,right,down,left,up,right,down,left,widget")) {
             qDebug("%s: key combo: %s", TAG, keyString.toLatin1().constData());
-            qDebug("%s: do something cool 2");
+            qDebug("%s: do something cool 2", TAG);
         }
         if (hit)
             keyStrokeHistory.clear();

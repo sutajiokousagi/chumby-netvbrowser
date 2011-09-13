@@ -109,23 +109,23 @@ void MainWindow::keyReleaseEvent  ( QKeyEvent * event )
 void MainWindow::addKeyStrokeHistory(QString keyName)
 {
     //Disable this temporarily, seems to cause the browser to hang randomly
-    if (keyName.toUpper() != "SETUP")
-        return;
+    //if (keyName.toUpper() != "SETUP")
+    //    return;
 
     qint64 currentEpochMs = QDateTime::currentMSecsSinceEpoch();
     keyStrokeHistory.prepend( QString("%1|%2").arg(QString(keyName)).arg(currentEpochMs) );
     while (keyStrokeHistory.size() > 16)
         keyStrokeHistory.removeLast();
 
-    //Delayed action for SETUP button
-    if (keyName.toUpper() == "SETUP") {
-        if (!keyStrokeTimer.isActive())
-            keyStrokeTimer.start();
-        return;
+    //Delayed action for SETUP button only
+    if (keyName.toUpper() == "SETUP" && !keyStrokeTimer.isActive())
+    {
+        keyStrokeTimer.stop();
+        keyStrokeTimer.start();
+        keyStrokeTimerEpoch = currentEpochMs;
     }
 
     //Detect complex pattern
-    /*
     if (keyStrokeHistory.size() >= 9)
     {
         QString keyString;
@@ -135,22 +135,22 @@ void MainWindow::addKeyStrokeHistory(QString keyName)
 
         if (keyString.contains("up,right,down,left,up,right,down,left,cpanel")) {
             qDebug("%s: key combo: %s", TAG, keyString.toLatin1().constData());
+            qDebug("%s: do something cool 1");
         }
         else if (keyString.contains("up,right,down,left,up,right,down,left,widget")) {
             qDebug("%s: key combo: %s", TAG, keyString.toLatin1().constData());
+            qDebug("%s: do something cool 2");
         }
         if (hit)
             keyStrokeHistory.clear();
     }
-    */
 }
 
 void MainWindow::slot_keyStrokeTimeout()
 {
     keyStrokeTimer.stop();
-    qint64 currentEpochMs = QDateTime::currentMSecsSinceEpoch();
 
-    //Get the keys pressed within 2 seconds
+    //Get the keys pressed within 1.5 seconds
     QStringList tempOneSecList;
     for (int i=0; i < keyStrokeHistory.size(); i++)
     {
@@ -159,12 +159,12 @@ void MainWindow::slot_keyStrokeTimeout()
         qint64 time = temp.split("|").at(1).toLongLong(&ok);
         if (!ok)
             continue;
-        if (currentEpochMs - time > 2000)
+        if (time < keyStrokeTimerEpoch)
             continue;
         tempOneSecList.prepend(temp);
     }
 
-    //Counting which keys are pressed within 2 second
+    //Counting which keys are pressed within 1.5 second
     QMap<QString, int> keyCountMap;
     for (int i=0; i < tempOneSecList.size(); i++)
     {

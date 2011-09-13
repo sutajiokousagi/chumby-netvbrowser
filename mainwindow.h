@@ -42,8 +42,8 @@ namespace Ui {
 #define MAX_TABS                10
 #define DEFAULT_TAB             0
 #define SECOND_TAB              1
+#define KEY_TIMEOUT             1500
 
-#define OPKG_READ_INTERVAL      2000
 #define UPGRADE_SCRIPT          "/usr/bin/chumby-netvbrowser-upgrade.sh"
 #define OPKG_DOWNLOAD_PATH      "/var/lib/opkg/tmp"
 #define UPGRADE_PROGRESS_FILE   "/tmp/netvbrowser_temp_upgrade"
@@ -127,6 +127,7 @@ private:
     QStringList keyStrokeHistory;
     QByteArray remoteControlKey(QByteArray buttonName, int oneSecCount = 1);
     QTimer keyStrokeTimer;
+    qint64 keyStrokeTimerEpoch;
     void addKeyStrokeHistory(QString);
     void remoteControlPageInteraction(QString);
 

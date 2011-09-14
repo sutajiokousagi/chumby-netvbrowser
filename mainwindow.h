@@ -43,6 +43,7 @@ namespace Ui {
 #define DEFAULT_TAB             0
 #define SECOND_TAB              1
 #define KEY_TIMEOUT             1500
+#define KEEPALIVE_TIMEOUT       60000
 
 #define UPGRADE_SCRIPT          "/usr/bin/chumby-netvbrowser-upgrade.sh"
 #define OPKG_DOWNLOAD_PATH      "/var/lib/opkg/tmp"

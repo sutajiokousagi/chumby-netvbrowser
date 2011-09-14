@@ -32,7 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(&keyStrokeTimer, SIGNAL(timeout()), this, SLOT(slot_keyStrokeTimeout()));
 
     //Ping the page every 60 seconds
-    keepAliveTimer.setInterval(60000);
+    keepAliveTimer.setInterval(KEEPALIVE_TIMEOUT);
     keepAliveTimer.setSingleShot(false);
     keepAliveTimer.stop();
     QObject::connect(&keepAliveTimer, SIGNAL(timeout()), this, SLOT(slot_keepAliveTimeout()));

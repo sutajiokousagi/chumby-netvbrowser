@@ -76,34 +76,41 @@ int SocketRequest::getParametersCount()
 
 void SocketRequest::ParseMessageXML(const char* data)
 {
-    QXmlStreamReader* xml = new QXmlStreamReader();
-    xml->addData(data);
-
-    //Input format is similar to this https://internal.chumby.com/wiki/index.php/JavaScript/HTML_-_Hardware_Bridge_protocol
-    //Example: <cmd>PlayWidget</cmd><data><value>1234567890</value></data>
-
-    QString currentTag;
-    bool isFirstElement = true;
-
-    while (!xml->atEnd())
+    try
     {
-        xml->readNext();
+        QXmlStreamReader* xml = new QXmlStreamReader();
+        xml->addData(data);
 
-        if (xml->isStartElement() && isFirstElement)
+        //Input format is similar to this https://internal.chumby.com/wiki/index.php/JavaScript/HTML_-_Hardware_Bridge_protocol
+        //Example: <cmd>PlayWidget</cmd><data><value>1234567890</value></data>
+
+        QString currentTag;
+        bool isFirstElement = true;
+
+        while (!xml->atEnd())
         {
-            isFirstElement = false;
-        }
-        else if (xml->isStartElement())
-        {
-            currentTag = xml->name().toString().trimmed();
+            xml->readNext();
 
-            if (currentTag == "cmd")
-                commandText = xml->readElementText().toLatin1();
+            if (xml->isStartElement() && isFirstElement)
+            {
+                isFirstElement = false;
+            }
+            else if (xml->isStartElement())
+            {
+                currentTag = xml->name().toString().trimmed();
 
-            else if (currentTag != "data")
-                parameters.insert(currentTag.toLatin1(), xml->readElementText().toLatin1());
+                if (currentTag == "cmd")
+                    commandText = xml->readElementText().toLatin1();
+
+                else if (currentTag != "data")
+                    parameters.insert(currentTag.toLatin1(), xml->readElementText().toLatin1());
+            }
         }
+        currentTag = "";
+        delete xml;
     }
-    currentTag = "";
-    delete xml;
+    catch (...)
+    {
+        qDebug("NeTVBrowser: exception occur in ParseMessageXML");
+    }
 }

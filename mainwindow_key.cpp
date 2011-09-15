@@ -16,7 +16,11 @@ void MainWindow::keyPressEvent ( QKeyEvent * event )
     {
         case Qt::Key_HomePage:
             //Will be delivered 1 second later
+            remoteControlKey("setup");
             addKeyStrokeHistory("setup");
+
+            //Call a system script to force rekey & hotplug on FPGA
+            this->Execute("/usr/bin/fpga_setup", QStringList() << QString().setNum(1));
             return;
 
         case Qt::Key_Up:
@@ -109,12 +113,14 @@ void MainWindow::keyReleaseEvent  ( QKeyEvent * event )
 void MainWindow::addKeyStrokeHistory(QString keyName)
 {
     //Disable this temporarily, seems to cause the browser to hang randomly
-    if (keyName.toUpper() != "SETUP")
+    return;
+
+    if (keyName == NULL || keyName.toUpper() != "SETUP")
         return;
 
     qint64 currentEpochMs = QDateTime::currentMSecsSinceEpoch();
     keyStrokeHistory.prepend( QString("%1|%2").arg(QString(keyName)).arg(currentEpochMs) );
-    while (keyStrokeHistory.size() > 16)
+    while (!keyStrokeHistory.isEmpty() && keyStrokeHistory.size() > 16)
         keyStrokeHistory.removeLast();
 
     //Delayed action for SETUP button only

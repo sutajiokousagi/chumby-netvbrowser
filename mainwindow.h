@@ -109,7 +109,10 @@ private:
     //Javascript Utilities
     bool HasJavaScriptFunction(QString functionName);
 
-    // Process Utilities
+    //Other Utilities
+    bool IsHexString(QString testString);
+
+    //Process Utilities
     QByteArray Execute(const QString &fullPath);
     QByteArray Execute(const QString &fullPath, QStringList args);
 

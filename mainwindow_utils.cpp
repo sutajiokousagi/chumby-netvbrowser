@@ -18,6 +18,24 @@ bool MainWindow::HasJavaScriptFunction(QString functionName)
 }
 
 //-----------------------------------------------------------------------------------------------------------
+// Other Utilities
+//-----------------------------------------------------------------------------------------------------------
+
+bool MainWindow::IsHexString(QString testString)
+{
+    static QString hexCharacters = "0123456789ABCDEF";
+    bool isHex = true;
+    for (int i=0; i<testString.length(); i++)
+    {
+        if ( hexCharacters.contains(testString.at(i), Qt::CaseInsensitive) )
+            continue;
+        isHex = false;
+        break;
+    }
+    return isHex;
+}
+
+//-----------------------------------------------------------------------------------------------------------
 // Process Utilities
 //-----------------------------------------------------------------------------------------------------------
 

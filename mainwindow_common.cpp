@@ -98,6 +98,15 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         return command;
     }
 
+    else if (command == "KEEPALIVE" && argCount >= 1)
+    {
+        QString param = argsList[0].toUpper();
+        bool isOn = param == "TRUE" || param == "YES" || param == "ON";
+        if (isOn)     {      if (!keepAliveTimer.isActive())    keepAliveTimer.start();     }
+        else          {      if (keepAliveTimer.isActive())     keepAliveTimer.stop();      }
+        return command;
+    }
+
     //----------------------------------------------------
 
     else if (command == "BACKGROUNDTRANSPARENT_ON")

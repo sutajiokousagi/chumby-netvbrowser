@@ -30,7 +30,8 @@ void MainWindow::slot_socketConnected()
     qDebug("%s: connected to NeTVServer", TAG);
 
     //Notify ControlPanel about this
-    QTimer::singleShot( 400, this, SLOT(slot_notifyBrowser()) );
+    if (ENABLE_FSERVERRESET)
+        QTimer::singleShot( 400, this, SLOT(slot_notifyBrowser()) );
 
     QTcpSocket *socket = (QTcpSocket *)QObject::sender();
     connect(socket, SIGNAL(readyRead()), this, SLOT(slot_socketReadReady()));

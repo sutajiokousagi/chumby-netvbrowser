@@ -50,37 +50,11 @@ void MainWindow::slot_pageloadProgress(int progress)
 
 void MainWindow::slot_frameCreated(QWebFrame *frame)
 {
+    if (frame == NULL)
+        return;
     //qDebug("%s: new web frame created", TAG);
     frame->setScrollBarPolicy ( Qt::Vertical, Qt::ScrollBarAlwaysOff );
     frame->setScrollBarPolicy ( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
-
-    QObject::connect(frame, SIGNAL(contentsSizeChanged(QSize)), this, SLOT(slot_frameContentSizeChange(QSize)));
-}
-
-void MainWindow::slot_frameContentSizeChange(const QSize&)
-{
-    QWebFrame *frame = (QWebFrame *)QObject::sender();
-    if (frame == NULL)
-        return;
-
-    //This will remember the iFrame element when we first see it
-    /*
-    if ((frame->frameName() == "iframe_externalUrlPlayer" || frame->requestedUrl().toString() == "about:blank") && myIFrame == NULL)
-    {
-        myIFrame = frame;
-        QObject::connect(myIFrame, SIGNAL(loadFinished(bool)), this, SLOT(slot_frameLoadFinished(bool)));
-    }
-
-    if (frame != myIFrame || myIFrame == NULL)
-        return;
-
-    //Resize iFrame whenever it changes (can be quite frequent as new content is loading)
-    qDebug("%s: myIFrame size changed (%d x %d)", TAG, frame->contentsSize().width(), frame->contentsSize().height());
-    if (HasJavaScriptFunction("fSetIFrame"))
-        myWebView->page()->mainFrame()->evaluateJavaScript( QString("fSetIFrame(\"resize\", \"%1,%2\");").arg(frame->contentsSize().width()).arg(frame->contentsSize().height()) );
-    else
-        qDebug("%s: does not contain JavaScript function 'fSetIFrame' (yet?)", TAG);
-    */
 }
 
 //--------------------------------------------------------------------------------------------------------

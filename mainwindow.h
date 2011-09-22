@@ -170,7 +170,6 @@ private slots:
     void slot_statusBarMessage ( const QString & text );
 
     void slot_frameCreated(QWebFrame*);
-    void slot_frameContentSizeChange(const QSize&);
 
     void slot_socketDisconnected();
     void slot_socketConnected();

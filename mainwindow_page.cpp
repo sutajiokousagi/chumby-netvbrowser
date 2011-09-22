@@ -19,14 +19,25 @@ void MainWindow::slot_pageloadFinished(bool ok)
     }
 
     //Hide scrollbars of all the frames
-    this->myWebView->page()->currentFrame()->setScrollBarPolicy ( Qt::Vertical, Qt::ScrollBarAlwaysOff );
-    this->myWebView->page()->currentFrame()->setScrollBarPolicy ( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
-    this->myWebView->page()->mainFrame()->setScrollBarPolicy ( Qt::Vertical, Qt::ScrollBarAlwaysOff );
-    this->myWebView->page()->mainFrame()->setScrollBarPolicy ( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
+    /*
+    try
+    {
+        qDebug("%s: slot_pageloadFinished 1", TAG);
+        this->myWebView->page()->currentFrame()->setScrollBarPolicy ( Qt::Vertical, Qt::ScrollBarAlwaysOff );
+        this->myWebView->page()->currentFrame()->setScrollBarPolicy ( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
+        this->myWebView->page()->mainFrame()->setScrollBarPolicy ( Qt::Vertical, Qt::ScrollBarAlwaysOff );
+        this->myWebView->page()->mainFrame()->setScrollBarPolicy ( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
 
-    //Start or restart keep alive timer
-    if (!this->keepAliveTimer.isActive())
-        this->keepAliveTimer.start();
+        //Start or restart keep alive timer
+        qDebug("%s: slot_pageloadFinished 2", TAG);
+        if (!this->keepAliveTimer.isActive())
+            this->keepAliveTimer.start();
+    }
+    catch (...)
+    {
+        qDebug("%s: error in slot_pageloadFinished", TAG);
+    }
+    */
 }
 
 void MainWindow::slot_pageloadProgress(int progress)

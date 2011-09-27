@@ -207,7 +207,7 @@ void MainWindow::scrollWebViewTabPercentage(int index, double x, double y)
 
 void MainWindow::sendWebViewTabEvent(int index, QEvent * event)
 {
-    QApplication::sendEvent(QApplication::instance(), event);
+    QApplication::sendEvent(this->centralWidget(), event);
     return;
 
     if (index < 0 || index >= MAX_TABS)

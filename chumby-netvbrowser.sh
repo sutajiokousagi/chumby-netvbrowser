@@ -26,7 +26,7 @@ case "$1" in
 		export QWS_DISPLAY="transformed"
 
 		# Start in the background so we don't hog the console
-		NeTVBrowser -qws > /dev/null 2>&1 &
+		NeTVBrowser -qws -nomouse > /dev/null 2>&1 &
 		;;
 
 	stop)

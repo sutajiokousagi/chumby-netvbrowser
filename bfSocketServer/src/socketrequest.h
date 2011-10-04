@@ -3,6 +3,7 @@
 #define SocketRequest_H
 
 #include <QMap>
+#include <QObject>
 #include <QByteArray>
 
 /**
@@ -18,11 +19,12 @@ public:
       Constructor.
       @param socket used to write the response
     */
-    SocketRequest(QByteArray data, QByteArray address, quint16 port);
+    SocketRequest(QByteArray data, QByteArray address, quint16 port, QObject *parent = NULL);
     ~SocketRequest();
 
     bool hasError();
 
+    QObject * getParent();
     QByteArray getCommand();
     QByteArray getAddress();
     QByteArray getLocalAddress();
@@ -36,6 +38,7 @@ private:
 
     bool containsError;
 
+    QObject *parent;
     QByteArray commandText;
     QByteArray address;
     quint16 port;

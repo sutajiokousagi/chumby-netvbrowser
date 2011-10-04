@@ -5,8 +5,9 @@
 #include <QNetworkInterface>
 #include <QHostInfo>
 
-SocketRequest::SocketRequest(QByteArray data, QByteArray address, quint16 port)
+SocketRequest::SocketRequest(QByteArray data, QByteArray address, quint16 port, QObject *parent /* = NULL */)
 {
+    this->parent = parent;
     this->commandText = "no-no-no-no-command";
     this->containsError = false;
     this->address = address;
@@ -31,6 +32,11 @@ SocketRequest::~SocketRequest()
 bool SocketRequest::hasError()
 {
     return containsError;
+}
+
+QObject * SocketRequest::getParent()
+{
+    return this->parent;
 }
 
 QByteArray SocketRequest::getCommand()

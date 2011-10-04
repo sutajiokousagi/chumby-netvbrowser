@@ -135,7 +135,7 @@ void MainWindow::slot_newSocketMessage( SocketRequest *request, SocketResponse *
         command = "JAVASCRIPT";
         dataString = javaScriptString;
     }
-    else if (command == "SETIFRAME" || command == "MULTITAB")
+    else if (command == "MULTITAB" || command == "SETIFRAME")
     {
         QByteArray options = request->getParameter("options");
         QByteArray param = request->getParameter("param");

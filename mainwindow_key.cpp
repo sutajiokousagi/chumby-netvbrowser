@@ -135,13 +135,23 @@ void MainWindow::addKeyStrokeHistory(QString keyName)
         for (int i=0; i < 9; i++)
             keyString = QString(keyStrokeHistory.at(i).split("|").at(0)).append(QString(",")).append(keyString);
 
-        if (keyString.contains("up,right,down,left,up,right,down,left,cpanel")) {
+        if (keyString.contains("up,right,down,left,up,right,down,left,center"))
+        {
+            qDebug("%s: key combo: %s", TAG, keyString.toLatin1().constData());
+            qDebug("%s: starting Access Point mode for Factory...", TAG);
+            sendNeTVServerCommand("STARTAPFACTORY");
+            setURL(FACTORY_PAGE);
+            hit = true;
+        }
+        else if (keyString.contains("up,right,down,left,up,right,down,left,cpanel")) {
             qDebug("%s: key combo: %s", TAG, keyString.toLatin1().constData());
             qDebug("%s: do something cool 1", TAG);
+            hit = true;
         }
         else if (keyString.contains("up,right,down,left,up,right,down,left,widget")) {
             qDebug("%s: key combo: %s", TAG, keyString.toLatin1().constData());
             qDebug("%s: do something cool 2", TAG);
+            hit = true;
         }
         if (hit)
             keyStrokeHistory.clear();

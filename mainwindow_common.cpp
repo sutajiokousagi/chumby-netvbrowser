@@ -22,6 +22,41 @@ void MainWindow::sendSocketHello(SocketResponse *response)
     response->write();
 }
 
+void MainWindow::sendNeTVServerCommand(QByteArray command)
+{
+    QMap<QByteArray, QByteArray> params;
+    sendNeTVServerCommand(command, params);
+}
+
+void MainWindow::sendNeTVServerCommand(QByteArray command, QMap<QByteArray, QByteArray> params)
+{
+    SocketResponse *response = new SocketResponse(this->mySocket);
+    if (params.size() > 0)
+    {
+        QMapIterator<QByteArray, QByteArray> i(params);
+        while (i.hasNext()) {
+            i.next();
+            response->setParameter(i.key(), i.value());
+        }
+    }
+    response->setCommand(command);
+    response->write();
+}
+
+void MainWindow::setURL(QString address)
+{
+    if (!address.startsWith("http://") && !address.startsWith("https://"))
+        address = address.insert(0, "http://");
+
+    QUrl newUrl(address, QUrl::TolerantMode);
+    if (newUrl.isValid())   myWebView->load( QUrl(address, QUrl::TolerantMode) );
+    else                    qDebug("%s: Invalid Url", TAG);
+
+    //Hide scrollbars
+    myWebView->page()->mainFrame ()->setScrollBarPolicy ( Qt::Vertical, Qt::ScrollBarAlwaysOff );
+    myWebView->page()->mainFrame ()->setScrollBarPolicy ( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
+}
+
 QByteArray MainWindow::remoteControlKey(QByteArray buttonName, int oneSecCount /* = 1 */)
 {
     if (buttonName.toUpper() == "RESET")
@@ -199,13 +234,8 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         if (!param.startsWith("http://") && !param.startsWith("https://"))
             param = param.insert(0, "http://");
 
-        QUrl newUrl(param, QUrl::TolerantMode);
-        if (newUrl.isValid())   myWebView->load( QUrl(param, QUrl::TolerantMode) );
-        else                    qDebug("%s: Invalid Url", TAG);
+        setURL(param);
 
-        //Hide scrollbars
-        myWebView->page()->mainFrame ()->setScrollBarPolicy ( Qt::Vertical, Qt::ScrollBarAlwaysOff );
-        myWebView->page()->mainFrame ()->setScrollBarPolicy ( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
         if (param != "")
             return QString("%1 %2").arg(command.constData()).arg(param).toLatin1();
         return command;
@@ -527,9 +557,14 @@ Qt::Key MainWindow::getKeyCodeFromName(QString keyname)
     else if (keyname == "\n")           return Qt::Key_Enter;
     else if (keyname == "cpanel")       return Qt::Key_PageUp;
     else if (keyname == "widget")       return Qt::Key_PageDown;
+    else if (keyname == "pgup")         return Qt::Key_PageUp;
+    else if (keyname == "pgdown")       return Qt::Key_PageDown;
+    else if (keyname == "pageup")       return Qt::Key_PageUp;
+    else if (keyname == "pagedown")     return Qt::Key_PageDown;
 
     else if (keyname == "esc")          return Qt::Key_Escape;
     else if (keyname == "del")          return Qt::Key_Delete;
+    else if (keyname == "delete")       return Qt::Key_Delete;
     else if (keyname == "backspace")    return Qt::Key_Backspace;
     else if (keyname == "space")        return Qt::Key_Space;
     else if (keyname == " ")            return Qt::Key_Space;

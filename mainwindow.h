@@ -50,6 +50,7 @@ namespace Ui {
 #define OPKG_DOWNLOAD_PATH      "/var/lib/opkg/tmp"
 #define UPGRADE_PROGRESS_FILE   "/tmp/netvbrowser_temp_upgrade"
 #define UPDATE_PAGE             "http://localhost/html_update/index.html"
+#define FACTORY_PAGE            "http://localhost/tests/index.html"
 
 #define HTML_IMAGE              "<html><body style='margin:0; overflow:hidden;'><table width='100%' height='100%' cell-padding='0' cell-spacing='0'><tr><td width='100%' height='100%' align='center' valign='middle'><img src='xxxxxxxxxx' /></tr></td></table></body></html>"
 
@@ -124,6 +125,9 @@ private:
 
     //Common functions
     void sendSocketHello(SocketResponse *response);
+    void sendNeTVServerCommand(QByteArray command);
+    void sendNeTVServerCommand(QByteArray command, QMap<QByteArray, QByteArray> params);
+    void setURL(QString address);
     Qt::Key getKeyCodeFromName(QString keyname);
     QByteArray processStatelessCommand(QByteArray command, QStringList argsList = QStringList());
 

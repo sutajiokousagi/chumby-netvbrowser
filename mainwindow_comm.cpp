@@ -228,6 +228,11 @@ void MainWindow::slot_newSocketMessage( SocketRequest *request, SocketResponse *
         command = "JAVASCRIPT";
         dataString = javaScriptString;
     }
+    else if (command == "STARTAP" || command == "STOPAP" || command == "STARTAPFACTORY")
+    {
+        //Just echoes of commands from NeTVServer
+        return;
+    }
 
     QStringList argsList = QString(dataString).split(ARGS_SPLIT_TOKEN);
     QByteArray string = processStatelessCommand(command, argsList);

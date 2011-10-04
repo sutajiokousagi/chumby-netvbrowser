@@ -86,7 +86,7 @@ void MainWindow::slot_socketReadReady()
     while (socket->bytesAvailable() > 0)
         buffer.append( socket->read(socket->bytesAvailable()) );
 
-    SocketRequest *request = new SocketRequest(buffer, socket->peerAddress().toString().toLatin1(), socket->peerPort());
+    SocketRequest *request = new SocketRequest(buffer, socket->peerAddress().toString().toLatin1(), socket->peerPort(), socket);
     if (request->hasError())
     {
         buffer = QByteArray();
@@ -236,11 +236,16 @@ void MainWindow::slot_newSocketMessage( SocketRequest *request, SocketResponse *
 
     QStringList argsList = QString(dataString).split(ARGS_SPLIT_TOKEN);
     QByteArray string = processStatelessCommand(command, argsList);
-    response->setStatus(1);
-    //response->setCommand(command);    //this will cause a echo if called from NeTVServer
-    response->setParameter("value", string);
-    response->write();
 
     if (request->getAddress().length() > 3)     qDebug("%s: slot_newSocketMessage: %s from %s", TAG, string.constData(), request->getAddress().constData());
     else                                        qDebug("%s: slot_newSocketMessage: %s", TAG, string.constData() );
+
+    //No need to reply to server
+    if (request->getParent() == (QObject*)(this->mySocket))
+        return;
+
+    response->setStatus(1);
+    response->setParameter("value", string);
+    response->setCommand(command);              //this will cause a echo if called from NeTVServer
+    response->write();
 }

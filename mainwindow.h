@@ -134,7 +134,7 @@ private:
     //Remote control & Keyboard events
     qint64 up,down,left,right,center,cpanel,widget,hidden1,hidden2;
     QStringList keyStrokeHistory;
-    QByteArray remoteControlKey(QByteArray buttonName, int oneSecCount = 1);
+    QByteArray remoteControlKey(bool isRepeat, QByteArray buttonName, int oneSecCount = 1);
     QTimer keyStrokeTimer;
     qint64 keyStrokeTimerEpoch;
     void addKeyStrokeHistory(QString);

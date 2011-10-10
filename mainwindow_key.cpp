@@ -8,16 +8,13 @@ void MainWindow::keyPressEvent ( QKeyEvent * event )
     int keycode = event->key();
     bool autoRepeat = event->isAutoRepeat();
 
-    //autoRepeat doesn't work with current IR driver anyway
-    if (autoRepeat)
-        return;
-
     switch (keycode)
     {
         case Qt::Key_HomePage:
             //Will be delivered 1 second later
-            //remoteControlKey("setup");
-            addKeyStrokeHistory("setup");
+            //remoteControlKey(autoRepeat, "setup");
+            if (!autoRepeat)
+                addKeyStrokeHistory("setup");
 
             //Call a system script to force rekey & hotplug on FPGA
             //this->Execute("/usr/bin/fpga_setup", QStringList() << QString().setNum(1));
@@ -25,53 +22,53 @@ void MainWindow::keyPressEvent ( QKeyEvent * event )
 
         case Qt::Key_Up:
             up = currentEpochMs;
-            remoteControlKey("up");
-            addKeyStrokeHistory("up");
+            remoteControlKey(autoRepeat, "up");
+            if (!autoRepeat)    addKeyStrokeHistory("up");
             remoteControlPageInteraction("up");
             return;
         case Qt::Key_Down:
             down = currentEpochMs;
-            remoteControlKey("down");
-            addKeyStrokeHistory("down");
+            remoteControlKey(autoRepeat, "down");
+            if (!autoRepeat)    addKeyStrokeHistory("down");
             remoteControlPageInteraction("down");
             return;
         case Qt::Key_Left:
             left = currentEpochMs;
-            remoteControlKey("left");
-            addKeyStrokeHistory("left");
+            remoteControlKey(autoRepeat, "left");
+            if (!autoRepeat)    addKeyStrokeHistory("left");
             return;
         case Qt::Key_Right:
             right = currentEpochMs;
-            remoteControlKey("right");
-            addKeyStrokeHistory("right");
+            remoteControlKey(autoRepeat, "right");
+            if (!autoRepeat)    addKeyStrokeHistory("right");
             return;
 
         case Qt::Key_Enter:
         case Qt::Key_Return:
             center = currentEpochMs;
-            remoteControlKey("center");
-            addKeyStrokeHistory("center");
+            remoteControlKey(autoRepeat, "center");
+            if (!autoRepeat)    addKeyStrokeHistory("center");
             return;
         case Qt::Key_PageUp:
             cpanel = currentEpochMs;
-            remoteControlKey("cpanel");
-            addKeyStrokeHistory("cpanel");
+            remoteControlKey(autoRepeat, "cpanel");
+            if (!autoRepeat)    addKeyStrokeHistory("cpanel");
             return;
         case Qt::Key_PageDown:
             widget = currentEpochMs;
-            remoteControlKey("widget");
-            addKeyStrokeHistory("widget");
+            remoteControlKey(autoRepeat, "widget");
+            if (!autoRepeat)    addKeyStrokeHistory("widget");
             return;
 
         case Qt::Key_1:
             hidden1 = currentEpochMs;
-            remoteControlKey("reset");
-            addKeyStrokeHistory("hidden1");
+            remoteControlKey(autoRepeat, "reset");
+            if (!autoRepeat)    addKeyStrokeHistory("hidden1");
             return;
         case Qt::Key_2:
             hidden2 = currentEpochMs;
-            remoteControlKey("reset");
-            addKeyStrokeHistory("hidden2");
+            remoteControlKey(autoRepeat, "reset");
+            if (!autoRepeat)    addKeyStrokeHistory("hidden2");
             return;
     }
 
@@ -92,7 +89,7 @@ void MainWindow::keyReleaseEvent  ( QKeyEvent * event )
         case Qt::Key_PageUp:
             if (cpanel >= 0 && currentEpochMs - cpanel > longClickThresholdMs1) {
                 qDebug("%s: [keyboard override] long-press ControlPanel key (%lldms)", TAG, currentEpochMs-cpanel);
-                remoteControlKey("reset");
+                remoteControlKey(false, "reset");
             }
             cpanel = 0;
             return;
@@ -100,7 +97,7 @@ void MainWindow::keyReleaseEvent  ( QKeyEvent * event )
         case Qt::Key_PageDown:
             if (widget >= 0 && currentEpochMs - widget > longClickThresholdMs1) {
                 qDebug("%s :[keyboard override] long-press Widget key (%lldms)", TAG, currentEpochMs-widget);
-                remoteControlKey("reset");
+                remoteControlKey(false, "reset");
             }
             widget = 0;
             return;
@@ -209,11 +206,11 @@ void MainWindow::slot_keyStrokeTimeout()
                 this->Execute("/usr/bin/fpga_setup", QStringList() << QString().setNum(count));
 
                 //Deliver event to Control Panel
-                remoteControlKey(key.toLatin1(), count);
+                remoteControlKey(false, key.toLatin1(), count);
             }
         }
         else if (count > 1)
-            remoteControlKey(key.toLatin1(), count);
+            remoteControlKey(false, key.toLatin1(), count);
     }
 
     tempOneSecList.clear();
@@ -225,7 +222,7 @@ void MainWindow::remoteControlPageInteraction(QString buttonName)
     if (isWebViewTabVisible(SECOND_TAB))
     {
         QSize frameSize = this->frameGeometry().size();
-        if (buttonName == "up")             scrollWebViewTabDelta(SECOND_TAB, 0, -frameSize.height() / 7);
-        else if (buttonName == "down")      scrollWebViewTabDelta(SECOND_TAB, 0, frameSize.height() / 7);
+        if (buttonName == "up")             scrollWebViewTabDelta(SECOND_TAB, 0, -frameSize.height() / 8);      //magic number 8
+        else if (buttonName == "down")      scrollWebViewTabDelta(SECOND_TAB, 0, frameSize.height() / 8);       //magic number 8
     }
 }

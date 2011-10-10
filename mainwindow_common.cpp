@@ -57,7 +57,7 @@ void MainWindow::setURL(QString address)
     myWebView->page()->mainFrame ()->setScrollBarPolicy ( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
 }
 
-QByteArray MainWindow::remoteControlKey(QByteArray buttonName, int oneSecCount /* = 1 */)
+QByteArray MainWindow::remoteControlKey(bool isRepeat, QByteArray buttonName, int oneSecCount /* = 1 */)
 {
     if (buttonName.toUpper() == "RESET")
     {
@@ -66,7 +66,7 @@ QByteArray MainWindow::remoteControlKey(QByteArray buttonName, int oneSecCount /
         return "";
     }
     qDebug("%s: [keyboard override] %s (%d)", TAG, buttonName.constData(), oneSecCount);
-    QString javascriptString = QString("fButtonPress('%1',%2);").arg(QString(buttonName)).arg(oneSecCount);
+    QString javascriptString = QString("fButtonPress('%1',%2,%3);").arg(QString(buttonName)).arg(oneSecCount).arg(QString(isRepeat?"true":"false"));
     return (this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
 }
 

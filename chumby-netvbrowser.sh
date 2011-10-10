@@ -20,7 +20,7 @@ case "$1" in
 		fi
 
 		# Use irkb and resetkb driver as a normal keyboard		
-		export QWS_KEYBOARD="chumbyirkb chumbyresetkb"
+		export QWS_KEYBOARD="chumbyirkb:reperrat-delay=700:repeat-rate=50 chumbyresetkb"
 
 		# Transformed screen driver supporting screen rotation
 		export QWS_DISPLAY="transformed"

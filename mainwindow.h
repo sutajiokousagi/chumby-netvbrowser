@@ -45,6 +45,7 @@ namespace Ui {
 #define KEY_TIMEOUT             1500
 #define KEEPALIVE_TIMEOUT       60000
 #define ENABLE_FSERVERRESET     false
+#define ENABLE_NATIVE_KB        false
 
 #define UPGRADE_SCRIPT          "/usr/bin/chumby-netvbrowser-upgrade.sh"
 #define OPKG_DOWNLOAD_PATH      "/var/lib/opkg/tmp"
@@ -86,6 +87,7 @@ private:
     int currentWebViewTab;
     void initWebViewTab(int index);
     void deinitWebViewTab(int index);
+    void resetAllTab();
     void resetWebViewTab(int index, QByteArray address = "");
     void loadWebViewTab(int index, QByteArray address = "");
     void loadWebViewTabHTML(int index, QByteArray htmlString = "");
@@ -129,16 +131,18 @@ private:
     void sendNeTVServerCommand(QByteArray command, QMap<QByteArray, QByteArray> params);
     void setURL(QString address);
     Qt::Key getKeyCodeFromName(QString keyname);
+    QByteArray getIRKeyName(int keycode);
     QByteArray processStatelessCommand(QByteArray command, QStringList argsList = QStringList());
 
     //Remote control & Keyboard events
-    qint64 up,down,left,right,center,cpanel,widget,hidden1,hidden2;
+    QMap<int, qint64> keyPressEpochMap;
     QStringList keyStrokeHistory;
     QByteArray remoteControlKey(bool isRepeat, QByteArray buttonName, int oneSecCount = 1);
     QTimer keyStrokeTimer;
     qint64 keyStrokeTimerEpoch;
-    void addKeyStrokeHistory(QString);
-    void remoteControlPageInteraction(QString);
+    void triggerKeycode(int keycode, int count = 1);
+    bool addKeyStrokeHistory(QString);
+    void remoteControlPageInteraction(int keycode);
 
     //Update mechanism
     QMap<QByteArray, QByteArray> packageSizeMap;

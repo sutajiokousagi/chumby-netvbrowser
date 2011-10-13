@@ -7,107 +7,75 @@ void MainWindow::keyPressEvent ( QKeyEvent * event )
     qint64 currentEpochMs = QDateTime::currentMSecsSinceEpoch();
     int keycode = event->key();
     bool autoRepeat = event->isAutoRepeat();
+    QByteArray keyName = getIRKeyName(keycode);
 
-    switch (keycode)
+    if (!autoRepeat)
+        keyPressEpochMap.insert(keycode, currentEpochMs);
+
+    //Special key - Event will be delivered 2 seconds later
+    if (keycode == Qt::Key_HomePage)
     {
-        case Qt::Key_HomePage:
-            //Will be delivered 1 second later
-            //remoteControlKey(autoRepeat, "setup");
-            if (!autoRepeat)
-                addKeyStrokeHistory("setup");
-
-            //Call a system script to force rekey & hotplug on FPGA
-            //this->Execute("/usr/bin/fpga_setup", QStringList() << QString().setNum(1));
+        if (autoRepeat)
             return;
-
-        case Qt::Key_Up:
-            up = currentEpochMs;
-            remoteControlKey(autoRepeat, "up");
-            if (!autoRepeat)    addKeyStrokeHistory("up");
-            remoteControlPageInteraction("up");
-            return;
-        case Qt::Key_Down:
-            down = currentEpochMs;
-            remoteControlKey(autoRepeat, "down");
-            if (!autoRepeat)    addKeyStrokeHistory("down");
-            remoteControlPageInteraction("down");
-            return;
-        case Qt::Key_Left:
-            left = currentEpochMs;
-            remoteControlKey(autoRepeat, "left");
-            if (!autoRepeat)    addKeyStrokeHistory("left");
-            return;
-        case Qt::Key_Right:
-            right = currentEpochMs;
-            remoteControlKey(autoRepeat, "right");
-            if (!autoRepeat)    addKeyStrokeHistory("right");
-            return;
-
-        case Qt::Key_Enter:
-        case Qt::Key_Return:
-            center = currentEpochMs;
-            remoteControlKey(autoRepeat, "center");
-            if (!autoRepeat)    addKeyStrokeHistory("center");
-            return;
-        case Qt::Key_PageUp:
-            cpanel = currentEpochMs;
-            remoteControlKey(autoRepeat, "cpanel");
-            if (!autoRepeat)    addKeyStrokeHistory("cpanel");
-            return;
-        case Qt::Key_PageDown:
-            widget = currentEpochMs;
-            remoteControlKey(autoRepeat, "widget");
-            if (!autoRepeat)    addKeyStrokeHistory("widget");
-            return;
-
-        case Qt::Key_1:
-            hidden1 = currentEpochMs;
-            remoteControlKey(autoRepeat, "reset");
-            if (!autoRepeat)    addKeyStrokeHistory("hidden1");
-            return;
-        case Qt::Key_2:
-            hidden2 = currentEpochMs;
-            remoteControlKey(autoRepeat, "reset");
-            if (!autoRepeat)    addKeyStrokeHistory("hidden2");
-            return;
+        addKeyStrokeHistory("setup");
+        return;
     }
 
-    qDebug("%s: keyPressEvent '%d'", TAG, keycode);
-
     //Default behavior
-    QWidget::keyPressEvent(event);
+    if (keyName.length() <= 0) {
+        qDebug("%s: keyPressEvent '%d'", TAG, keycode);
+        QMainWindow::keyPressEvent(event);
+        return;
+    }
+
+    //Detect combo sequence is not detected
+    if (!autoRepeat)
+    {
+        bool isCombo = addKeyStrokeHistory(keyName);
+        if (!ENABLE_NATIVE_KB && !isCombo)
+            remoteControlKey(false, keyName);
+    }
+
+    remoteControlPageInteraction(keycode);
+    if (ENABLE_NATIVE_KB)
+        QMainWindow::keyPressEvent(event);
 }
 
 void MainWindow::keyReleaseEvent  ( QKeyEvent * event )
 {
     static qint64 longClickThresholdMs1 = 3000;
-    qint64 currentEpochMs = QDateTime::currentMSecsSinceEpoch();
     int keycode = event->key();
 
-    switch (keycode)
+    if (keycode == Qt::Key_PageUp)
     {
-        case Qt::Key_PageUp:
-            if (cpanel >= 0 && currentEpochMs - cpanel > longClickThresholdMs1) {
-                qDebug("%s: [keyboard override] long-press ControlPanel key (%lldms)", TAG, currentEpochMs-cpanel);
-                remoteControlKey(false, "reset");
-            }
-            cpanel = 0;
-            return;
+        qint64 currentEpochMs = QDateTime::currentMSecsSinceEpoch();
+        qint64 lastEpochMs = keyPressEpochMap.value(keycode);
+        qint64 deltaEpochMs = currentEpochMs - lastEpochMs;
 
-        case Qt::Key_PageDown:
-            if (widget >= 0 && currentEpochMs - widget > longClickThresholdMs1) {
-                qDebug("%s :[keyboard override] long-press Widget key (%lldms)", TAG, currentEpochMs-widget);
-                remoteControlKey(false, "reset");
-            }
-            widget = 0;
-            return;
+        if (lastEpochMs >= 0 && deltaEpochMs > longClickThresholdMs1 && deltaEpochMs < 20000)
+        {
+            qDebug("%s: [keyboard override] long-press ControlPanel key (%lldms)", TAG, deltaEpochMs);
+            resetAllTab();
+        }
     }
 
     //Default behavior
-    QWidget::keyReleaseEvent(event);
+    QMainWindow::keyReleaseEvent(event);
 }
 
-void MainWindow::addKeyStrokeHistory(QString keyName)
+void MainWindow::triggerKeycode(int keycode, int count /* = 1 */)
+{
+    for (int i=0; i < count; i++)
+    {
+        QKeyEvent keyPressEvent(QEvent::KeyPress, keycode, Qt::NoModifier);
+        sendWebViewTabEvent(this->currentWebViewTab, &keyPressEvent);
+
+        QKeyEvent keyReleaseEvent(QEvent::KeyRelease, keycode, Qt::NoModifier);
+        sendWebViewTabEvent(this->currentWebViewTab, &keyReleaseEvent);
+    }
+}
+
+bool MainWindow::addKeyStrokeHistory(QString keyName)
 {
     //if (keyName == NULL || keyName.toUpper() != "SETUP")
     //    return;
@@ -152,7 +120,9 @@ void MainWindow::addKeyStrokeHistory(QString keyName)
         }
         if (hit)
             keyStrokeHistory.clear();
+        return hit;
     }
+    return false;
 }
 
 void MainWindow::slot_keyStrokeTimeout()
@@ -217,12 +187,12 @@ void MainWindow::slot_keyStrokeTimeout()
     keyCountMap.clear();
 }
 
-void MainWindow::remoteControlPageInteraction(QString buttonName)
+void MainWindow::remoteControlPageInteraction(int keycode)
 {
     if (isWebViewTabVisible(SECOND_TAB))
     {
         QSize frameSize = this->frameGeometry().size();
-        if (buttonName == "up")             scrollWebViewTabDelta(SECOND_TAB, 0, -frameSize.height() / 8);      //magic number 8
-        else if (buttonName == "down")      scrollWebViewTabDelta(SECOND_TAB, 0, frameSize.height() / 8);       //magic number 8
+        if (keycode == Qt::Key_Up)             scrollWebViewTabDelta(SECOND_TAB, 0, -frameSize.height() / 10);      //magic number 10
+        else if (keycode == Qt::Key_Down)      scrollWebViewTabDelta(SECOND_TAB, 0, frameSize.height() / 10);       //magic number 10
     }
 }

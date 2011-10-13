@@ -59,12 +59,6 @@ void MainWindow::setURL(QString address)
 
 QByteArray MainWindow::remoteControlKey(bool isRepeat, QByteArray buttonName, int oneSecCount /* = 1 */)
 {
-    if (buttonName.toUpper() == "RESET")
-    {
-        this->resetWebViewTab(DEFAULT_TAB);
-        this->showWebViewTab(DEFAULT_TAB);
-        return "";
-    }
     qDebug("%s: [keyboard override] %s (%d)", TAG, buttonName.constData(), oneSecCount);
     QString javascriptString = QString("fButtonPress('%1',%2,%3);").arg(QString(buttonName)).arg(oneSecCount).arg(QString(isRepeat?"true":"false"));
     return (this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
@@ -79,8 +73,7 @@ void MainWindow::slot_keepAliveTimeout()
     if (refWebView == NULL)
     {
         this->initWebViewFirstTab();
-        this->resetWebViewTab(DEFAULT_TAB);
-        this->showWebViewTab(DEFAULT_TAB);
+        this->resetAllTab();
         return;
     }
 
@@ -274,20 +267,9 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         if (keycode == Qt::Key_unknown)
             return QString("%1 %2").arg(command.constData()).arg("Unknown key").toLatin1();
 
+        //Trigger native keyboard event
+        triggerKeycode(keycode);
 
-        QKeyEvent keyPressEvent(QEvent::KeyPress, keycode, Qt::NoModifier);
-        sendWebViewTabEvent(this->currentWebViewTab, &keyPressEvent);
-
-        QKeyEvent keyReleaseEvent(QEvent::KeyRelease, keycode, Qt::NoModifier);
-        sendWebViewTabEvent(this->currentWebViewTab, &keyReleaseEvent);
-
-        /* // Old implementation
-        QByteArray javaResult = remoteControlKey(param.toLatin1());
-        if (javaResult != "")
-            return QString("%1 %2").arg(command.constData()).arg(javaResult.constData()).toLatin1();
-        if (param != "")
-            return QString("%1 %2").arg(command.constData()).arg(param).toLatin1();
-        */
         return QString("%1 %2").arg(command.constData()).arg(param.toLatin1().constData()).toLatin1();
     }
 
@@ -298,20 +280,9 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         if (keycode == Qt::Key_unknown)
             return QString("%1 %2").arg(command.constData()).arg("Unknown key").toLatin1();
 
-        QKeyEvent keyPressEvent(QEvent::KeyPress, keycode, Qt::ShiftModifier);
-        sendWebViewTabEvent(this->currentWebViewTab, &keyPressEvent);
+        //Trigger native keyboard event
+        triggerKeycode(keycode);
 
-        QKeyEvent keyReleaseEvent(QEvent::KeyRelease, keycode, Qt::NoModifier);
-        sendWebViewTabEvent(this->currentWebViewTab, &keyReleaseEvent);
-
-        /*
-        if (key.isAccepted())
-        {
-            qDebug("Key accepted");
-        } else {
-            qDebug("Key NOT accepted");
-        }
-        */
         return QString("%1 %2").arg(command.constData()).arg(param.toLatin1().constData()).toLatin1();
     }
 
@@ -540,6 +511,22 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
     }
 
     return QByteArray(UNIMPLEMENTED) + ":" + command;
+}
+
+QByteArray MainWindow::getIRKeyName(int keycode)
+{
+    switch (keycode)
+    {
+        case Qt::Key_PageUp:        return "cpanel";
+        case Qt::Key_PageDown:      return "widget";
+        case Qt::Key_Up:            return "up";
+        case Qt::Key_Down:          return "down";
+        case Qt::Key_Left:          return "left";
+        case Qt::Key_Right:         return "right";
+        case Qt::Key_Return:        return "center";
+        default:                    return "";
+    }
+    return "";
 }
 
 Qt::Key MainWindow::getKeyCodeFromName(QString keyname)

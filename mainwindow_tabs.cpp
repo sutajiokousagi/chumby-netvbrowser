@@ -14,7 +14,8 @@ void MainWindow::initWebViewTab(int index)
     this->ui->rootLayout->addWidget(myWebViewArray[index]);
 
     //Ignore mouse & keyboard
-    myWebViewArray[index]->setEnabled(false);
+    if (!ENABLE_NATIVE_KB)      myWebViewArray[index]->setEnabled(false);
+    else                        myWebViewArray[index]->setEnabled(index == DEFAULT_TAB);
 
     //Disable AA
     myWebViewArray[index]->setRenderHints(0);
@@ -49,6 +50,16 @@ void MainWindow::deinitWebViewTab(int index)
     delete myWebViewArray[index];
     myWebViewArray[index] = NULL;
 
+}
+
+void MainWindow::resetAllTab()
+{
+    for (int i=0;i<MAX_TABS; i++)
+        if (i != DEFAULT_TAB)
+            hideWebViewTab(i);
+
+    this->resetWebViewTab(DEFAULT_TAB);
+    this->showWebViewTab(DEFAULT_TAB);
 }
 
 void MainWindow::resetWebViewTab(int index, QByteArray address /* = "" */)
@@ -207,8 +218,8 @@ void MainWindow::scrollWebViewTabPercentage(int index, double x, double y)
 
 void MainWindow::sendWebViewTabEvent(int index, QEvent * event)
 {
-    QApplication::sendEvent(this->centralWidget(), event);
-    return;
+    //QApplication::sendEvent(this->centralWidget(), event);
+    //return;
 
     if (index < 0 || index >= MAX_TABS)
         return;

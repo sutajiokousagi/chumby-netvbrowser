@@ -25,7 +25,6 @@ MainWindow::MainWindow(QWidget *parent) :
         myWebPageArray[i] = NULL;
 
     //Keystroke hander
-    up = 0;down = 0;left = 0;right = 0;center = 0;cpanel = 0;widget = 0;hidden1 = 0; hidden2 = 0;
     keyStrokeTimer.setInterval(KEY_TIMEOUT);
     keyStrokeTimer.setSingleShot(true);
     QObject::connect(&keyStrokeTimer, SIGNAL(timeout()), this, SLOT(slot_keyStrokeTimeout()));

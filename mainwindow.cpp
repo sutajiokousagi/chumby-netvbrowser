@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->myWebView = NULL;
     this->mySocket = NULL;
     this->port = DEFAULT_PORT;
+    this->enNativeKeyboard = ENABLE_NATIVE_KB;
 
     //Multi-tab
     this->currentWebViewTab = 0;
@@ -73,7 +74,7 @@ void MainWindow::initWebViewFirstTab()
 
 MainWindow::~MainWindow()
 {
-    isShuttingDown = true;
+    this->isShuttingDown = true;
     this->keyStrokeTimer.stop();
     this->keepAliveTimer.stop();
     if (this->mySocket != NULL)         delete this->mySocket;

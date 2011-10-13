@@ -145,7 +145,7 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         this->myWebView->page()->setPalette(palette);
         this->myWebView->setAttribute(Qt::WA_OpaquePaintEvent, false);
         this->myWebView->update();
-        printf("BackgroundTransparent: On \n");
+        qDebug("BackgroundTransparent: On \n");
         return command;
     }
 
@@ -153,7 +153,7 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
     {
         this->myWebView->page()->setPalette( myWebView->style()->standardPalette() );
         this->myWebView->update();
-        printf("BackgroundTransparent: Off \n");
+        qDebug("BackgroundTransparent: Off \n");
         return command;
     }
 
@@ -161,7 +161,7 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
     {
         this->myWebView->setInvertColor( true );
         this->myWebView->update();
-        printf("InvertColor: On \n");
+        qDebug("InvertColor: On \n");
         return command;
     }
 
@@ -169,7 +169,7 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
     {
         myWebView->setInvertColor( false );
         myWebView->update();
-        printf("InvertColor: Off \n");
+        qDebug("InvertColor: Off \n");
         return command;
     }
 
@@ -282,6 +282,18 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
 
         //Trigger native keyboard event
         triggerKeycode(keycode);
+
+        return QString("%1 %2").arg(command.constData()).arg(param.toLatin1().constData()).toLatin1();
+    }
+
+    else if ((command == "NATIVEKB" || command == "NATIVEKEYBOARD" || command == "KEYBOARD") && argCount >= 1)
+    {
+        QString param = argsList[0].toUpper();
+        enNativeKeyboard = param == "TRUE" || param == "YES" || param == "ON";
+
+        //Ignore mouse & keyboard
+        if (!enNativeKeyboard)                          myWebViewArray[DEFAULT_TAB]->setEnabled(false);
+        else if (myWebViewArray[DEFAULT_TAB] != NULL)   myWebViewArray[DEFAULT_TAB]->setEnabled(true);
 
         return QString("%1 %2").arg(command.constData()).arg(param.toLatin1().constData()).toLatin1();
     }

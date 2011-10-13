@@ -14,7 +14,7 @@ void MainWindow::initWebViewTab(int index)
     this->ui->rootLayout->addWidget(myWebViewArray[index]);
 
     //Ignore mouse & keyboard
-    if (!ENABLE_NATIVE_KB)      myWebViewArray[index]->setEnabled(false);
+    if (!enNativeKeyboard)      myWebViewArray[index]->setEnabled(false);
     else                        myWebViewArray[index]->setEnabled(index == DEFAULT_TAB);
 
     //Disable AA

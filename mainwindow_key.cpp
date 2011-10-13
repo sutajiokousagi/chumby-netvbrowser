@@ -32,12 +32,12 @@ void MainWindow::keyPressEvent ( QKeyEvent * event )
     if (!autoRepeat)
     {
         bool isCombo = addKeyStrokeHistory(keyName);
-        if (!ENABLE_NATIVE_KB && !isCombo)
+        if (!enNativeKeyboard && !isCombo)
             remoteControlKey(false, keyName);
     }
 
     remoteControlPageInteraction(keycode);
-    if (ENABLE_NATIVE_KB)
+    if (enNativeKeyboard)
         QMainWindow::keyPressEvent(event);
 }
 

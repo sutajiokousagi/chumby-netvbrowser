@@ -74,6 +74,7 @@ private:
 
     //Flags
     bool isShuttingDown;
+    bool enNativeKeyboard;
 
     //Webview
     bool cPanelLoaded;

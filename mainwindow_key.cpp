@@ -6,16 +6,16 @@ void MainWindow::keyPressEvent ( QKeyEvent * event )
 {
     qint64 currentEpochMs = QDateTime::currentMSecsSinceEpoch();
     int keycode = event->key();
-    bool autoRepeat = event->isAutoRepeat();
+    bool isRepeat = event->isAutoRepeat();
     QByteArray keyName = getIRKeyName(keycode);
 
-    if (!autoRepeat)
+    if (!isRepeat)
         keyPressEpochMap.insert(keycode, currentEpochMs);
 
     //Special key - Event will be delivered 2 seconds later
     if (keycode == Qt::Key_HomePage)
     {
-        if (autoRepeat)
+        if (isRepeat)
             return;
         addKeyStrokeHistory("setup");
         return;
@@ -28,12 +28,17 @@ void MainWindow::keyPressEvent ( QKeyEvent * event )
         return;
     }
 
-    //Detect combo sequence is not detected
-    if (!autoRepeat)
+    //Detect combo sequence
+    if (!isRepeat)
     {
         bool isCombo = addKeyStrokeHistory(keyName);
         if (!enNativeKeyboard && !isCombo)
             remoteControlKey(false, keyName);
+    }
+    else if (!enNativeKeyboard)
+    {
+        if (keycode != Qt::Key_PageUp && keycode != Qt::Key_PageDown)
+            remoteControlKey(true, keyName);
     }
 
     remoteControlPageInteraction(keycode);

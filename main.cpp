@@ -3,6 +3,27 @@
 #include <qtsingleapplication.h>
 #include "mainwindow.h"
 #include "stdio.h"
+#include <QDebug>
+#include <QProcess>
+#include <QStringList>
+
+bool isRunning()
+{
+    QProcess *newProc = new QProcess();
+    newProc->start("/bin/pidof", QStringList(APPNAME));
+    newProc->waitForFinished();
+
+    QByteArray buffer = newProc->readAllStandardOutput();
+    newProc->close();
+    delete newProc;
+    newProc = NULL;
+
+    QStringList pidList = QString(buffer.trimmed()).split(" ", QString::SkipEmptyParts);
+    if (pidList.length() > 1)
+        return true;
+
+    return false;
+}
 
 #ifdef ENABLE_QWS_STUFF
     #include <QWSServer>
@@ -10,7 +31,6 @@
 
 int main(int argc, char *argv[])
 {
-    //Check if another instance is already running by sending a message to it
     QtSingleApplication instance(argc, argv, QApplication::GuiServer);
     instance.setApplicationName(APPNAME);
     instance.setOrganizationName(ORGANISATION);
@@ -18,24 +38,40 @@ int main(int argc, char *argv[])
     QStringList argsList = instance.arguments();
     QString argsString = argsList.join(ARGS_SPLIT_TOKEN);
 
-    if (instance.sendMessage(argsString))
-    {
-        printf("Sending arguments to running NeTVBrowser instance: %s\n", argsString.toLatin1().constData());
-        return 0;
-    }
-
-    if (argsList.contains("-h")) {
+    // Show help message
+    if (argsList.contains("-h") || argsList.contains("--help")) {
         printf("\tUsage: %s [-d] -qws -nomouse [SetUrl http://example.com/]\n"
-               "\tIf -d is specified, this program will run as a daemon.\n",
+               "\tIf -d is specified, this program will run as a daemon.\n"
+               "\tFor more info, see http://wiki.chumby.com/index.php/NeTV_local_UI\n",
                argv[0]);
         return 0;
     }
 
-    // If the args list contains "-d", then daemonize
-    if (argsList.contains("-d"))
+    //Check if another instance is already running & attempt to send arguments to it
+    bool running = isRunning();
+    if (running)
+    {
+        int retryCounter = 3;
+        while (retryCounter > 0)
+        {
+            if (instance.sendMessage(argsString, 3000))
+            {
+                printf("Sending arguments to running %s instance: %s\n", TAG, argsString.toLatin1().constData());
+                return 0;
+            }
+            retryCounter--;
+        }
+
+        // For some reason, the local socket in previous instance doesn't accept command. We give up.
+        printf("Failed to send arguments to running %s instance: %s\n", TAG, argsString.toLatin1().constData());
+        return 1;
+    }
+
+    // If the args list contains "-d", then daemonize it
+    if (argsList.contains("-d") || argsList.contains("--daemon"))
         daemon(0, 0);
 
-    //Pink background (temp fix. We should completely prevent it from drawing in non-window area)
+    //Pink background for the entire QWS environment
 #ifdef ENABLE_QWS_STUFF
     QWSServer *qserver = QWSServer::instance();
     qserver->setBackground(QBrush(QColor(240,0,240)));

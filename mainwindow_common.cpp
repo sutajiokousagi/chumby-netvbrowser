@@ -77,6 +77,12 @@ void MainWindow::slot_keepAliveTimeout()
         return;
     }
 
+    //Stopping keep-alive timer
+    if (this->enKeepAliveTimer == false) {
+        this->keepAliveTimer.stop();
+        return;
+    }
+
     //We don't need to check if fCheckAlive exist or not. It will failed anyway.
     QString isAlive = refWebView->page()->mainFrame()->evaluateJavaScript( QString("fCheckAlive();") ).toString();
     QString url = refWebView->page()->mainFrame()->url().toString();
@@ -130,8 +136,8 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
     {
         QString param = argsList[0].toUpper();
         bool isOn = param == "TRUE" || param == "YES" || param == "ON";
-        if (isOn)     {      if (!keepAliveTimer.isActive())    keepAliveTimer.start();     }
-        else          {      if (keepAliveTimer.isActive())     keepAliveTimer.stop();      }
+        if (isOn)     {      if (!keepAliveTimer.isActive())    keepAliveTimer.start();     this->enKeepAliveTimer = true;      }
+        else          {      if (keepAliveTimer.isActive())     keepAliveTimer.stop();      this->enKeepAliveTimer = false;     }
         return command;
     }
 

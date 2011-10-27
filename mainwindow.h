@@ -46,6 +46,7 @@ namespace Ui {
 #define KEEPALIVE_TIMEOUT       60000
 #define ENABLE_FSERVERRESET     false
 #define ENABLE_NATIVE_KB        false
+#define ENABLE_KEEPALIVE        true
 
 #define UPGRADE_SCRIPT          "/usr/bin/chumby-netvbrowser-upgrade.sh"
 #define OPKG_DOWNLOAD_PATH      "/var/lib/opkg/tmp"
@@ -75,6 +76,7 @@ private:
     //Flags
     bool isShuttingDown;
     bool enNativeKeyboard;
+    bool enKeepAliveTimer;
 
     //Webview
     bool cPanelLoaded;

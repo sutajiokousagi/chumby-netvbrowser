@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->mySocket = NULL;
     this->port = DEFAULT_PORT;
     this->enNativeKeyboard = ENABLE_NATIVE_KB;
+    this->enKeepAliveTimer = ENABLE_KEEPALIVE;
 
     //Multi-tab
     this->currentWebViewTab = 0;

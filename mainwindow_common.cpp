@@ -234,16 +234,30 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         return command;
     }
 
-    else if (command == "TAB" && argCount >= 2)
+    else if ((command == "TAB" || command == "MULTITAB") && argCount >= 1)
     {
-        QString action = argsList[1];
         QString tabIndex = argsList[0];
-        int index = tabIndex.toInt();
-
-        if (action.toUpper() == "HIDE")             hideWebViewTab(index);
-        else if (action.toUpper() == "SHOW")        showWebViewTab(index);
-        else                                        loadWebViewTab(index, action.toLatin1());
-
+        QString action = (argCount >= 2) ? argsList[1] : "";
+        QString param = (argCount >= 3) ? argsList[2] : "";
+        if (argCount == 1)
+        {
+            if (action.toUpper() == "DESTROYALL")     {      hideOtherWebViewTab(DEFAULT_TAB, true);       showWebViewTab(DEFAULT_TAB);               }
+            else if (action.toUpper() == "HIDEALL")   {      hideOtherWebViewTab(DEFAULT_TAB, true);       showWebViewTab(DEFAULT_TAB);               }
+        }
+        else if (argCount >= 3)
+        {
+            int index = tabIndex.toInt();
+            if (action.toUpper() == "LOAD")           {      loadWebViewTab(index, param.toLatin1());                   }
+            else if (action.toUpper() == "SHOW")      {      loadWebViewTab(index, param.toLatin1());                   }
+        }
+        else if (argCount >= 2)
+        {
+            int index = tabIndex.toInt();
+            if (action.toUpper() == "HIDE")           {      hideOtherWebViewTab(DEFAULT_TAB, false);      showWebViewTab(DEFAULT_TAB);               }
+            else if (action.toUpper() == "DESTROY")   {      hideWebViewTab(index, true);                  showWebViewTab(DEFAULT_TAB);               }
+            else if (action.toUpper() == "SHOW")      {      showWebViewTab(index);                                                                   }
+            else                                             loadWebViewTab(index, action.toLatin1());
+        }
         return command;
     }
 

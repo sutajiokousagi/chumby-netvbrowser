@@ -177,14 +177,27 @@ void MainWindow::slot_newSocketMessage( SocketRequest *request, SocketResponse *
             qDebug("%s: loading another tab with HTML string", TAG);
             qDebug("%s", QUrl::fromPercentEncoding(param.replace("+", " ")).toLatin1().constData());
         }
-        else if (options.toUpper() == "HIDE" || options.toUpper() == "HIDEALL" || options.toUpper() == "BACK")
+        else if (options.toUpper() == "HIDE" || options.toUpper() == "HIDEALL" || options.toUpper() == "BACK" || options.toUpper() == "HOME")
         {
             hideOtherWebViewTab(DEFAULT_TAB);
             showWebViewTab(DEFAULT_TAB);
         }
-        else if (options.toUpper() == "HIDEONE")
+        else if (options.toUpper() == "DESTROY" || options.toUpper() == "CLOSE")
         {
-            hideWebViewTab(tabIndex);
+            hideWebViewTab(tabIndex, true);
+            showWebViewTab(DEFAULT_TAB);
+        }
+        else if (options.toUpper() == "DESTROYALL" || options.toUpper() == "CLOSEALL")
+        {
+            hideOtherWebViewTab(DEFAULT_TAB, true);
+            showWebViewTab(DEFAULT_TAB);
+        }
+        else if (options.toUpper() == "SHOW")
+        {
+            if (tabIndex < 0 || tabIndex >= MAX_TABS)
+                tabIndex = 0;
+            hideOtherWebViewTab(tabIndex);
+            showWebViewTab(tabIndex);
         }
         else if (options.toUpper() == "SCROLL")
         {

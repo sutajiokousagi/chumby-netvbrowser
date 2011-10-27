@@ -93,8 +93,8 @@ private:
     void loadWebViewTab(int index, QByteArray address = "");
     void loadWebViewTabHTML(int index, QByteArray htmlString = "");
     void showWebViewTab(int index);
-    void hideWebViewTab(int index);
-    void hideOtherWebViewTab(int index);
+    void hideWebViewTab(int index, bool destroy = false);
+    void hideOtherWebViewTab(int index, bool destroy = false);
     QSize getWebViewTabContentSize(int index);
     bool isWebViewTabVisible(int index);
     void scrollWebViewTabDelta(int index, int dx, int dy);

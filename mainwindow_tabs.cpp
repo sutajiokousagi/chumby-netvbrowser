@@ -142,7 +142,7 @@ void MainWindow::showWebViewTab(int index)
     myWebViewArray[index]->move(0,0);
 }
 
-void MainWindow::hideWebViewTab(int index)
+void MainWindow::hideWebViewTab(int index, bool destroy /*= false*/)
 {
     if (myWebViewArray[index] == NULL)
         return;
@@ -154,17 +154,18 @@ void MainWindow::hideWebViewTab(int index)
         return;
 
     //Clear memory
-    deinitWebViewTab(index);
+    if (destroy)
+        deinitWebViewTab(index);
 }
 
-void MainWindow::hideOtherWebViewTab(int index)
+void MainWindow::hideOtherWebViewTab(int index, bool destroy /*= false*/)
 {
     if (index < 0 || index >= MAX_TABS)
         return;
 
     for (int i=0; i<MAX_TABS; i++)
         if (i != index)
-            hideWebViewTab(i);
+            hideWebViewTab(i, destroy);
 }
 
 QSize MainWindow::getWebViewTabContentSize(int index)

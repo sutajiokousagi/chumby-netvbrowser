@@ -3,6 +3,9 @@
 
 case "$1" in
 	start)
+		# enable chroma key
+		fpga_ctl w 0xc 2
+
 		# [Temp] bottom pink line
 		regutil -w LCD_SPU_V_PORCH=0x50005
 

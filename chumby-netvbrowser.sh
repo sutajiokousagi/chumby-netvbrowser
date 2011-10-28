@@ -3,21 +3,8 @@
 
 case "$1" in
 	start)
-		# prefix chroma key
-		fpga_ctl w 0xd 240
-		fpga_ctl w 0xe 0
-		fpga_ctl w 0xf 240
-		fpga_ctl w 0xc 2
-
 		# [Temp] bottom pink line
 		regutil -w LCD_SPU_V_PORCH=0x50005
-
-		# [Temp] Hide the flash player
-		if [ ! -z $(pidof chumbyflashplayer.x) ];
-		then
-			setplayer c 0 0 1 1
-			setplayer p
-		fi
 
 		# Use irkb and resetkb driver as a normal keyboard		
 		export QWS_KEYBOARD="chumbyirkb:repeat-delay=600:repeat-rate=50 chumbyresetkb"
@@ -27,6 +14,12 @@ case "$1" in
 
 		# Start in the background so we don't hog the console
 		NeTVBrowser -qws -nomouse > /dev/null 2>&1 &
+
+		# To use a different default URL
+		# Remember to implement a JavaScript function "fCheckAlive();" to return 'true' to keep the page alive
+		# See http://wiki.chumby.com/index.php/NeTV_web_services#KeepAlive
+		#NeTVBrowser -qws -nomouse SetUrl http://www.yoururl.com > /dev/null 2>&1 &
+
 		;;
 
 	stop)

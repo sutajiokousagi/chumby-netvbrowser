@@ -54,6 +54,13 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    //Give it another go
+    if (instance.sendMessage(argsString))
+    {
+        printf("Sending arguments to running %s instance: %s\n", TAG, argsString.toLatin1().constData());
+        return 0;
+    }
+
     bool running = isRunning();
     if (running)
     {

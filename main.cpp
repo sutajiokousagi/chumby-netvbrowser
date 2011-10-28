@@ -48,20 +48,15 @@ int main(int argc, char *argv[])
     }
 
     //Check if another instance is already running & attempt to send arguments to it
+    if (instance.sendMessage(argsString))
+    {
+        printf("Sending arguments to running %s instance: %s\n", TAG, argsString.toLatin1().constData());
+        return 0;
+    }
+
     bool running = isRunning();
     if (running)
     {
-        int retryCounter = 3;
-        while (retryCounter > 0)
-        {
-            if (instance.sendMessage(argsString, 3000))
-            {
-                printf("Sending arguments to running %s instance: %s\n", TAG, argsString.toLatin1().constData());
-                return 0;
-            }
-            retryCounter--;
-        }
-
         // For some reason, the local socket in previous instance doesn't accept command. We give up.
         printf("Failed to send arguments to running %s instance: %s\n", TAG, argsString.toLatin1().constData());
         return 1;

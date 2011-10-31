@@ -3,7 +3,6 @@
 # Absolute path to this script. /home/user/bin/foo.sh
 SCRIPT=$(readlink -f $0)
 
-
 # Copy this script to /tmp and execute from there
 if [[ ${SCRIPT:0:8} == "/usr/bin" ]]
 then
@@ -12,22 +11,28 @@ then
 	exec /tmp/upgrade-script.sh $*
 fi
 
+# Run this script while redirecting everything to a logfile
+exec > /tmp/upgrade.$$.log 2>&1
 echo "Executing upgrade script from ${SCRIPT}..."
 
 UPDATE_PROGRESS_FILE=/tmp/netvbrowser_temp_upgrade
 
 # Wait for CPanel to hide & new html_page to load (1650ms x 2)
+echo "Wait for 4 seconds..."
 sleep 4
 
 # Start the upgrade, pipe to fifo (blocking)
 # Might restart the browser half way
+echo "Remount / as read-write"
 mount -o remount,rw /
-opkg-chumby-upgrade debug > /tmp/upgrade.$$.log 2>&1
+#opkg-chumby-upgrade debug > /tmp/upgrade.$$.log 2>&1
+opkg-chumby-upgrade debug
 
 # XXX HACK XXX
 # We're having problems where / is not remounting as ro.
 # This hack forces the two chumby processes to restart.
 sleep 2
+echo "Remount / as read-only"
 if ! mount -o remount,ro /
 then
 	logger -t update "Unable to remount / as ro.  Stopping netvbrowser and netvserver and trying again..."
@@ -64,7 +69,8 @@ fi
 # Tell the browser that we are done here
 # The browser should have reloaded the html_update page &
 # load the upgraded package list from /tmp/
-NeTVBrowser -qws UpdateDone &
+echo "Tell NeTVBrowser we are done upgrading"
+NeTVBrowser -qws -nomouse UpdateDone &
 
 # Wait for browser to perform cleaning up & slide out update page (1650ms)
 sleep 2

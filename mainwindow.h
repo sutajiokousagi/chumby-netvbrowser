@@ -53,6 +53,7 @@ namespace Ui {
 #define UPGRADE_PROGRESS_FILE   "/tmp/netvbrowser_temp_upgrade"
 #define UPDATE_PAGE             "http://localhost/html_update/index.html"
 #define FACTORY_PAGE            "http://localhost/tests/index.html"
+#define HOMEPAGE_PAGE_FILE      "/psp/homepage"
 
 #define HTML_IMAGE              "<html><body style='margin:0; overflow:hidden;'><table width='100%' height='100%' cell-padding='0' cell-spacing='0'><tr><td width='100%' height='100%' align='center' valign='middle'><img src='xxxxxxxxxx' /></tr></td></table></body></html>"
 

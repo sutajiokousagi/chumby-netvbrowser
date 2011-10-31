@@ -90,11 +90,25 @@ void MainWindow::resetWebViewTab(int index, QByteArray address /* = "" */)
     QObject::connect(myWebViewArray[index]->page(), SIGNAL(frameCreated(QWebFrame*)), this, SLOT(slot_frameCreated(QWebFrame*)));
     QObject::connect(myWebViewArray[index], SIGNAL(statusBarMessage(QString)), this, SLOT(slot_statusBarMessage(QString)));
 
-    //Load default page
-    if (address == "")      myWebViewArray[index]->load( QUrl(QString("http://%1").arg(DEFAULT_HOST_URL)) );
-    else                    myWebViewArray[index]->load( QUrl(address, QUrl::TolerantMode) );
+    //Check if we have a custom homepage URL
+    QString homepageUrl = QString("http://%1").arg(DEFAULT_HOST_URL);
+    if (address != "")
+    {
+        homepageUrl = QString(address);
+    }
+    else if (FileExists(HOMEPAGE_PAGE_FILE))
+    {
+        QString temp_homepageUrl = QString(GetFileContents(HOMEPAGE_PAGE_FILE).trimmed());
+        if (temp_homepageUrl.length() > 10 && (temp_homepageUrl.contains("http://") || temp_homepageUrl.contains("https://") || temp_homepageUrl.contains("index.html")))
+            homepageUrl = temp_homepageUrl;
+    }
 
-    //Show it (remember to do this manually)
+    //Load default page
+    if (index == DEFAULT_TAB)
+        qDebug("Homepage URL: %s", qPrintable(homepageUrl));
+    myWebViewArray[index]->load( QUrl(homepageUrl, QUrl::TolerantMode) );
+
+    //Remember to do this at calling function
     //showWebViewTab(index);
 }
 

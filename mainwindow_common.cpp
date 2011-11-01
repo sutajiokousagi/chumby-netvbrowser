@@ -22,6 +22,18 @@ void MainWindow::sendSocketHello(SocketResponse *response)
     response->write();
 }
 
+void MainWindow::requestUpdateCPanel()
+{
+    sendNeTVServerCommand("UpdateCPanel");
+}
+
+void MainWindow::requestSetDocroot(QByteArray newPath)
+{
+    QMap<QByteArray, QByteArray> params;
+    params.insert("value", newPath);
+    sendNeTVServerCommand("SetDocroot", params);
+}
+
 void MainWindow::sendNeTVServerCommand(QByteArray command)
 {
     QMap<QByteArray, QByteArray> params;
@@ -95,6 +107,11 @@ void MainWindow::slot_keepAliveTimeout()
 
     if (url.contains(DEFAULT_HOST_URL))     refWebView->reload();
     else                                    this->resetWebViewTab(DEFAULT_TAB);
+}
+
+void MainWindow::slot_requestUpdateCPanel()
+{
+    this->requestUpdateCPanel();
 }
 
 QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList argsList)
@@ -226,6 +243,13 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
     }
 
     //----------------------------------------------------
+
+    else if (command == "SETDOCROOT")
+    {
+        resetWebViewTab(DEFAULT_TAB);
+        showWebViewTab(DEFAULT_TAB);
+        return command;
+    }
 
     else if (command == "SETURL" && argCount >= 1)
     {

@@ -43,10 +43,13 @@ qint64 MainWindow::doUpgrade(bool reboot)
 
 void MainWindow::upgradeDone()
 {
+    QByteArray pkgList = getFriendlyPackageList();
+    QString javascriptString = QString("fUPDATEEvents('done', '%1');").arg(pkgList.constData());
+
     //Could this ever fail to execute like the starting trigger?
-    QString javascriptString = QString("fUPDATEEvents('done', '" + getFriendlyPackageList() + "'");
-    this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString);
-    qDebug("Upgrade completed!");
+    qDebug("%s: %s", TAG, qPrintable(javascriptString));
+    QString javaResult = this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString).toString();
+    qDebug("%s: Upgrade completed!", TAG);
 
     //Clean up
     UnlinkFile(UPGRADE_PROGRESS_FILE);

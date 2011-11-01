@@ -54,6 +54,7 @@ namespace Ui {
 #define UPDATE_PAGE             "http://localhost/html_update/index.html"
 #define FACTORY_PAGE            "http://localhost/tests/index.html"
 #define HOMEPAGE_PAGE_FILE      "/psp/homepage"
+#define CPANEL_GIT_LOG          "/tmp/cpanel_git.log"
 
 #define HTML_IMAGE              "<html><body style='margin:0; overflow:hidden;'><table width='100%' height='100%' cell-padding='0' cell-spacing='0'><tr><td width='100%' height='100%' align='center' valign='middle'><img src='xxxxxxxxxx' /></tr></td></table></body></html>"
 
@@ -78,6 +79,7 @@ private:
     bool isShuttingDown;
     bool enNativeKeyboard;
     bool enKeepAliveTimer;
+    bool updateCPanel;
 
     //Webview
     bool cPanelLoaded;
@@ -131,8 +133,11 @@ private:
 
     //Common functions
     void sendSocketHello(SocketResponse *response);
+    void requestUpdateCPanel();
+    void requestSetDocroot(QByteArray newPath);
     void sendNeTVServerCommand(QByteArray command);
     void sendNeTVServerCommand(QByteArray command, QMap<QByteArray, QByteArray> params);
+
     void setURL(QString address);
     Qt::Key getKeyCodeFromName(QString keyname);
     QByteArray getIRKeyName(int keycode);
@@ -195,6 +200,7 @@ private slots:
 
     void slot_keyStrokeTimeout();
     void slot_keepAliveTimeout();
+    void slot_requestUpdateCPanel();
 };
 
 #endif // MAINWINDOW_H

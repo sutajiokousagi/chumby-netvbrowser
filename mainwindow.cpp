@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     this->isShuttingDown = false;
     this->cPanelLoaded = false;
+    this->updateCPanel = false;
     this->myWebView = NULL;
     this->mySocket = NULL;
     this->port = DEFAULT_PORT;
@@ -66,6 +67,9 @@ MainWindow::MainWindow(QWidget *parent) :
     //Previously not doing an update
     this->resetWebViewTab(DEFAULT_TAB);
     this->showWebViewTab(DEFAULT_TAB);
+
+    //Start pulling Control Panel from git
+    requestUpdateCPanel();
 }
 
 void MainWindow::initWebViewFirstTab()

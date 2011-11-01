@@ -36,6 +36,9 @@ void MainWindow::slot_socketConnected()
     QTcpSocket *socket = (QTcpSocket *)QObject::sender();
     connect(socket, SIGNAL(readyRead()), this, SLOT(slot_socketReadReady()));
 
+    //Request NeTVServer to pull new Control Panel from git repo
+    QTimer::singleShot( 2000, this, SLOT(slot_requestUpdateCPanel()) );
+
     SocketResponse *response = new SocketResponse(socket, socket->peerAddress().toString().toLatin1(), socket->peerPort());
     sendSocketHello(response);
     delete response;
@@ -244,6 +247,22 @@ void MainWindow::slot_newSocketMessage( SocketRequest *request, SocketResponse *
     else if (command == "STARTAP" || command == "STOPAP" || command == "STARTAPFACTORY")
     {
         //Just echoes of commands from NeTVServer
+        return;
+    }
+    else if (command == "UPDATECPANEL" || command == "UPDATECONTROLPANEL")
+    {
+        QByteArray docroot = request->getParameter("docroot");
+        QByteArray gitoutput = request->getParameter("gitoutput");
+        if (!docroot.startsWith("/"))
+            return;
+        this->SetFileContents(CPANEL_GIT_LOG, gitoutput);
+        if (gitoutput.toUpper().contains("ERROR"))
+            return;
+
+        //Switch docroot if we are running on http://localhost
+        QString homepageUrl = this->myWebView->url().toString();
+        if (homepageUrl.contains("http") && homepageUrl.contains("localhost"))
+            requestSetDocroot(docroot);
         return;
     }
 

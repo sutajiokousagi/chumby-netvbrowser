@@ -7,6 +7,10 @@
 #include <QProcess>
 #include <QStringList>
 
+#ifdef ENABLE_QWS_STUFF
+    #include <QWSServer>
+#endif
+
 bool isRunning()
 {
     QProcess *newProc = new QProcess();
@@ -25,10 +29,6 @@ bool isRunning()
     return false;
 }
 
-#ifdef ENABLE_QWS_STUFF
-    #include <QWSServer>
-#endif
-
 int main(int argc, char *argv[])
 {
     QtSingleApplication instance(argc, argv, QApplication::GuiServer);
@@ -37,6 +37,12 @@ int main(int argc, char *argv[])
 
     QStringList argsList = instance.arguments();
     QString argsString = argsList.join(ARGS_SPLIT_TOKEN);
+
+//Pink background for the entire QWS environment
+#ifdef ENABLE_QWS_STUFF
+    QWSServer *qserver = QWSServer::instance();
+    qserver->setCursorVisible(false);
+#endif
 
     // Show help message
     if (argsList.contains("-h") || argsList.contains("--help")) {
@@ -73,15 +79,13 @@ int main(int argc, char *argv[])
     if (argsList.contains("-d") || argsList.contains("--daemon"))
         daemon(0, 0);
 
-    //Pink background for the entire QWS environment
-#ifdef ENABLE_QWS_STUFF
-    QWSServer *qserver = QWSServer::instance();
-    qserver->setBackground(QBrush(QColor(240,0,240)));
-    qserver->setCursorVisible(false);
-#endif
-
     printf("Starting new %s with args:", TAG);
     printf("%s", argsString.toLatin1().constData());
+
+//Pink background for the entire QWS environment
+#ifdef ENABLE_QWS_STUFF
+    qserver->setBackground(QBrush(QColor(240,0,240)));
+#endif
 
     MainWindow w;
     w.receiveArgs(argsString);

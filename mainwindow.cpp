@@ -51,19 +51,20 @@ MainWindow::MainWindow(QWidget *parent) :
     this->initWebViewFirstTab();
     this->setupSocket();
 
-    //Previously not doing an update
-    if (!FileExists(UPGRADE_PROGRESS_FILE))
+    //Previously was doing an system upgrade, NeTVBrowser get killed
+    if (FileExists(UPGRADE_PROGRESS_FILE))
     {
-        this->resetWebViewTab(DEFAULT_TAB);
+        //Continue reading the fifo
+        this->setupUpgrade();
+
+        //Here we have to reload the package list & recalculate the size
+        this->resetWebViewTab(DEFAULT_TAB, QByteArray(UPDATE_PAGE) + "?continue=true");
         this->showWebViewTab(DEFAULT_TAB);
         return;
     }
 
-    //Continue reading the fifo
-    this->setupUpgrade();
-
-    //Here we have to reload the package list & recalculate the size
-    this->resetWebViewTab(DEFAULT_TAB, QByteArray(UPDATE_PAGE) + "?continue=true");
+    //Previously not doing an update
+    this->resetWebViewTab(DEFAULT_TAB);
     this->showWebViewTab(DEFAULT_TAB);
 }
 

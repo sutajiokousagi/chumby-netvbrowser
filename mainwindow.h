@@ -50,7 +50,7 @@ namespace Ui {
 
 #define UPGRADE_SCRIPT          "/usr/bin/chumby-netvbrowser-upgrade.sh"
 #define OPKG_DOWNLOAD_PATH      "/var/lib/opkg/tmp"
-#define UPGRADE_PROGRESS_FILE   "/tmp/netvbrowser_temp_upgrade"
+#define UPGRADE_PROGRESS_FILE   "/tmp/netvbrowser_upgrade_packages"
 #define UPDATE_PAGE             "http://localhost/html_update/index.html"
 #define FACTORY_PAGE            "http://localhost/tests/index.html"
 #define HOMEPAGE_PAGE_FILE      "/psp/homepage"
@@ -155,6 +155,7 @@ private:
     void setupUpgrade();
     void resetUpgrade();
     QByteArray getFriendlyPackageName(QByteArray rawName);
+    QByteArray getFriendlyPackageList();
     void getUpgradablePackageList();
     void getDownloadedPackageSize();
     QByteArray updatePackageSize(QByteArray rawPackageName, quint64 size);

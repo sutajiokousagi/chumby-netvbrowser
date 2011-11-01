@@ -20,14 +20,6 @@ void MainWindow::setupUpgrade()
             upgradeDone();
             return;
         }
-        /* This is now invalid by the new chumby-opkg
-        qDebug("%s: Total upgrade size: %lldMb", TAG, getUpdateTotalSizeKb()/1024);
-
-        //Execute JavaScript
-        QString javascriptString = QString("fUPDATEEvents('progress',%1);").arg(QString().setNum(getUpdatePercentage()));
-        this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString);
-        qDebug() << "Upgrade progress: " << getUpdatePercentage() << "%";
-        */
     }
     else
     {
@@ -51,65 +43,15 @@ qint64 MainWindow::doUpgrade(bool reboot)
 
 void MainWindow::upgradeDone()
 {
-    //Execute JavaScript
-    QString javascriptString = QString("fUPDATEEvents('done', '');");
+    //Could this ever fail to execute like the starting trigger?
+    QString javascriptString = QString("fUPDATEEvents('done', '" + getFriendlyPackageList() + "'");
     this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString);
-    qDebug() << "Upgrade completed!";
+    qDebug("Upgrade completed!");
 
     //Clean up
     UnlinkFile(UPGRADE_PROGRESS_FILE);
 }
 
-//--------------------------------------------------------------------
-
-/*
-void MainWindow::slot_opkgNewLine(QByteArray newline)
-{
-*/
-    /* Example output
-    Upgrading angstrom-version on root from v20110703-r47.9 to v20110703-r55.9...
-    --> NeTVBrowser: Upgrade progress 100.0%
-    Copying /var/lib/opkg/tmp/http:,,buildbot.chumby.com.sg,build,silvermoon-netv-debug,LATEST,chumby-silvermoon-netv,angstrom-version_v20110703-r55.9_chumby-silvermoon-netv.ipk.
-    (sometimes) //usr/lib/opkg/info/opkg-collateral.postinst: line 2: /home/chumby/chumby-oe/netv-debug/work/output-angstrom-.9/work/all-angstrom-linux-gnueabi/opkg-collateral-1.0-r7/opkg.conf: No such file or directory
-    (sometimes) //usr/lib/opkg/info/opkg-collateral.postinst: line 3: /home/chumby/chumby-oe/netv-debug/work/output-angstrom-.9/work/all-angstrom-linux-gnueabi/opkg-collateral-1.0-r7/opkg.conf: No such file or directory
-    Configuring angstrom-version.
-    Configuring opkg-collateral.
-    (sometimes) Collected errors:
-    (sometimes)  * pkg_run_script: package "opkg-collateral" postinst script returned status 1.
-    (sometimes)  * opkg_configure: opkg-collateral.postinst returned 1.
-    */
-/*
-    if (newline.startsWith("Upgrading "))
-    {
-        //Indicate that this package is done
-        QByteArray currentPackage = updatePackageState(newline, true);
-        QString currentPackageName;
-        QString currentPackageVersion;
-        QString currentPackageSize = QString().setNum(getPackageSize(currentPackage));      //in bytes
-
-        //angstrom-version - v20110703-r22.9 - v20110703-r24.9
-        QStringList tempsplit = QString(currentPackage).split(" - ");
-        if (tempsplit.size() >= 3)
-        {
-            currentPackageName = tempsplit.at(0);
-            currentPackageVersion = tempsplit.at(2);
-        }
-
-        //Execute JavaScript
-        double percentage = getUpdatePercentage();
-        QString eventData = QString("<percentage>%1</percentage><pkgname>%2</pkgname><pkgversion>%3</pkgversion><pkgsize>%4</pkgsize>").arg(QString().setNum(percentage)).arg(currentPackageName).arg(currentPackageVersion).arg(currentPackageSize);
-        QString javascriptString = QString("fUPDATEEvents('progress','%1');").arg(QString(QUrl::toPercentEncoding(eventData)));
-        this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString);
-        qDebug("%s: Upgrade progress %.1f%%", TAG, percentage);
-    }
-
-    //Clean up memory
-    newline.clear();
-
-    //Save package state to a temp file
-    exportPackageList();
-}
-*/
 
 //-----------------------------------------------------------------------------------
 // Getting useful info
@@ -120,6 +62,21 @@ QByteArray MainWindow::getFriendlyPackageName(QByteArray rawName)
     //netv-utils - 0-r39.9 - 0-r40.9
     //angstrom-version - v20110703-r22.9 - v20110703-r24.9
     return rawName.split('-')[0].trimmed();
+}
+
+QByteArray MainWindow::getFriendlyPackageList()
+{
+    if (packageSizeMap.size() > 0)
+        return "";
+
+    QByteArray pkgList = "";
+    QMapIterator<QByteArray, QByteArray> i(packageSizeMap);
+    while (i.hasNext())
+    {
+        i.next();
+        pkgList += getFriendlyPackageName(i.key().trimmed()) + ";";
+    }
+    return pkgList;
 }
 
 void MainWindow::getUpgradablePackageList()

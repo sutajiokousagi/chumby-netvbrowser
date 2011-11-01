@@ -506,10 +506,16 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         getDownloadedPackageSize();
         doUpgrade(reboot == "1" ? true : false);
 
-        //Notify JavaScript
+        //Notify JavaScript (this implementation doesn't work sometimes)
+        //If customer choose to replace with their own UI, this implementation will fail
         QString javascriptString = QString("fUPDATEEvents('starting', '%1');").arg(argsList[1]);
         QByteArray javaResult = (this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
-        return javaResult;
+        if (javaResult == "ok")
+            return javaResult;
+
+        //JavaScript failed to execute, force NeTVBrowser to switch to Update UI
+        setURL(UPDATE_PAGE);
+        return "ok";
     }
 
     else if (command == "UPGRADECOMPLETE" || command == "UPGRADECOMP")

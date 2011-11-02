@@ -248,9 +248,9 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
 
     else if (command == "SETDOCROOT")
     {
-        qDebug("%s: ------------------------------------------", TAG);
-        qDebug("%s: docroot changed to %s. Reload", TAG, qPrintable(argsList[0]));
-        qDebug("%s: ------------------------------------------", TAG);
+        qDebug("%s: --------------------------------------------------------------", TAG);
+        qDebug("%s: docroot changed to %s. Reload now!", TAG, qPrintable(argsList[0]));
+        qDebug("%s: --------------------------------------------------------------", TAG);
         resetWebViewTab(DEFAULT_TAB);
         showWebViewTab(DEFAULT_TAB);
         return command;

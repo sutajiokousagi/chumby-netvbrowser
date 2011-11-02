@@ -69,7 +69,8 @@ MainWindow::MainWindow(QWidget *parent) :
     this->showWebViewTab(DEFAULT_TAB);
 
     //Start pulling Control Panel from git
-    requestUpdateCPanel();
+    //This will be done once socket to server is connected
+    //requestUpdateCPanel();
 }
 
 void MainWindow::initWebViewFirstTab()

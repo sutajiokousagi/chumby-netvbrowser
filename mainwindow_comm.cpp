@@ -37,7 +37,8 @@ void MainWindow::slot_socketConnected()
     connect(socket, SIGNAL(readyRead()), this, SLOT(slot_socketReadReady()));
 
     //Request NeTVServer to pull new Control Panel from git repo
-    QTimer::singleShot( 2000, this, SLOT(slot_requestUpdateCPanel()) );
+    if (!this->updateCPanel)
+        QTimer::singleShot( 2000, this, SLOT(slot_requestUpdateCPanel()) );
 
     SocketResponse *response = new SocketResponse(socket, socket->peerAddress().toString().toLatin1(), socket->peerPort());
     sendSocketHello(response);
@@ -46,13 +47,11 @@ void MainWindow::slot_socketConnected()
 
 void MainWindow::slot_socketDisconnected()
 {
-#ifdef SUPERVERBOSE
-    if (QObject::sender() != NULL)
-        qDebug("TcpSocket (%x): disconnected",(unsigned int) this);
-#endif
-
     if (QObject::sender() != NULL)
         qDebug("%s: disconnected from NeTVServer", TAG);
+
+    this->updateCPanel = false;
+
     QTimer::singleShot( 3000, this, SLOT(slot_socketRetry()) );
 }
 
@@ -257,7 +256,13 @@ void MainWindow::slot_newSocketMessage( SocketRequest *request, SocketResponse *
             return;
         this->SetFileContents(CPANEL_GIT_LOG, gitoutput);
         if (gitoutput.toUpper().contains("ERROR"))
+        {
+            this->updateCPanel = false;
+            qDebug("%s: Error updating Control Panel from repo. See log in %s", TAG, CPANEL_GIT_LOG);
             return;
+        }
+        this->updateCPanel = true;
+        qDebug("%s: succesfully updated Control Panel in %s", TAG, docroot.constData());
 
         //Switch docroot if we are running on http://localhost
         QString homepageUrl = this->myWebView->url().toString();

@@ -24,11 +24,13 @@ void MainWindow::sendSocketHello(SocketResponse *response)
 
 void MainWindow::requestUpdateCPanel()
 {
+    qDebug("%s: request NeTVServer to update Control Panel", TAG);
     sendNeTVServerCommand("UpdateCPanel");
 }
 
 void MainWindow::requestSetDocroot(QByteArray newPath)
 {
+    qDebug("%s: request NeTVServer to change docroot to %s", TAG, newPath.constData());
     QMap<QByteArray, QByteArray> params;
     params.insert("value", newPath);
     sendNeTVServerCommand("SetDocroot", params);
@@ -246,6 +248,9 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
 
     else if (command == "SETDOCROOT")
     {
+        qDebug("%s: ------------------------------------------", TAG);
+        qDebug("%s: docroot changed to %s. Reload", TAG, qPrintable(argsList[0]));
+        qDebug("%s: ------------------------------------------", TAG);
         resetWebViewTab(DEFAULT_TAB);
         showWebViewTab(DEFAULT_TAB);
         return command;

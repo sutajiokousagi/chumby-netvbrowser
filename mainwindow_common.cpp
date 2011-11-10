@@ -591,6 +591,7 @@ QByteArray MainWindow::getIRKeyName(int keycode)
         case Qt::Key_Left:          return "left";
         case Qt::Key_Right:         return "right";
         case Qt::Key_Return:        return "center";
+        case Qt::Key_Enter:         return "center";
         default:                    return "";
     }
     return "";

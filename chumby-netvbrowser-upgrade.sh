@@ -25,8 +25,20 @@ sleep 4
 # Might restart the browser half way
 echo "Remount / as read-write"
 mount -o remount,rw /
-#opkg-chumby-upgrade debug > /tmp/upgrade.$$.log 2>&1
-opkg-chumby-upgrade debug
+
+#We are having seg fault recently while upgrading angstrom-version package
+#Fallback to manual update
+if ! opkg-chumby-upgrade debug 
+then
+	echo "opkg-chumby-upgrade failed. Fallback to 'opkg upgrade' (with cache)."
+	mount -o remount,rw /
+	if ! opkg -cache /var/lib/opkg/tmp upgrade 
+	then
+		echo "'opkg upgrade' with cache failed. Fallback to 'opkg upgrade' (without cache)."
+		mount -o remount,rw /
+		opkg upgrade
+	fi
+fi
 
 # XXX HACK XXX
 # We're having problems where / is not remounting as ro.

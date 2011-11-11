@@ -607,9 +607,9 @@ Qt::Key MainWindow::getKeyCodeFromName(QString keyname)
     else if (keyname == "right")        return Qt::Key_Right;
     else if (keyname == "up")           return Qt::Key_Up;
     else if (keyname == "down")         return Qt::Key_Down;
-    else if (keyname == "enter")        return Qt::Key_Enter;
-    else if (keyname == "center")       return Qt::Key_Enter;
-    else if (keyname == "\n")           return Qt::Key_Enter;
+    else if (keyname == "enter")        return Qt::Key_Return;
+    else if (keyname == "center")       return Qt::Key_Return;
+    else if (keyname == "\n")           return Qt::Key_Return;
     else if (keyname == "cpanel")       return Qt::Key_PageUp;
     else if (keyname == "widget")       return Qt::Key_PageDown;
     else if (keyname == "pgup")         return Qt::Key_PageUp;

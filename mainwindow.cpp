@@ -24,8 +24,6 @@ MainWindow::MainWindow(QWidget *parent) :
     this->currentWebViewTab = 0;
     for (int i=0;i<MAX_TABS; i++)
         myWebViewArray[i] = NULL;
-    for (int i=0;i<MAX_TABS; i++)
-        myWebPageArray[i] = NULL;
 
     //Keystroke hander
     keyStrokeTimer.setInterval(KEY_TIMEOUT);
@@ -49,7 +47,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowFlags(Qt::FramelessWindowHint);              //Set a frameless window
 #endif
 
-    this->initWebViewFirstTab();
+    initWebViewTab(DEFAULT_TAB);
     this->setupSocket();
 
     //Previously was doing an system upgrade, NeTVBrowser get killed
@@ -73,12 +71,6 @@ MainWindow::MainWindow(QWidget *parent) :
     //requestUpdateCPanel();
 }
 
-void MainWindow::initWebViewFirstTab()
-{
-    initWebViewTab(DEFAULT_TAB);
-    this->myWebView = myWebViewArray[DEFAULT_TAB];
-}
-
 MainWindow::~MainWindow()
 {
     this->isShuttingDown = true;
@@ -86,7 +78,6 @@ MainWindow::~MainWindow()
     this->keepAliveTimer.stop();
     if (this->mySocket != NULL)         delete this->mySocket;
     for (int i=0;i<MAX_TABS; i++)       if (myWebViewArray[i] != NULL)   {   delete myWebViewArray[i];      myWebViewArray[i] = NULL;   }
-    for (int i=0;i<MAX_TABS; i++)       if (myWebPageArray[i] != NULL)   {   delete myWebPageArray[i];      myWebPageArray[i] = NULL;   }
     delete this->ui;
 }
 

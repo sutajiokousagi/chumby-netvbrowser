@@ -85,9 +85,7 @@ private:
     bool cPanelLoaded;
     MyWebView* myWebView;
     MyWebView* myWebViewArray[MAX_TABS];
-    MyWebPage* myWebPageArray[MAX_TABS];
     QTimer keepAliveTimer;
-    void initWebViewFirstTab();
 
     //Multi-tabs
     int currentWebViewTab;

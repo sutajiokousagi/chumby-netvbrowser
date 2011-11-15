@@ -4,11 +4,12 @@
 
 void MainWindow::initWebViewTab(int index)
 {
+    qDebug("%s: initWebViewTab %d", TAG, index);
+
     if (index < 0 || index >= MAX_TABS)
         return;
     if (myWebViewArray[index] != NULL)
-        return;
-    qDebug("%s: initWebViewTab %d", TAG, index);
+        deinitWebViewTab(index);
 
     myWebViewArray[index] = new MyWebView(this);
     this->ui->rootLayout->addWidget(myWebViewArray[index]);
@@ -17,21 +18,21 @@ void MainWindow::initWebViewTab(int index)
     if (!enNativeKeyboard)      myWebViewArray[index]->setEnabled(false);
     else                        myWebViewArray[index]->setEnabled(index == DEFAULT_TAB);
 
-    //Disable AA
+    //Disable Anti-aliasing
     myWebViewArray[index]->setRenderHints(0);
 
     //Do any other customization on default page
-    myWebPageArray[index] = new MyWebPage(this);
+    MyWebPage *newPage = new MyWebPage(this);
     myWebViewArray[index]->setInvertColor(false);
-    myWebViewArray[index]->setPage(myWebPageArray[index]);
+    myWebViewArray[index]->setPage(newPage);
 
     //Hide scrollbars
     myWebViewArray[index]->page()->mainFrame()->setScrollBarPolicy ( Qt::Vertical, Qt::ScrollBarAlwaysOff );
     myWebViewArray[index]->page()->mainFrame()->setScrollBarPolicy ( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
 
-    //Set this as central widget
-    //if (index == 0)
-    //  this->setCentralWidget(myWebViewArray[index]);
+    //Set reference pointer to default tab for convenience
+    if (index == DEFAULT_TAB)
+        this->myWebView = myWebViewArray[DEFAULT_TAB];
 }
 
 void MainWindow::deinitWebViewTab(int index)
@@ -42,14 +43,11 @@ void MainWindow::deinitWebViewTab(int index)
         return;
     qDebug("%s: deinitWebViewTab %d", TAG, index);
 
-    //Remove reference only
-    myWebPageArray[index] = NULL;
-
     //Delete QWebView object
+    myWebViewArray[index]->setHtml("");
     myWebViewArray[index]->setVisible(false);
     delete myWebViewArray[index];
     myWebViewArray[index] = NULL;
-
 }
 
 void MainWindow::resetAllTab()

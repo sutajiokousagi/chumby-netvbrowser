@@ -86,7 +86,7 @@ void MainWindow::slot_keepAliveTimeout()
     MyWebView * refWebView = myWebViewArray[DEFAULT_TAB];
     if (refWebView == NULL)
     {
-        this->initWebViewFirstTab();
+        this->initWebViewTab(DEFAULT_TAB);
         this->resetAllTab();
         return;
     }
@@ -251,6 +251,8 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         qDebug("%s: --------------------------------------------------------------", TAG);
         qDebug("%s: docroot changed to %s. Reload now!", TAG, qPrintable(argsList[0]));
         qDebug("%s: --------------------------------------------------------------", TAG);
+        cPanelLoaded = false;
+        initWebViewTab(DEFAULT_TAB);
         resetWebViewTab(DEFAULT_TAB);
         showWebViewTab(DEFAULT_TAB);
         return command;

@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QDateTime>
+#include <QWebElementCollection>
 
 void MainWindow::keyPressEvent ( QKeyEvent * event )
 {
@@ -48,6 +49,8 @@ void MainWindow::keyPressEvent ( QKeyEvent * event )
 
 void MainWindow::keyReleaseEvent  ( QKeyEvent * event )
 {
+    //Detect long-pressed of ControlPanel key
+
     static qint64 longClickThresholdMs1 = 3000;
     int keycode = event->key();
 
@@ -61,8 +64,12 @@ void MainWindow::keyReleaseEvent  ( QKeyEvent * event )
         {
             qDebug("%s: [keyboard override] long-press ControlPanel key (%lldms)", TAG, deltaEpochMs);
             resetAllTab();
+            return;
         }
     }
+
+    //Update screenshot of current focused text input (if any)
+    this->updateFocusedInputScreenshot();
 
     //Default behavior
     QMainWindow::keyReleaseEvent(event);
@@ -200,4 +207,74 @@ void MainWindow::remoteControlPageInteraction(int keycode)
         if (keycode == Qt::Key_Up)             scrollWebViewTabDelta(SECOND_TAB, 0, -frameSize.height() / 10);      //magic number 10
         else if (keycode == Qt::Key_Down)      scrollWebViewTabDelta(SECOND_TAB, 0, frameSize.height() / 10);       //magic number 10
     }
+}
+
+//---------------------------------------------------------------------------
+// Trigger input event on Android/iOS
+//---------------------------------------------------------------------------
+
+QWebElement MainWindow::getFocusedInputElement()
+{
+    if (this->myWebView == NULL || this->myWebView->page() == NULL || this->myWebView->page()->currentFrame() == NULL)
+        return QWebElement();
+
+    QWebFrame* currentFrame = this->myWebView->page()->currentFrame();
+    QWebElementCollection collection = currentFrame->findAllElements("input[type=text]");
+    if (collection.count() <= 0)
+        return QWebElement();
+
+    foreach(QWebElement inputElement, collection)
+    {
+        QString id = inputElement.attribute("id", "");
+        if (id == "" || !inputElement.hasFocus())
+            continue;
+        return inputElement;
+    }
+    return QWebElement();
+}
+
+QString MainWindow::getFocusedInputText()
+{
+    QWebElement focus = getFocusedInputElement();
+    if (focus == QWebElement())
+        return "";
+    return focus.evaluateJavaScript("this.value").toString();
+}
+
+QString MainWindow::getFocusedInputID()
+{
+    QWebElement focus = getFocusedInputElement();
+    if (focus == QWebElement())
+        return "";
+    return focus.attribute("id", "");
+}
+
+bool MainWindow::updateFocusedInputScreenshot()
+{
+    //Note: This is not very efficient to keep creating & deleting the screenshot file
+    //      but it is simplest & stateless (not much dependency on NeTVServer) to implement this
+    //      besides it is not hurting too much considered the file is in RAM partition
+
+    //If we have a different focused element, trigger an event to NeTVServer
+    QWebElement newFocus = getFocusedInputElement();
+    if (this->focusedInput != newFocus)
+        sendFocusedInput(getFocusedInputID().toLatin1(), getFocusedInputText().toLatin1());
+    this->focusedInput = newFocus;
+
+    //Delete the screenshot if no focus
+    if (newFocus == QWebElement()) {
+        UnlinkFile(INPUT_SCREENSHOT_FILE);
+        return false;
+    }
+
+    //Take screenshot, save to /tmp
+    QRect rect = this->focusedInput.geometry();
+    int dw = 200 - rect.width()/2;
+    int dh = 100 - rect.height()/2;
+    rect.setLeft(rect.left()-dw);
+    rect.setTop(rect.top()-dh);
+    rect.setWidth(400);
+    rect.setHeight(200);
+
+    return (QPixmap::grabWidget(this, rect)).save(INPUT_SCREENSHOT_FILE, "png");
 }

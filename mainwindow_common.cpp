@@ -24,7 +24,7 @@ void MainWindow::sendSocketHello(SocketResponse *response)
 
 void MainWindow::requestUpdateCPanel()
 {
-    qDebug("%s: request NeTVServer to update Control Panel", TAG);
+    qDebug("%s: request NeTVServer to update Control Panel from git repo", TAG);
     sendNeTVServerCommand("UpdateCPanel");
 }
 
@@ -34,6 +34,14 @@ void MainWindow::requestSetDocroot(QByteArray newPath)
     QMap<QByteArray, QByteArray> params;
     params.insert("value", newPath);
     sendNeTVServerCommand("SetDocroot", params);
+}
+
+void MainWindow::sendFocusedInput(QByteArray id, QByteArray value)
+{
+    QMap<QByteArray, QByteArray> params;
+    params.insert("id", id);
+    params.insert("value", value);
+    sendNeTVServerCommand("TextInput", params);
 }
 
 void MainWindow::sendNeTVServerCommand(QByteArray command)
@@ -104,8 +112,12 @@ void MainWindow::slot_keepAliveTimeout()
     if (isAlive.toLower() == "true")        qDebug("%s: [keep alive] [OK] %s", TAG, url.toLatin1().constData());
     else                                    qDebug("%s: [keep alive] [FAILED] %s", TAG, url.toLatin1().constData());
 
+    //Update text input focus if still alive
     if (isAlive.toLower() == "true")
+    {
+        this->updateFocusedInputScreenshot();
         return;
+    }
 
     if (url.contains(DEFAULT_HOST_URL))     refWebView->reload();
     else                                    this->resetWebViewTab(DEFAULT_TAB);

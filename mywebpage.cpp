@@ -13,6 +13,15 @@ void MyWebPage::javaScriptAlert ( QWebFrame * frame, const QString & msg )
     qDebug() << "NeTVBrowser: javaScriptAlert: " << msg;
 }
 
+bool MyWebPage::javaScriptConfirm ( QWebFrame * frame, const QString & msg )
+{
+    Q_UNUSED(frame);
+
+    //Disable pop-up window, just print out to console
+    qDebug() << "NeTVBrowser: javaScriptConfirm: " << msg;
+    return false;
+}
+
 void MyWebPage::javaScriptConsoleMessage(const QString& message, int lineNumber, const QString& sourceID)
 {
     if (message.startsWith("|~|"))      qDebug() << message.right(message.length()-3);

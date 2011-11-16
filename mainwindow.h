@@ -12,6 +12,7 @@
 #include "mywebview.h"
 #include "mywebpage.h"
 #include <QWebFrame>
+#include <QWebElement>
 #include "socketrequest.h"
 #include "socketresponse.h"
 
@@ -55,6 +56,7 @@ namespace Ui {
 #define FACTORY_PAGE            "http://localhost/tests/index.html"
 #define HOMEPAGE_PAGE_FILE      "/psp/homepage"
 #define CPANEL_GIT_LOG          "/tmp/cpanel_git.log"
+#define INPUT_SCREENSHOT_FILE   "/tmp/focused_input.png"
 
 #define HTML_IMAGE              "<html><body style='margin:0; overflow:hidden;'><table width='100%' height='100%' cell-padding='0' cell-spacing='0'><tr><td width='100%' height='100%' align='center' valign='middle'><img src='xxxxxxxxxx' /></tr></td></table></body></html>"
 
@@ -129,10 +131,11 @@ private:
     QTcpSocket *mySocket;
     void setupSocket();
 
-    //Common functions
+    //Communication to NeTVServer
     void sendSocketHello(SocketResponse *response);
     void requestUpdateCPanel();
     void requestSetDocroot(QByteArray newPath);
+    void sendFocusedInput(QByteArray id, QByteArray value);
     void sendNeTVServerCommand(QByteArray command);
     void sendNeTVServerCommand(QByteArray command, QMap<QByteArray, QByteArray> params);
 
@@ -150,6 +153,13 @@ private:
     void triggerKeycode(int keycode, int count = 1);
     bool addKeyStrokeHistory(QString);
     void remoteControlPageInteraction(int keycode);
+
+    //Reversed textinput event
+    QWebElement focusedInput;
+    QWebElement getFocusedInputElement();
+    QString getFocusedInputText();
+    QString getFocusedInputID();
+    bool updateFocusedInputScreenshot();
 
     //Update mechanism
     QMap<QByteArray, QByteArray> packageSizeMap;

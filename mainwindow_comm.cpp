@@ -277,7 +277,7 @@ void MainWindow::slot_newSocketMessage( SocketRequest *request, SocketResponse *
     if (request->getAddress().length() > 3)     qDebug("%s: slot_newSocketMessage: %s from %s", TAG, string.constData(), request->getAddress().constData());
     else                                        qDebug("%s: slot_newSocketMessage: %s", TAG, string.constData() );
 
-    //No need to reply to server
+    //Do not reply to server
     if (request->getParent() == (QObject*)(this->mySocket))
         return;
 

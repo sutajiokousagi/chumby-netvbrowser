@@ -31,6 +31,9 @@ void MainWindow::slot_pageloadFinished(bool ok)
     qDebug("%s: slot_pageloadFinished 2", TAG);
     if (!this->keepAliveTimer.isActive() && this->enKeepAliveTimer)
         this->keepAliveTimer.start();
+
+    //Update text input focus
+    this->updateFocusedInputScreenshot();
 }
 
 void MainWindow::slot_pageloadProgress(int progress)

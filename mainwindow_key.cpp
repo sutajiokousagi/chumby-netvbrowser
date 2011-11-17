@@ -69,7 +69,7 @@ void MainWindow::keyReleaseEvent  ( QKeyEvent * event )
     }
 
     //Force update screenshot of current focused text input (if any)
-    this->updateFocusedInputScreenshot(true);
+    this->updateFocusedInputScreenshot();
 
     //Default behavior
     QMainWindow::keyReleaseEvent(event);

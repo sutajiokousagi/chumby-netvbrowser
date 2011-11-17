@@ -25,12 +25,17 @@ MainWindow::MainWindow(QWidget *parent) :
     for (int i=0;i<MAX_TABS; i++)
         myWebViewArray[i] = NULL;
 
-    //Keystroke hander
+    //Keystroke handler
     keyStrokeTimer.setInterval(KEY_TIMEOUT);
     keyStrokeTimer.setSingleShot(true);
     QObject::connect(&keyStrokeTimer, SIGNAL(timeout()), this, SLOT(slot_keyStrokeTimeout()));
 
-    //Ping the page every 60 seconds
+    //Focus input handler
+    focusInputTimer.setInterval(FOCUS_INPUT_TIMEOUT);
+    focusInputTimer.setSingleShot(false);
+    QObject::connect(&focusInputTimer, SIGNAL(timeout()), this, SLOT(slot_updateFocusInput()));
+
+    //Ping the page every 40 seconds
     keepAliveTimer.setInterval(KEEPALIVE_TIMEOUT);
     keepAliveTimer.setSingleShot(false);
     QObject::connect(&keepAliveTimer, SIGNAL(timeout()), this, SLOT(slot_keepAliveTimeout()));

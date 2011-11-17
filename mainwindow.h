@@ -43,8 +43,9 @@ namespace Ui {
 #define MAX_TABS                10
 #define DEFAULT_TAB             0
 #define SECOND_TAB              1
-#define KEY_TIMEOUT             1500
-#define KEEPALIVE_TIMEOUT       60000
+#define KEY_TIMEOUT             1800
+#define KEEPALIVE_TIMEOUT       40000
+#define FOCUS_INPUT_TIMEOUT     2000
 #define ENABLE_FSERVERRESET     false
 #define ENABLE_NATIVE_KB        false
 #define ENABLE_KEEPALIVE        true
@@ -156,10 +157,13 @@ private:
 
     //Reversed textinput event
     QWebElement focusedInput;
+    QString focusedInputValue;
+    QString focusedInputID;
+    QTimer focusInputTimer;
     QWebElement getFocusedInputElement();
     QString getFocusedInputText();
     QString getFocusedInputID();
-    bool updateFocusedInputScreenshot();
+    bool updateFocusedInputScreenshot(bool forced = false);
 
     //Update mechanism
     QMap<QByteArray, QByteArray> packageSizeMap;
@@ -209,6 +213,8 @@ private slots:
     void slot_keyStrokeTimeout();
     void slot_keepAliveTimeout();
     void slot_requestUpdateCPanel();
+
+    void slot_updateFocusInput();
 };
 
 #endif // MAINWINDOW_H

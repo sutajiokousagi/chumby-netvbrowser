@@ -32,8 +32,9 @@ void MainWindow::slot_pageloadFinished(bool ok)
     if (!this->keepAliveTimer.isActive() && this->enKeepAliveTimer)
         this->keepAliveTimer.start();
 
-    //Update text input focus
-    this->updateFocusedInputScreenshot();
+    //Start or restart input focus timer
+    if (!this->focusInputTimer.isActive())
+        this->focusInputTimer.start();
 }
 
 void MainWindow::slot_pageloadProgress(int progress)

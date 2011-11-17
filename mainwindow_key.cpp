@@ -68,8 +68,8 @@ void MainWindow::keyReleaseEvent  ( QKeyEvent * event )
         }
     }
 
-    //Update screenshot of current focused text input (if any)
-    this->updateFocusedInputScreenshot();
+    //Force update screenshot of current focused text input (if any)
+    this->updateFocusedInputScreenshot(true);
 
     //Default behavior
     QMainWindow::keyReleaseEvent(event);
@@ -89,9 +89,6 @@ void MainWindow::triggerKeycode(int keycode, int count /* = 1 */)
 
 bool MainWindow::addKeyStrokeHistory(QString keyName)
 {
-    //if (keyName == NULL || keyName.toUpper() != "SETUP")
-    //    return;
-
     qint64 currentEpochMs = QDateTime::currentMSecsSinceEpoch();
     keyStrokeHistory.prepend( QString("%1|%2").arg(QString(keyName)).arg(currentEpochMs) );
     while (!keyStrokeHistory.isEmpty() && keyStrokeHistory.size() > 16)
@@ -213,6 +210,11 @@ void MainWindow::remoteControlPageInteraction(int keycode)
 // Trigger input event on Android/iOS
 //---------------------------------------------------------------------------
 
+void MainWindow::slot_updateFocusInput()
+{
+    updateFocusedInputScreenshot();
+}
+
 QWebElement MainWindow::getFocusedInputElement()
 {
     if (this->myWebView == NULL || this->myWebView->page() == NULL || this->myWebView->page()->currentFrame() == NULL)
@@ -249,7 +251,7 @@ QString MainWindow::getFocusedInputID()
     return focus.attribute("id", "");
 }
 
-bool MainWindow::updateFocusedInputScreenshot()
+bool MainWindow::updateFocusedInputScreenshot(bool forced /* = false */)
 {
     //Note: This is not very efficient to keep creating & deleting the screenshot file
     //      but it is simplest & stateless (not much dependency on NeTVServer) to implement this
@@ -257,9 +259,15 @@ bool MainWindow::updateFocusedInputScreenshot()
 
     //If we have a different focused element, trigger an event to NeTVServer
     QWebElement newFocus = getFocusedInputElement();
-    if (this->focusedInput != newFocus)
-        sendFocusedInput(getFocusedInputID().toLatin1(), getFocusedInputText().toLatin1());
+    QString newValue = (newFocus == QWebElement()) ? "" : newFocus.evaluateJavaScript("this.value").toString();
+    QString newID = (newFocus == QWebElement()) ? "" : newFocus.attribute("id", "");
+
+    if (!forced && this->focusedInput == newFocus && this->focusedInputValue == newValue && this->focusedInputID == newID)
+        return false;
+
     this->focusedInput = newFocus;
+    this->focusedInputID = newID;
+    this->focusedInputValue = newValue;
 
     //Delete the screenshot if no focus
     if (newFocus == QWebElement()) {
@@ -270,11 +278,19 @@ bool MainWindow::updateFocusedInputScreenshot()
     //Take screenshot, save to /tmp
     QRect rect = this->focusedInput.geometry();
     int dw = 200 - rect.width()/2;
-    int dh = 100 - rect.height()/2;
+    int dh = 150 - rect.height()/2;
     rect.setLeft(rect.left()-dw);
     rect.setTop(rect.top()-dh);
     rect.setWidth(400);
-    rect.setHeight(200);
+    rect.setHeight(300);
 
-    return (QPixmap::grabWidget(this, rect)).save(INPUT_SCREENSHOT_FILE, "png");
+    if (rect.x() < 0)                                   rect.moveLeft(0);
+    if (rect.y() < 0)                                   rect.moveTop(0);
+    if (rect.bottom() > this->geometry().bottom())      rect.moveBottom(this->geometry().bottom());
+    if (rect.right() > this->geometry().right())        rect.moveRight(this->geometry().right());
+
+    bool returnValue = (QPixmap::grabWidget(this, rect)).save(INPUT_SCREENSHOT_FILE, "png");
+    sendFocusedInput(this->focusedInputID.toLatin1(), this->focusedInputValue.toLatin1());
+
+    return returnValue;
 }

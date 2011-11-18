@@ -78,6 +78,7 @@ private:
 
     Ui::MainWindow *ui;
 
+    //Custom docroot
     QString checkPspHomepageLocalPath();
 
     //Flags

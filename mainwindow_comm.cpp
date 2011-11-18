@@ -265,7 +265,7 @@ void MainWindow::slot_newSocketMessage( SocketRequest *request, SocketResponse *
         qDebug("%s: succesfully updated Control Panel in %s", TAG, docroot.constData());
 
         //Check if the /psp/homepage hook is not valid
-        QString hook = checkPspHomepageLocalPath();
+        QString pspHook = checkPspHomepageLocalPath();
 
         //Switch docroot if we are running on http://localhost (rather than 3rd party remote location)
         QString homepageUrl = this->myWebView->url().toString();

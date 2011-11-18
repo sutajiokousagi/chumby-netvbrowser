@@ -6,6 +6,7 @@
 #include <QWebFrame>
 #include <QUrl>
 #include <QDebug>
+#include <QDir>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -132,4 +133,25 @@ void MainWindow::resizeEvent ( QResizeEvent * event )
     }
 
     qDebug("%s: resizeEvent (%d x %d) - resized %d tabs", TAG, this->frameGeometry().size().width(), this->frameGeometry().size().height(), count);
+}
+
+QString MainWindow::checkPspHomepageLocalPath()
+{
+    if (!FileExists(HOMEPAGE_PAGE_FILE))
+        return "";
+    QByteArray fileContent = GetFileContents(HOMEPAGE_PAGE_FILE).trimmed();
+    if (fileContent.length() < 1)
+        return "";
+    if (fileContent.startsWith("http"))
+        return "";
+    if (!fileContent.startsWith("/"))
+        return "";
+    QString fileContentString = fileContent;
+    QDir dir(fileContentString);
+    if (!dir.exists(fileContentString))
+        return "";
+
+    if (fileContent.endsWith("/"))
+        fileContent = fileContent.left(fileContent.size()-1);
+    return QString(fileContent);
 }

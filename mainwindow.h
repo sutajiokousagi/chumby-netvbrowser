@@ -78,6 +78,8 @@ private:
 
     Ui::MainWindow *ui;
 
+    QString checkPspHomepageLocalPath();
+
     //Flags
     bool isShuttingDown;
     bool enNativeKeyboard;

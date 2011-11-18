@@ -269,7 +269,7 @@ void MainWindow::slot_newSocketMessage( SocketRequest *request, SocketResponse *
 
         //Switch docroot if we are running on http://localhost (rather than 3rd party remote location)
         QString homepageUrl = this->myWebView->url().toString();
-        if (homepageUrl.contains("http") && homepageUrl.contains("localhost") && hook.length() <= 0)
+        if (homepageUrl.contains("http") && homepageUrl.contains("localhost") && pspHook.length() <= 0)
             requestSetDocroot(docroot);
 
         return;

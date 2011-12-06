@@ -9,8 +9,15 @@ case "$1" in
 		# [Temp] bottom pink line
 		regutil -w LCD_SPU_V_PORCH=0x50005
 
-		# Use irkb and resetkb driver as a normal keyboard		
-		export QWS_KEYBOARD="chumbyirkb:repeat-delay=600:repeat-rate=50 chumbyresetkb"
+		# Custom keyboard driver for infrared remote & on-board Setup button
+		inputDrivers="chumbyirkb:repeat-delay=600:repeat-rate=50 chumbyresetkb"
+
+		# If external keyboard & mouse is connnected, use it as well
+		[ -e /dev/input/event2 ] && inputDrivers="${inputDrivers} linuxinput:/dev/input/event2"
+		[ -e /dev/input/event3 ] && inputDrivers="${inputDrivers} linuxinput:/dev/input/event3"
+		[ -e /dev/input/event4 ] && inputDrivers="${inputDrivers} linuxinput:/dev/input/event4"
+		[ -e /dev/input/event5 ] && inputDrivers="${inputDrivers} linuxinput:/dev/input/event5"
+		export QWS_KEYBOARD="${inputDrivers}"
 
 		# Transformed screen driver supporting screen rotation
 		export QWS_DISPLAY="transformed"

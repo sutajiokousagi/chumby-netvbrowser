@@ -355,11 +355,24 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         enNativeKeyboard = param == "TRUE" || param == "YES" || param == "ON";
 
         //Ignore mouse & keyboard
-        if (!enNativeKeyboard)                          myWebViewArray[DEFAULT_TAB]->setEnabled(false);
-        else if (myWebViewArray[DEFAULT_TAB] != NULL)   myWebViewArray[DEFAULT_TAB]->setEnabled(true);
+        //if (!enNativeKeyboard)                                      myWebViewArray[this->currentWebViewTab]->setEnabled(false);
+        //else if (myWebViewArray[this->currentWebViewTab] != NULL)   myWebViewArray[this->currentWebViewTab]->setEnabled(true);
 
         return QString("%1 %2").arg(command.constData()).arg(param.toLatin1().constData()).toLatin1();
     }
+
+#ifdef ENABLE_QWS_STUFF
+    else if ((command == "MOUSECURSOR" || command == "MOUSECUR" || command == "CURSOR") && argCount >= 1)
+    {
+        QString param = argsList[0].toUpper();
+        bool isShown = param == "TRUE" || param == "YES" || param == "ON";
+
+        QWSServer *qserver = QWSServer::instance();
+        qserver->setCursorVisible(isShown);
+
+        return QString("%1 %2").arg(command.constData()).arg(param.toLatin1().constData()).toLatin1();
+    }
+#endif
 
     //----------------------------------------------------
 

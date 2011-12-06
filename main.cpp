@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
     QStringList argsList = instance.arguments();
     QString argsString = argsList.join(ARGS_SPLIT_TOKEN);
 
-//Pink background for the entire QWS environment
+//Hide mouse cursor by default
 #ifdef ENABLE_QWS_STUFF
     QWSServer *qserver = QWSServer::instance();
     qserver->setCursorVisible(false);

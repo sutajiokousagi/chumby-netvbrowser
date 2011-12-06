@@ -14,10 +14,6 @@ void MainWindow::initWebViewTab(int index)
     myWebViewArray[index] = new MyWebView(this);
     this->ui->rootLayout->addWidget(myWebViewArray[index]);
 
-    //Ignore mouse & keyboard
-    if (!enNativeKeyboard)      myWebViewArray[index]->setEnabled(false);
-    else                        myWebViewArray[index]->setEnabled(index == DEFAULT_TAB);
-
     //Disable Anti-aliasing
     myWebViewArray[index]->setRenderHints(0);
 
@@ -140,14 +136,15 @@ void MainWindow::showWebViewTab(int index)
     if (myWebViewArray[index] == NULL)
         return;
     qDebug("NeTVBrowser: showWebViewTab %d", index);
+    this->currentWebViewTab = index;
 
-    //Hide others
-    //hideOtherWebViewTab(index);
+    //Note: under non-native keyboard mode, all tabs are setEnabled(false) so that they don't catch any event
+    //only MainWindow is enabled hence catchesr all events regardless of which tab is being shown
 
     //Show it
     myWebViewArray[index]->setVisible(true);
+    myWebViewArray[index]->setEnabled(enNativeKeyboard);
     myWebViewArray[index]->setFocus(Qt::MouseFocusReason);
-    currentWebViewTab = index;
 
     //Resize fullscreen
     myWebViewArray[index]->resize(this->frameGeometry().size());
@@ -158,15 +155,14 @@ void MainWindow::hideWebViewTab(int index, bool destroy /*= false*/)
 {
     if (myWebViewArray[index] == NULL)
         return;
-    myWebViewArray[index]->clearFocus();
-    myWebViewArray[index]->setVisible(false);
     qDebug("NeTVBrowser: hideWebViewTab %d", index);
 
-    if (index == DEFAULT_TAB)
-        return;
+    myWebViewArray[index]->setVisible(false);
+    myWebViewArray[index]->setEnabled(false);
+    myWebViewArray[index]->clearFocus();
 
-    //Clear memory
-    if (destroy)
+    //Clear memory if not main tab
+    if (index != DEFAULT_TAB && destroy)
         deinitWebViewTab(index);
 }
 

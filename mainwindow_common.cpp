@@ -83,7 +83,8 @@ QByteArray MainWindow::remoteControlKey(bool isRepeat, QByteArray buttonName, in
 {
     qDebug("%s: [keyboard override] %s (%d)", TAG, buttonName.constData(), oneSecCount);
     QString javascriptString = QString("fButtonPress('%1',%2,%3);").arg(QString(buttonName)).arg(oneSecCount).arg(QString(isRepeat?"true":"false"));
-    return (this->myWebView->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
+    if (myWebViewArray[this->currentWebViewTab] != NULL)
+        return (myWebViewArray[this->currentWebViewTab]->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
 }
 
 void MainWindow::slot_keepAliveTimeout()
@@ -355,8 +356,11 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         enNativeKeyboard = param == "TRUE" || param == "YES" || param == "ON";
 
         //Ignore mouse & keyboard
-        //if (!enNativeKeyboard)                                      myWebViewArray[this->currentWebViewTab]->setEnabled(false);
-        //else if (myWebViewArray[this->currentWebViewTab] != NULL)   myWebViewArray[this->currentWebViewTab]->setEnabled(true);
+        if (!enNativeKeyboard)
+            for (int i=0; i<MAX_TABS; i++)
+                myWebViewArray[i]->setEnabled(false);
+        else if (myWebViewArray[this->currentWebViewTab] != NULL)
+            showWebViewTab(this->currentWebViewTab);
 
         return QString("%1 %2").arg(command.constData()).arg(param.toLatin1().constData()).toLatin1();
     }
@@ -648,6 +652,7 @@ Qt::Key MainWindow::getKeyCodeFromName(QString keyname)
     else if (keyname == "del")          return Qt::Key_Delete;
     else if (keyname == "delete")       return Qt::Key_Delete;
     else if (keyname == "backspace")    return Qt::Key_Backspace;
+    else if (keyname == "tab")          return Qt::Key_Tab;
     else if (keyname == "space")        return Qt::Key_Space;
     else if (keyname == " ")            return Qt::Key_Space;
     else if (keyname == "+")            return Qt::Key_Plus;
@@ -669,6 +674,9 @@ Qt::Key MainWindow::getKeyCodeFromName(QString keyname)
     else if (keyname == "volup")        return Qt::Key_VolumeUp;
     else if (keyname == "voldown")      return Qt::Key_VolumeDown;
     else if (keyname == "mute")         return Qt::Key_VolumeMute;
+    else if (keyname == "play")         return Qt::Key_Play;
+    else if (keyname == "pause")        return Qt::Key_Pause;
+    else if (keyname == "stop")         return Qt::Key_Stop;
     else if (keyname == "search")       return Qt::Key_Search;
     else if (keyname == "menu")         return Qt::Key_Menu;
 

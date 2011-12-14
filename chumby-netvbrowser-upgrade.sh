@@ -61,6 +61,9 @@ then
 	/etc/init.d/chumby-netvserver start
 fi
 
+# Enable chroma key
+fpga_ctl x i
+
 # Wait for NeTVBrowser in case it got killed
 if [ ! -z "$(pidof NeTVBrowser)" ];
 then

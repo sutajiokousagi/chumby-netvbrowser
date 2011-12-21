@@ -14,7 +14,8 @@ SOURCES += main.cpp \
            mainwindow_utils.cpp \
            mywebpage.cpp \
            mainwindow_key.cpp \
-           mainwindow_tabs.cpp
+           mainwindow_tabs.cpp \
+           mainwindow_settings.cpp
 HEADERS += mainwindow.h mywebview.h \
            mywebpage.h
 FORMS   += mainwindow.ui
@@ -46,3 +47,4 @@ MOC_DIR = $$PWD/tmp/$$BUILD_NAME
 UI_DIR = $$PWD/tmp/$$BUILD_NAME
 RCC_DIR = $$PWD/tmp/$$BUILD_NAME
 DESTDIR = $$PWD/bin
+

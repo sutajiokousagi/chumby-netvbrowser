@@ -3,6 +3,7 @@
 *.debug
 *.release
 *.exe
+._*
 tmp
 debug
 release

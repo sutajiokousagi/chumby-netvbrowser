@@ -53,7 +53,7 @@ void MainWindow::slot_pageloadFinished(bool ok)
     */
 
     //Start or restart keep alive timer
-    qDebug("%s: slot_pageloadFinished (%d bytes)", TAG, this->myWebView->page()->bytesReceived());
+    qDebug("%s: slot_pageloadFinished (%lld bytes)", TAG, this->myWebView->page()->bytesReceived());
     if (this->enKeepAliveTimer && !this->keepAliveTimer.isActive())
         this->keepAliveTimer.start();
 

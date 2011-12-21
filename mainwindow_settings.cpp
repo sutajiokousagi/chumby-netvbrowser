@@ -32,4 +32,5 @@ bool MainWindow::saveSettings()
     browserSettings.setValue("keepAliveInterval", keepAliveInterval);
     browserSettings.endGroup();
     browserSettings.sync();
+    return true;
 }

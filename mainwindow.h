@@ -9,10 +9,12 @@
 #include <QByteArray>
 #include <QMap>
 #include <QTimer>
-#include "mywebview.h"
-#include "mywebpage.h"
 #include <QWebFrame>
 #include <QWebElement>
+#include <QSettings>
+
+#include "mywebview.h"
+#include "mywebpage.h"
 #include "socketrequest.h"
 #include "socketresponse.h"
 
@@ -36,6 +38,7 @@ namespace Ui {
 /** The special string used to split & join arguements */
 #define ARGS_SPLIT_TOKEN        "|~|"
 
+//Hardcoded, not configurable
 #define DEFAULT_HOST_URL        "localhost"
 #define DEFAULT_PORT            8081
 #define UNIMPLEMENTED           "Un1mPl3m3nT3D"
@@ -43,18 +46,22 @@ namespace Ui {
 #define MAX_TABS                10
 #define DEFAULT_TAB             0
 #define SECOND_TAB              1
-#define KEY_TIMEOUT             1800
-#define KEEPALIVE_TIMEOUT       40000
 #define FOCUS_INPUT_TIMEOUT     2000
+#define KEY_TIMEOUT             1800
+
+#define KEEPALIVE_INTERVAL      40000
 #define ENABLE_FSERVERRESET     false
 #define ENABLE_NATIVE_KB        false
+#define ENABLE_MOUSE_CURSOR     false
 #define ENABLE_KEEPALIVE        true
+#define ENABLE_JAVASCRIPT_LOG   true
 
 #define UPGRADE_SCRIPT          "/usr/bin/chumby-netvbrowser-upgrade.sh"
 #define OPKG_DOWNLOAD_PATH      "/var/lib/opkg/tmp"
 #define UPGRADE_PROGRESS_FILE   "/tmp/netvbrowser_upgrade_packages"
 #define UPDATE_PAGE             "http://localhost/html_update/index.html"
 #define FACTORY_PAGE            "http://localhost/tests/index.html"
+#define SETTINGS_FILE           "/psp/NeTVBrowser.ini"
 #define HOMEPAGE_PAGE_FILE      "/psp/homepage"
 #define CPANEL_GIT_LOG          "/tmp/cpanel_git.log"
 #define INPUT_SCREENSHOT_FILE   "/tmp/focused_input.png"
@@ -84,11 +91,19 @@ private:
     //Flags
     bool isShuttingDown;
     bool enNativeKeyboard;
+    bool enMouseCursor;
     bool enKeepAliveTimer;
+    bool enJavaScriptConsoleLog;
+    int keepAliveInterval;
     bool updateCPanel;
+
+    bool hasSettingsFile();
+    bool reloadSettings();
+    bool saveSettings();
 
     //Webview
     bool cPanelLoaded;
+    int cPanelLoadCount;
     MyWebView* myWebView;
     MyWebView* myWebViewArray[MAX_TABS];
     QTimer keepAliveTimer;

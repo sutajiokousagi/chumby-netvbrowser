@@ -19,6 +19,7 @@ void MainWindow::initWebViewTab(int index)
 
     //Do any other customization on default page
     MyWebPage *newPage = new MyWebPage(this);
+    newPage->enJavascriptConsoleLog = this->enJavaScriptConsoleLog;
     myWebViewArray[index]->setInvertColor(false);
     myWebViewArray[index]->setPage(newPage);
 
@@ -29,6 +30,11 @@ void MainWindow::initWebViewTab(int index)
     //Set reference pointer to default tab for convenience
     if (index == DEFAULT_TAB)
         this->myWebView = myWebViewArray[DEFAULT_TAB];
+
+    //Resize fullscreen
+    myWebViewArray[index]->resize(this->frameGeometry().size());
+    myWebViewArray[index]->move(0,0);
+    myWebViewArray[index]->setVisible(false);
 }
 
 void MainWindow::deinitWebViewTab(int index)
@@ -40,14 +46,18 @@ void MainWindow::deinitWebViewTab(int index)
     qDebug("%s: deinitWebViewTab %d", TAG, index);
 
     //Delete QWebView object
-    myWebViewArray[index]->setHtml("");
     myWebViewArray[index]->setVisible(false);
-    delete myWebViewArray[index];
+
+    myWebViewArray[index]->page()->deleteLater();
+    myWebViewArray[index]->deleteLater();
     myWebViewArray[index] = NULL;
 }
 
 void MainWindow::resetAllTab()
 {
+    cPanelLoaded = false;
+    cPanelLoadCount = 0;
+
     for (int i=0;i<MAX_TABS; i++)
         if (i != DEFAULT_TAB)
             hideWebViewTab(i);
@@ -145,10 +155,6 @@ void MainWindow::showWebViewTab(int index)
     myWebViewArray[index]->setVisible(true);
     myWebViewArray[index]->setEnabled(enNativeKeyboard);
     myWebViewArray[index]->setFocus(Qt::MouseFocusReason);
-
-    //Resize fullscreen
-    myWebViewArray[index]->resize(this->frameGeometry().size());
-    myWebViewArray[index]->move(0,0);
 }
 
 void MainWindow::hideWebViewTab(int index, bool destroy /*= false*/)

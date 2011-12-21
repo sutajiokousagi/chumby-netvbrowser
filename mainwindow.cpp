@@ -14,12 +14,21 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     this->isShuttingDown = false;
     this->cPanelLoaded = false;
+    this->cPanelLoadCount = 0;
+
     this->updateCPanel = false;
     this->myWebView = NULL;
     this->mySocket = NULL;
     this->port = DEFAULT_PORT;
     this->enNativeKeyboard = ENABLE_NATIVE_KB;
+    this->enMouseCursor = ENABLE_MOUSE_CURSOR;
     this->enKeepAliveTimer = ENABLE_KEEPALIVE;
+    this->enJavaScriptConsoleLog = ENABLE_JAVASCRIPT_LOG;
+    this->keepAliveInterval = KEEPALIVE_INTERVAL;
+
+    //Create or reload settings file
+    if (!hasSettingsFile())        saveSettings();
+    else                           reloadSettings();
 
     //Multi-tab
     this->currentWebViewTab = 0;
@@ -36,8 +45,8 @@ MainWindow::MainWindow(QWidget *parent) :
     focusInputTimer.setSingleShot(false);
     QObject::connect(&focusInputTimer, SIGNAL(timeout()), this, SLOT(slot_updateFocusInput()));
 
-    //Ping the page every 40 seconds
-    keepAliveTimer.setInterval(KEEPALIVE_TIMEOUT);
+    //Ping the page every 40 seconds (configurable)
+    keepAliveTimer.setInterval(this->keepAliveInterval);
     keepAliveTimer.setSingleShot(false);
     QObject::connect(&keepAliveTimer, SIGNAL(timeout()), this, SLOT(slot_keepAliveTimeout()));
 
@@ -51,6 +60,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowFlags(Qt::MSWindowsFixedSizeDialogHint);     //Set window to fixed size
     this->setWindowFlags(Qt::CustomizeWindowHint);              //Set window with no title bar
     this->setWindowFlags(Qt::FramelessWindowHint);              //Set a frameless window
+    qserver->setCursorVisible(this->enMouseCursor);
 #endif
 
     initWebViewTab(DEFAULT_TAB);

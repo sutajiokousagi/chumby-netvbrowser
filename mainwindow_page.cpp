@@ -9,13 +9,38 @@ void MainWindow::slot_pageloadStarted()
 
 }
 
-void MainWindow::slot_pageloadFinished(bool ok)
+void MainWindow::slot_pageloadProgress(int progress)
 {
     if (!cPanelLoaded)
+        qDebug("%s: loading ControlPanel...%d%%", TAG, progress);
+
+    //if (progress > 99)
+    //    qDebug("%s", qPrintable(this->myWebView->page()->mainFrame()->toHtml()));
+}
+
+void MainWindow::slot_pageloadFinished(bool ok)
+{
+    cPanelLoadCount++;
+    if (!cPanelLoaded)
     {
+        if (!ok)
+        {
+            if (cPanelLoadCount < 3)    qDebug("%s: ControlPanel loaded with ERROR! Retrying...", TAG);
+            else                        qDebug("%s: ControlPanel loaded with ERROR! Give up after 3 tries!", TAG);
+
+            if (cPanelLoadCount >= 3) {
+                cPanelLoaded = true;
+                return;
+            }
+
+            this->initWebViewTab(DEFAULT_TAB);
+            this->resetWebViewTab(DEFAULT_TAB);
+            this->showWebViewTab(DEFAULT_TAB);
+            return;
+        }
+
+        qDebug("%s: ControlPanel loaded OK", TAG);
         cPanelLoaded = true;
-        if (ok)     qDebug("%s: ControlPanel loaded", TAG);
-        else        qDebug("%s: ControlPanel loaded with ERROR!", TAG);
     }
 
     //Hide scrollbars of all the frames
@@ -28,19 +53,13 @@ void MainWindow::slot_pageloadFinished(bool ok)
     */
 
     //Start or restart keep alive timer
-    qDebug("%s: slot_pageloadFinished 2", TAG);
-    if (!this->keepAliveTimer.isActive() && this->enKeepAliveTimer)
+    qDebug("%s: slot_pageloadFinished (%d bytes)", TAG, this->myWebView->page()->bytesReceived());
+    if (this->enKeepAliveTimer && !this->keepAliveTimer.isActive())
         this->keepAliveTimer.start();
 
     //Start or restart input focus timer
     if (!this->focusInputTimer.isActive())
         this->focusInputTimer.start();
-}
-
-void MainWindow::slot_pageloadProgress(int progress)
-{
-    if (!cPanelLoaded)
-        qDebug("%s: loading ControlPanel...%d%%", TAG, progress);
 }
 
 //--------------------------------------------------------------------------------------------------------

@@ -85,6 +85,7 @@ QByteArray MainWindow::remoteControlKey(bool isRepeat, QByteArray buttonName, in
     QString javascriptString = QString("fButtonPress('%1',%2,%3);").arg(QString(buttonName)).arg(oneSecCount).arg(QString(isRepeat?"true":"false"));
     if (myWebViewArray[this->currentWebViewTab] != NULL)
         return (myWebViewArray[this->currentWebViewTab]->page()->mainFrame()->evaluateJavaScript(javascriptString)).toByteArray();
+    return "";
 }
 
 void MainWindow::slot_keepAliveTimeout()
@@ -170,6 +171,21 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         bool isOn = param == "TRUE" || param == "YES" || param == "ON";
         if (isOn)     {      if (!keepAliveTimer.isActive())    keepAliveTimer.start();     this->enKeepAliveTimer = true;      }
         else          {      if (keepAliveTimer.isActive())     keepAliveTimer.stop();      this->enKeepAliveTimer = false;     }
+        return command;
+    }
+
+    else if ((command == "JSLOG" || command == "JAVASCRIPTLOG") && argCount >= 1)
+    {
+        QString param = argsList[0].toUpper();
+        this->enJavaScriptConsoleLog = param == "TRUE" || param == "YES" || param == "ON";
+
+        for (int i=0; i<MAX_TABS; i++)
+        {
+            if (myWebViewArray[i] == NULL)
+                continue;
+            MyWebPage* page = (MyWebPage*) myWebViewArray[i]->page();
+            page->enJavascriptConsoleLog = this->enJavaScriptConsoleLog;
+        }
         return command;
     }
 
@@ -265,6 +281,7 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
         qDebug("%s: docroot changed to %s. Reload now!", TAG, qPrintable(argsList[0]));
         qDebug("%s: --------------------------------------------------------------", TAG);
         cPanelLoaded = false;
+        cPanelLoadCount = 0;
         initWebViewTab(DEFAULT_TAB);
         resetWebViewTab(DEFAULT_TAB);
         showWebViewTab(DEFAULT_TAB);
@@ -370,6 +387,7 @@ QByteArray MainWindow::processStatelessCommand(QByteArray command, QStringList a
     {
         QString param = argsList[0].toUpper();
         bool isShown = param == "TRUE" || param == "YES" || param == "ON";
+        this->enMouseCursor = isShown;
 
         QWSServer *qserver = QWSServer::instance();
         qserver->setCursorVisible(isShown);

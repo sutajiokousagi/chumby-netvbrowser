@@ -3,6 +3,7 @@
 
 MyWebPage::MyWebPage(QObject *parent) : QWebPage(parent)
 {
+    this->enJavascriptConsoleLog = true;
 }
 
 void MyWebPage::javaScriptAlert ( QWebFrame * frame, const QString & msg )
@@ -24,6 +25,8 @@ bool MyWebPage::javaScriptConfirm ( QWebFrame * frame, const QString & msg )
 
 void MyWebPage::javaScriptConsoleMessage(const QString& message, int lineNumber, const QString& sourceID)
 {
+    if (!this->enJavascriptConsoleLog)
+        return;
     if (message.startsWith("|~|"))      qDebug() << message.right(message.length()-3);
     else                                qDebug() << sourceID << " (line " << lineNumber << "): " << message;
 }

@@ -76,8 +76,9 @@ int main(int argc, char *argv[])
     }
 
     // If the args list contains "-d", then daemonize it
+    int temp = 0;
     if (argsList.contains("-d") || argsList.contains("--daemon"))
-        daemon(0, 0);
+        temp = daemon(0, 0);
 
     printf("Starting new %s with args:", TAG);
     printf("%s", argsString.toLatin1().constData());

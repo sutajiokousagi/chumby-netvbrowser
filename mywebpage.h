@@ -11,6 +11,8 @@ public:
 
     MyWebPage(QObject *parent = 0);
 
+    bool enJavascriptConsoleLog;
+
 protected:
 
     void javaScriptAlert ( QWebFrame * frame, const QString & msg );
@@ -23,6 +25,7 @@ protected:
 public slots:
 
     bool shouldInterruptJavaScript();
+
 };
 
 #endif // MYWEBPAGE_H

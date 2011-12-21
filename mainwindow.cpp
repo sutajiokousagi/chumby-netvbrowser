@@ -60,6 +60,8 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowFlags(Qt::MSWindowsFixedSizeDialogHint);     //Set window to fixed size
     this->setWindowFlags(Qt::CustomizeWindowHint);              //Set window with no title bar
     this->setWindowFlags(Qt::FramelessWindowHint);              //Set a frameless window
+
+    QWSServer *qserver = QWSServer::instance();                 //Show or hide mouse cursor
     qserver->setCursorVisible(this->enMouseCursor);
 #endif
 
